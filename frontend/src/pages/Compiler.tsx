@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback, useLayoutEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -80,14 +80,11 @@ const Compiler = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [executionStatus, setExecutionStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [syntaxErrors, setSyntaxErrors] = useState<Array<{line: number, message: string}>>([]);
   const outputRef = useRef<HTMLDivElement>(null);
   const compilerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLPreElement>(null);
   const errorDetectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isTypingRef = useRef(false);
-  const lastSelectionRef = useRef<{start: number, end: number}>({start: 0, end: 0});
 
 
 
@@ -140,8 +137,14 @@ const Compiler = () => {
 
   // Ultra-simplified code change handler
   const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    codeRef.current = e.target.value;
-    setCode(e.target.value);
+    const nextValue = e.target.value;
+    scrollPositionRef.current = e.target.scrollTop;
+    selectionRef.current = {
+      start: e.target.selectionStart,
+      end: e.target.selectionEnd
+    };
+    codeRef.current = nextValue;
+    setCode(nextValue);
     try {
       localStorage.setItem(codeStorageKey, codeRef.current);
     } catch (error) {
@@ -152,6 +155,7 @@ const Compiler = () => {
   // Simple scroll handler
   const handleScroll = useCallback(() => {
     if (textareaRef.current && lineNumbersRef.current) {
+      scrollPositionRef.current = textareaRef.current.scrollTop;
       lineNumbersRef.current.scrollTop = textareaRef.current.scrollTop;
     }
   }, []);
@@ -350,23 +354,6 @@ const Compiler = () => {
       });
     } finally {
       setIsRunning(false);
-      
-      // Auto-scroll to output with smooth animation
-      setTimeout(() => {
-        if (isFullscreen) {
-          // In fullscreen mode, scroll the entire page to show the output section
-          outputRef.current?.scrollIntoView({ 
-            behavior: 'smooth',
-            block: 'start'
-          });
-        } else {
-          // In normal mode, use the existing behavior
-          outputRef.current?.scrollIntoView({ 
-            behavior: 'smooth',
-            block: 'start'
-          });
-        }
-      }, 100);
     }
   };
 
@@ -374,6 +361,7 @@ const Compiler = () => {
 
   // Restore scroll position effect - using ref instead of state
   const scrollPositionRef = useRef(0);
+  const selectionRef = useRef<{start: number; end: number}>({ start: 0, end: 0 });
   
   useEffect(() => {
     if (textareaRef.current && scrollPositionRef.current >= 0) {
@@ -381,10 +369,10 @@ const Compiler = () => {
     }
   }, []);
 
-  // Restore selection with layout effect to avoid cursor jump on rerenders
   useLayoutEffect(() => {
-    if (textareaRef.current && lastSelectionRef.current) {
-      const { start, end } = lastSelectionRef.current;
+    if (textareaRef.current) {
+      textareaRef.current.scrollTop = scrollPositionRef.current;
+      const { start, end } = selectionRef.current;
       textareaRef.current.setSelectionRange(start, end);
     }
   }, [code]);
@@ -420,54 +408,6 @@ const Compiler = () => {
       description: "Your code file is being downloaded."
     });
   };
-
-  // Syntax highlighting function
-  const highlightJavaCode = (code: string): string => {
-    // Java keywords
-    const keywords = [
-      'public', 'private', 'protected', 'static', 'final', 'abstract', 'class', 'interface',
-      'extends', 'implements', 'import', 'package', 'void', 'int', 'String', 'boolean',
-      'double', 'float', 'long', 'short', 'byte', 'char', 'if', 'else', 'for', 'while',
-      'do', 'switch', 'case', 'default', 'break', 'continue', 'return', 'try', 'catch',
-      'finally', 'throw', 'throws', 'new', 'this', 'super', 'null', 'true', 'false'
-    ];
-
-    let highlightedCode = code;
-
-    // Highlight keywords
-    keywords.forEach(keyword => {
-      const regex = new RegExp(`\\b${keyword}\\b`, 'g');
-      highlightedCode = highlightedCode.replace(regex, `<span class="text-blue-400 font-semibold">${keyword}</span>`);
-    });
-
-    // Highlight strings
-    highlightedCode = highlightedCode.replace(/"([^"\\]|\\.)*"/g, '<span class="text-green-400">"$1"</span>');
-    
-    // Highlight single-line comments
-    highlightedCode = highlightedCode.replace(/\/\/.*$/gm, '<span class="text-gray-500 italic">$&</span>');
-    
-    // Highlight multi-line comments
-    highlightedCode = highlightedCode.replace(/\/\*[\s\S]*?\*\//g, '<span class="text-gray-500 italic">$&</span>');
-    
-    // Highlight numbers
-    highlightedCode = highlightedCode.replace(/\b\d+(\.\d+)?\b/g, '<span class="text-orange-400">$&</span>');
-    
-    // Highlight method calls
-    highlightedCode = highlightedCode.replace(/(\w+)(\s*\()/g, '<span class="text-yellow-400">$1</span>$2');
-
-    return highlightedCode;
-  };
-
-  // Syntax highlighted code overlay (optimized to reduce re-renders)
-  const syntaxHighlightedCode = useMemo(() => {
-    // Don't update syntax highlighting during typing to prevent cursor jumping
-    if (isTypingRef.current) {
-      return highlightJavaCode(codeRef.current);
-    }
-    return highlightJavaCode(code);
-  }, [code]);
-
-
 
   const CompilerContent = () => ( 
     <div className={`${isFullscreen ? 'h-screen bg-black overflow-y-auto' : 'min-h-screen'} bg-gradient-to-br from-background via-background to-background/95`}> 
