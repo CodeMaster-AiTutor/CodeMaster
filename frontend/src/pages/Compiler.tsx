@@ -7,7 +7,7 @@ import {
   Download, 
   Maximize2,
   Minimize2,
-  Terminal,
+  Terminal as TerminalIcon,
   Code2,
   Trash2,
   Loader2
@@ -15,6 +15,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 import AppLayout from '@/components/layout/AppLayout';
 import { compilerAPI } from '@/lib/api';
+import Terminal from '@/components/Terminal';
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -365,6 +366,8 @@ const Compiler = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [executionStatus, setExecutionStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [terminalSessionId, setTerminalSessionId] = useState<string | null>(null);
+  const [terminalWsUrl, setTerminalWsUrl] = useState('');
   const outputRef = useRef<HTMLDivElement>(null);
   const compilerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -596,47 +599,6 @@ const Compiler = () => {
     scheduleSave(codeRef.current, selectionRef.current, scrollPositionRef.current);
   }, [scheduleSave]);
 
-  // Real Java compilation and execution using backend API
-  const compileAndExecuteJava = async (javaCode: string): Promise<{ success: boolean; output: string; error?: string }> => {
-    try {
-      const requestId = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-      const response = await compilerAPI.compileAndRun(javaCode, requestId);
-      
-      if (response.success) {
-        const executionTime = response.execution_time 
-          ? `${response.execution_time.toFixed(3)} seconds`
-          : '';
-        const output = response.output || 'Program executed successfully (no output)';
-        const outputWithTime = executionTime 
-          ? `${output}\n\nProgram executed successfully in ${executionTime}.`
-          : output;
-        
-        return {
-          success: true,
-          output: outputWithTime
-        };
-      } else {
-        // Handle compilation/execution errors
-        const errorMessages = response.errors 
-          ? response.errors.map(err => `${err.message} (line ${err.line})`).join('\n')
-          : response.error || 'Compilation failed';
-        const errorWithRequest = response.request_id ? `${errorMessages}\n\nRequest ID: ${response.request_id}` : errorMessages;
-        
-        return {
-          success: false,
-          output: '',
-          error: errorWithRequest
-        };
-      }
-    } catch (error) {
-      return {
-        success: false,
-        output: '',
-        error: `Execution error: ${error instanceof Error ? error.message : 'Unknown error'}`
-      };
-    }
-  };
-
   // Fullscreen functions
   const exitFullscreen = useCallback(() => {
     if (document.fullscreenElement) {
@@ -801,6 +763,14 @@ const Compiler = () => {
     };
   }, [restoreEditorState]);
 
+  useEffect(() => {
+    return () => {
+      if (terminalSessionId) {
+        compilerAPI.stopTerminalSession(terminalSessionId).catch(() => void 0);
+      }
+    };
+  }, [terminalSessionId]);
+
   // Enhanced handleRun with real compilation
   const handleRun = async () => {
     const authToken = localStorage.getItem("access_token");
@@ -817,30 +787,52 @@ const Compiler = () => {
       navigate('/login');
       return;
     }
+    if (terminalSessionId) {
+      await compilerAPI.stopTerminalSession(terminalSessionId).catch(() => void 0);
+      setTerminalSessionId(null);
+      setTerminalWsUrl('');
+    }
     setIsRunning(true);
     setExecutionStatus('idle');
-    setOutput('Compiling...\n');
-    saveOutputState('Compiling...\n');
+    setOutput('');
+    saveOutputState('');
+    setOutput('Compiling...\r\n');
+    saveOutputState('Compiling...\r\n');
     
     // Get current code from textarea ref
     const currentCode = textareaRef.current?.value || codeRef.current;
     scheduleSave(currentCode, selectionRef.current, scrollPositionRef.current);
     
     try {
-      const result = await compileAndExecuteJava(currentCode);
-      
-      if (result.success) {
-        setOutput(result.output);
+      console.log('[Compiler] Starting terminal session');
+      console.log('[Compiler] Code length:', currentCode.length);
+      const requestId = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      const result = await compilerAPI.startTerminalSession(currentCode, requestId);
+      console.log('[Compiler] Session result:', result);
+      console.log('[Compiler] Success:', result.success);
+      console.log('[Compiler] Errors:', result.errors);
+      console.log('[Compiler] WS URL:', result.ws_url);
+      if (result.success && result.session_id) {
+        console.log('[Compiler] Setting terminal WS URL:', result.ws_url);
+        setTerminalSessionId(result.session_id);
+        setTerminalWsUrl(result.ws_url || '');
         setExecutionStatus('success');
-        saveOutputState(result.output);
+        const startedMessage = 'Session started. Waiting for output...\r\n';
+        setOutput((previous) => {
+          const next = `${previous || ''}${startedMessage}`;
+          saveOutputState(next);
+          return next;
+        });
         toast({
-          title: "Compilation successful!",
-          description: "Your Java code executed successfully."
+          title: "Session started!",
+          description: "Interactive terminal is ready."
         });
       } else {
-        setOutput(result.error || 'Compilation failed');
+        console.log('[Compiler] Session failed:', result.errors);
+        const errorMessage = result.errors && result.errors.length > 0 ? result.errors.map(err => err.message).join('\n') : 'Compilation failed';
+        setOutput(errorMessage);
         setExecutionStatus('error');
-        saveOutputState(result.error || 'Compilation failed');
+        saveOutputState(errorMessage);
         toast({
           title: "Compilation failed",
           description: "Please check your code for errors.",
@@ -848,9 +840,11 @@ const Compiler = () => {
         });
       }
     } catch (error) {
-      setOutput(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('[Compiler] Error:', error);
+      const message = `Execution error: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      setOutput(message);
       setExecutionStatus('error');
-      saveOutputState(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      saveOutputState(message);
       toast({
         title: "Execution error",
         description: "An unexpected error occurred.",
@@ -876,6 +870,11 @@ const Compiler = () => {
 
   const handleClearCompiler = async () => {
     setIsClearing(true);
+    if (terminalSessionId) {
+      await compilerAPI.stopTerminalSession(terminalSessionId).catch(() => void 0);
+      setTerminalSessionId(null);
+      setTerminalWsUrl('');
+    }
     clearCompilerState();
     clearOutputState();
     codeRef.current = '';
@@ -1049,7 +1048,7 @@ const Compiler = () => {
                   <div className="flex items-center justify-between p-1.5 sm:p-1.5 md:p-2 bg-gradient-to-r from-card/50 to-card/30 backdrop-blur-sm border border-accent/10 rounded-t-xl"> 
                     <div className="flex items-center space-x-2 sm:space-x-3"> 
                       <div className="p-1.5 sm:p-2 bg-accent/20 rounded-lg"> 
-                        <Terminal className="w-4 h-4 sm:w-5 sm:h-5 text-accent" /> 
+                        <TerminalIcon className="w-4 h-4 sm:w-5 sm:h-5 text-accent" /> 
                       </div> 
                       <div> 
                         <h2 className="text-base sm:text-lg font-semibold text-foreground">Console Output</h2> 
@@ -1059,10 +1058,8 @@ const Compiler = () => {
                   </div> 
       
                   <div className={`bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm border border-accent/10 rounded-b-xl overflow-hidden shadow-2xl ${isFullscreen ? 'h-[35vh]' : 'h-[30vh]'}`}> 
-                    <div ref={outputRef} className="h-full p-2 sm:p-3 md:p-4 overflow-y-auto">
-                      <pre className="font-mono text-xs sm:text-sm text-foreground whitespace-pre-wrap">
-                        {output || "Ready to execute your code..."}
-                      </pre>
+                    <div className="h-full p-2 sm:p-3 md:p-4 overflow-hidden">
+                      <Terminal output={output || ''} wsUrl={terminalWsUrl} dataTestId="compiler-terminal" />
                     </div>
                   </div> 
                 </div>

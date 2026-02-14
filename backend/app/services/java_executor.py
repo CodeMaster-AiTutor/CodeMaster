@@ -10,6 +10,14 @@ from typing import Dict, List, Optional
 from app.config import Config
 import logging
 
+def _create_docker_client() -> docker.DockerClient:
+    try:
+        client = docker.from_env()
+        client.ping()
+        return client
+    except Exception as e:
+        raise RuntimeError(f"Docker connection failed: {e}")
+
 class JavaExecutor:
     """Execute Java code using OpenJDK with error detection and parsing"""
     
@@ -22,7 +30,7 @@ class JavaExecutor:
         
         if self.use_docker:
             try:
-                self.docker_client = docker.from_env()
+                self.docker_client = _create_docker_client()
                 self.docker_image = os.getenv('DOCKER_IMAGE', 'codemaster-java17:local').lower()
             except Exception as e:
                 self.logger.warning(f"Docker not available: {e}. Falling back to subprocess.")

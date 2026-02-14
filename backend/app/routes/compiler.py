@@ -4,6 +4,7 @@ from app.models.code_submission import CodeSubmission
 from app.middleware.auth import token_required
 from app.services.java_executor import get_java_executor
 from app.services.ai_service import get_ai_service
+from app.services.terminal_sessions import get_terminal_manager
 from datetime import datetime
 from app.config import Config
 import uuid
@@ -147,6 +148,91 @@ def check_syntax(current_user):
         
     except Exception as e:
         return jsonify({'error': 'Syntax check failed', 'message': str(e)}), 500
+
+
+@compiler_bp.route('/terminal/start', methods=['POST'])
+@token_required
+def start_terminal_session(current_user):
+    request_id = request.headers.get('X-Request-Id') or str(uuid.uuid4())
+    try:
+        data = request.get_json()
+        if not data:
+            response = jsonify({'error': 'No data provided', 'request_id': request_id})
+            response.headers['X-Request-Id'] = request_id
+            return response, 400
+        java_code = data.get('code', '').strip()
+        language = (data.get('language') or 'java').strip().lower()
+        if not java_code:
+            response = jsonify({'error': 'Java code is required', 'request_id': request_id})
+            response.headers['X-Request-Id'] = request_id
+            return response, 400
+        if language != 'java':
+            response = jsonify({'error': 'Unsupported language', 'request_id': request_id})
+            response.headers['X-Request-Id'] = request_id
+            return response, 400
+        if len(java_code) > Config.MAX_CODE_LENGTH:
+            response = jsonify({'error': 'Code exceeds maximum length', 'request_id': request_id})
+            response.headers['X-Request-Id'] = request_id
+            return response, 400
+        manager = get_terminal_manager()
+        result = manager.start_session(java_code, current_user.id)
+        if not result.get("success"):
+            response = jsonify({
+                'success': False,
+                'errors': result.get("errors", []),
+                'compilation_time': result.get("compilation_time", 0),
+                'request_id': request_id
+            })
+            response.headers['X-Request-Id'] = request_id
+            return response, 400
+        ws_scheme = 'wss' if request.scheme == 'https' else 'ws'
+        ws_url = f"{ws_scheme}://{request.host}/ws/terminal?sessionId={result['session_id']}"
+        response = jsonify({
+            'success': True,
+            'session_id': result['session_id'],
+            'ws_url': ws_url,
+            'compilation_time': result.get("compilation_time", 0),
+            'request_id': request_id
+        })
+        response.headers['X-Request-Id'] = request_id
+        return response, 200
+    except Exception as e:
+        current_app.logger.error(f'compiler.terminal.start error request_id={request_id} error={e}')
+        response = jsonify({'error': 'Terminal session failed', 'message': str(e), 'request_id': request_id})
+        response.headers['X-Request-Id'] = request_id
+        return response, 500
+
+
+@compiler_bp.route('/terminal/stop', methods=['POST'])
+@token_required
+def stop_terminal_session(current_user):
+    request_id = request.headers.get('X-Request-Id') or str(uuid.uuid4())
+    try:
+        data = request.get_json()
+        session_id = (data or {}).get('session_id')
+        if not session_id:
+            response = jsonify({'error': 'Session id is required', 'request_id': request_id})
+            response.headers['X-Request-Id'] = request_id
+            return response, 400
+        manager = get_terminal_manager()
+        session = manager.get_session(session_id)
+        if not session:
+            response = jsonify({'success': True, 'request_id': request_id})
+            response.headers['X-Request-Id'] = request_id
+            return response, 200
+        if session.user_id and session.user_id != current_user.id:
+            response = jsonify({'error': 'Unauthorized', 'request_id': request_id})
+            response.headers['X-Request-Id'] = request_id
+            return response, 403
+        manager.stop_session(session_id)
+        response = jsonify({'success': True, 'request_id': request_id})
+        response.headers['X-Request-Id'] = request_id
+        return response, 200
+    except Exception as e:
+        current_app.logger.error(f'compiler.terminal.stop error request_id={request_id} error={e}')
+        response = jsonify({'error': 'Terminal stop failed', 'message': str(e), 'request_id': request_id})
+        response.headers['X-Request-Id'] = request_id
+        return response, 500
 
 @compiler_bp.route('/suggest-fix', methods=['POST'])
 @token_required

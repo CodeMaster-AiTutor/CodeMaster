@@ -9,6 +9,9 @@ let navigationSpy: ReturnType<typeof vi.spyOn>;
 vi.mock("@/components/layout/AppLayout", () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
+vi.mock("@/components/Terminal", () => ({
+  default: () => <div data-testid="compiler-terminal" />,
+}));
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
@@ -152,7 +155,7 @@ describe("Compiler persistence", () => {
       { type: "reload" } as PerformanceNavigationTiming
     ]);
     render(<Compiler />);
-    expect(screen.queryByText("Ready to execute your code...")).not.toBeNull();
+    expect(screen.getByTestId("compiler-terminal")).toBeTruthy();
   });
 
   it("clears compiler state via confirmation dialog", async () => {

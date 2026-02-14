@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_sock import Sock
 from app.config import config
 import os
 import logging
@@ -13,6 +14,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
 cors = CORS()
+sock = Sock()
 
 def create_app(config_name=None):
     """Application factory pattern"""
@@ -42,6 +44,7 @@ def create_app(config_name=None):
     migrate.init_app(app, db)
     jwt.init_app(app)
     cors.init_app(app, origins=app.config['CORS_ORIGINS'])
+    sock.init_app(app)
     
     # Register blueprints
     from app.routes.auth import auth_bp
@@ -51,6 +54,7 @@ def create_app(config_name=None):
     from app.routes.assessment import assessment_bp
     from app.routes.analytics import analytics_bp
     from app.routes.dashboard import dashboard_bp
+    from app.routes import terminal_ws
     
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(generator_bp, url_prefix='/api/generator')

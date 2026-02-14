@@ -45,6 +45,10 @@ class Config:
     JAVA_PATH = os.getenv('JAVA_PATH', 'java')
     MAX_CODE_LENGTH = int(os.getenv('MAX_CODE_LENGTH', 20000))
     ALERT_WEBHOOK_URL = os.getenv('ALERT_WEBHOOK_URL', '')
+    TERMINAL_IDLE_TIMEOUT = int(os.getenv('TERMINAL_IDLE_TIMEOUT', 300))
+    TERMINAL_MAX_RUNTIME = int(os.getenv('TERMINAL_MAX_RUNTIME', 300))
+    TERMINAL_OUTPUT_LIMIT = int(os.getenv('TERMINAL_OUTPUT_LIMIT', 200000))
+    TERMINAL_REQUIRE_AUTH = os.getenv('TERMINAL_REQUIRE_AUTH', 'false').lower() == 'true'
     
     # Google OAuth Configuration
     GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '')
