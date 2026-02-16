@@ -12,6 +12,9 @@ import {
   Trash2,
   Loader2
 } from 'lucide-react';
+import Editor from '@monaco-editor/react';
+import type { OnMount } from '@monaco-editor/react';
+import type { editor as MonacoEditor } from 'monaco-editor';
 import { toast } from '@/hooks/use-toast';
 import AppLayout from '@/components/layout/AppLayout';
 import { compilerAPI } from '@/lib/api';
@@ -27,52 +30,6 @@ import {
   AlertDialogCancel,
   AlertDialogAction
 } from '@/components/ui/alert-dialog';
-
-// Separate LineNumbers component that works independently
-const LineNumbers = ({ textareaRef, lineNumbersRef }: { 
-  textareaRef: React.RefObject<HTMLTextAreaElement>, 
-  lineNumbersRef: React.RefObject<HTMLPreElement> 
-}) => {
-  const [lineNumbers, setLineNumbers] = useState('1');
-
-  useEffect(() => {
-    const updateLineNumbers = () => {
-      if (textareaRef.current) {
-        const content = textareaRef.current.value;
-        const lines = content.split('\n');
-        const numbers = lines.map((_, i) => i + 1).join('\n');
-        setLineNumbers(numbers);
-      }
-    };
-
-    const textarea = textareaRef.current;
-    if (textarea) {
-      // Initial update
-      updateLineNumbers();
-
-      // Add event listeners for real-time updates
-      textarea.addEventListener('input', updateLineNumbers);
-      textarea.addEventListener('paste', updateLineNumbers);
-      textarea.addEventListener('keydown', updateLineNumbers);
-
-      return () => {
-        textarea.removeEventListener('input', updateLineNumbers);
-        textarea.removeEventListener('paste', updateLineNumbers);
-        textarea.removeEventListener('keydown', updateLineNumbers);
-      };
-    }
-  }, [textareaRef]);
-
-  return (
-    <pre
-      ref={lineNumbersRef}
-      className="absolute left-0 top-0 w-12 h-full text-right pr-2 pt-3 text-sm text-muted-foreground/60 font-mono leading-6 select-none pointer-events-none overflow-hidden bg-muted/20 border-r border-border/50"
-      style={{ lineHeight: '1.5rem' }}
-    >
-      {lineNumbers}
-    </pre>
-  );
-};
 
 const COMPILER_SESSION_KEY = 'compiler:session-id';
 const COMPILER_STATE_PREFIX = 'compiler:state:';
@@ -368,14 +325,9 @@ const Compiler = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [terminalSessionId, setTerminalSessionId] = useState<string | null>(null);
   const [terminalWsUrl, setTerminalWsUrl] = useState('');
-  const outputRef = useRef<HTMLDivElement>(null);
   const compilerRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const lineNumbersRef = useRef<HTMLPreElement>(null);
+  const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
   const errorDetectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const autoScrollFrameRef = useRef<number | null>(null);
-  const lastAutoScrollTimeRef = useRef(0);
-  const lastKeyWasEnterRef = useRef(false);
   const scrollPositionRef = useRef(0);
   const selectionRef = useRef<{start: number; end: number}>({ start: 0, end: 0 });
   const saveTimerRef = useRef<number | null>(null);
@@ -477,127 +429,86 @@ const Compiler = () => {
     setCode(state.code);
     selectionRef.current = state.selection;
     scrollPositionRef.current = state.scrollTop;
-    requestAnimationFrame(() => {
-      const textarea = textareaRef.current;
-      if (!textarea) {
-        return;
-      }
-      textarea.scrollTop = state.scrollTop;
-      if (document.activeElement === textarea) {
-        textarea.setSelectionRange(state.selection.start, state.selection.end);
-      }
+    const editor = editorRef.current;
+    if (!editor) {
+      return;
+    }
+    const model = editor.getModel();
+    if (!model) {
+      return;
+    }
+    if (model.getValue() !== state.code) {
+      editor.setValue(state.code);
+    }
+    const start = model.getPositionAt(state.selection.start);
+    const end = model.getPositionAt(state.selection.end);
+    editor.setSelection({
+      startLineNumber: start.lineNumber,
+      startColumn: start.column,
+      endLineNumber: end.lineNumber,
+      endColumn: end.column
     });
+    editor.setScrollTop(state.scrollTop);
   }, []);
 
-  const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const nextValue = e.target.value;
-    const nextScrollTop = scrollPositionRef.current;
-    const nextSelectionStart = e.target.selectionStart;
-    const nextSelectionEnd = e.target.selectionEnd;
+  const updateSelectionFromEditor = useCallback(() => {
+    const editor = editorRef.current;
+    const model = editor?.getModel();
+    const selection = editor?.getSelection();
+    if (!editor || !model || !selection) {
+      return;
+    }
     selectionRef.current = {
-      start: nextSelectionStart,
-      end: nextSelectionEnd
+      start: model.getOffsetAt(selection.getStartPosition()),
+      end: model.getOffsetAt(selection.getEndPosition())
     };
+  }, []);
+
+  const handleCodeChange = useCallback((value: string | undefined) => {
+    const nextValue = value ?? '';
     codeRef.current = nextValue;
     setCode(nextValue);
-    requestAnimationFrame(() => {
-      const textarea = textareaRef.current;
-      if (!textarea) {
-        return;
+    const editor = editorRef.current;
+    if (editor) {
+      const model = editor.getModel();
+      const selection = editor.getSelection();
+      if (model && selection) {
+        selectionRef.current = {
+          start: model.getOffsetAt(selection.getStartPosition()),
+          end: model.getOffsetAt(selection.getEndPosition())
+        };
       }
-      if (document.activeElement === textarea) {
-        textarea.setSelectionRange(nextSelectionStart, nextSelectionEnd);
-      }
-      if (textarea.scrollTop !== nextScrollTop) {
-        textarea.scrollTop = nextScrollTop;
-      }
-    });
-    ensureCursorInView(lastKeyWasEnterRef.current);
-    lastKeyWasEnterRef.current = false;
-    scheduleSave(nextValue, { start: nextSelectionStart, end: nextSelectionEnd }, nextScrollTop);
-  };
-
-  const ensureCursorInView = useCallback((preferSmooth: boolean) => {
-    const textarea = textareaRef.current as HTMLTextAreaElement | null;
-    if (!textarea) {
-      return;
+      scrollPositionRef.current = editor.getScrollTop();
     }
-    const selectionStart = textarea.selectionStart;
-    const value = textarea.value;
-    const computed = window.getComputedStyle(textarea);
-    let lineHeight = parseFloat(computed.lineHeight);
-    const fontSize = parseFloat(computed.fontSize);
-    if (!Number.isFinite(lineHeight)) {
-      lineHeight = Number.isFinite(fontSize) ? fontSize * 1.5 : 24;
-    }
-    const paddingTop = parseFloat(computed.paddingTop) || 0;
-    const lineIndex = value.slice(0, selectionStart).split("\n").length - 1;
-    const caretTop = paddingTop + lineIndex * lineHeight;
-    const caretBottom = caretTop + lineHeight;
-    const visibleTop = textarea.scrollTop;
-    const visibleBottom = visibleTop + textarea.clientHeight;
-    const offset = lineHeight * 2;
-    let targetScrollTop = visibleTop;
-    if (caretTop < visibleTop + offset) {
-      targetScrollTop = caretTop - offset;
-    } else if (caretBottom > visibleBottom - offset) {
-      targetScrollTop = caretBottom - (textarea.clientHeight - offset);
-    }
-    const maxScrollTop = Math.max(0, textarea.scrollHeight - textarea.clientHeight);
-    targetScrollTop = Math.min(Math.max(0, targetScrollTop), maxScrollTop);
-    if (Math.abs(targetScrollTop - visibleTop) < 1) {
-      return;
-    }
-    const now = performance.now();
-    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
-    const shouldSmooth = preferSmooth && !reduceMotion && now - lastAutoScrollTimeRef.current > 120;
-    lastAutoScrollTimeRef.current = now;
-    if (autoScrollFrameRef.current) {
-      cancelAnimationFrame(autoScrollFrameRef.current);
-    }
-    autoScrollFrameRef.current = requestAnimationFrame(() => {
-      if (typeof textarea.scrollTo === "function") {
-        textarea.scrollTo({ top: targetScrollTop, behavior: shouldSmooth ? "smooth" : "auto" });
-      } else {
-        textarea.scrollTop = targetScrollTop;
-      }
-      scrollPositionRef.current = targetScrollTop;
-      const lineNumbers = lineNumbersRef.current;
-      if (lineNumbers instanceof HTMLElement) {
-        lineNumbers.scrollTop = targetScrollTop;
-      }
-    });
-  }, []);
-
-  const handleSelectionChange = useCallback((e: React.SyntheticEvent<HTMLTextAreaElement>) => {
-    const target = e.currentTarget;
-    selectionRef.current = {
-      start: target.selectionStart,
-      end: target.selectionEnd
-    };
-    ensureCursorInView(false);
-    scheduleSave(codeRef.current, selectionRef.current, scrollPositionRef.current);
-  }, [ensureCursorInView, scheduleSave]);
-
-  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === "Enter") {
-      lastKeyWasEnterRef.current = true;
-    }
-  }, []);
-
-  const handleKeyUp = useCallback((event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    handleSelectionChange(event);
-    ensureCursorInView(false);
-  }, [ensureCursorInView, handleSelectionChange]);
-
-  // Simple scroll handler
-  const handleScroll = useCallback(() => {
-    if (textareaRef.current && lineNumbersRef.current) {
-      scrollPositionRef.current = textareaRef.current.scrollTop;
-      lineNumbersRef.current.scrollTop = textareaRef.current.scrollTop;
-    }
-    scheduleSave(codeRef.current, selectionRef.current, scrollPositionRef.current);
+    scheduleSave(nextValue, selectionRef.current, scrollPositionRef.current);
   }, [scheduleSave]);
+
+  const handleEditorMount: OnMount = useCallback((editor) => {
+    editorRef.current = editor;
+    const model = editor.getModel();
+    if (model && model.getValue() !== codeRef.current) {
+      editor.setValue(codeRef.current);
+    }
+    if (model) {
+      const start = model.getPositionAt(selectionRef.current.start);
+      const end = model.getPositionAt(selectionRef.current.end);
+      editor.setSelection({
+        startLineNumber: start.lineNumber,
+        startColumn: start.column,
+        endLineNumber: end.lineNumber,
+        endColumn: end.column
+      });
+      editor.setScrollTop(scrollPositionRef.current);
+    }
+    editor.onDidChangeCursorSelection(() => {
+      updateSelectionFromEditor();
+      scheduleSave(codeRef.current, selectionRef.current, editor.getScrollTop());
+    });
+    editor.onDidScrollChange(() => {
+      scrollPositionRef.current = editor.getScrollTop();
+      scheduleSave(codeRef.current, selectionRef.current, scrollPositionRef.current);
+    });
+  }, [scheduleSave, updateSelectionFromEditor]);
 
   // Fullscreen functions
   const exitFullscreen = useCallback(() => {
@@ -693,17 +604,17 @@ const Compiler = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      ensureCursorInView(false);
+      editorRef.current?.layout();
     };
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [ensureCursorInView]);
+  }, []);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
-      const currentCode = textareaRef.current?.value ?? codeRef.current;
+      const currentCode = editorRef.current?.getValue() ?? codeRef.current;
       try {
         localStorage.setItem(COMPILER_FALLBACK_KEY, currentCode);
       } catch {
@@ -799,8 +710,7 @@ const Compiler = () => {
     setOutput('Compiling...\r\n');
     saveOutputState('Compiling...\r\n');
     
-    // Get current code from textarea ref
-    const currentCode = textareaRef.current?.value || codeRef.current;
+    const currentCode = editorRef.current?.getValue() ?? codeRef.current;
     scheduleSave(currentCode, selectionRef.current, scrollPositionRef.current);
     
     try {
@@ -817,12 +727,6 @@ const Compiler = () => {
         setTerminalSessionId(result.session_id);
         setTerminalWsUrl(result.ws_url || '');
         setExecutionStatus('success');
-        const startedMessage = 'Session started. Waiting for output...\r\n';
-        setOutput((previous) => {
-          const next = `${previous || ''}${startedMessage}`;
-          saveOutputState(next);
-          return next;
-        });
         toast({
           title: "Session started!",
           description: "Interactive terminal is ready."
@@ -860,11 +764,21 @@ const Compiler = () => {
   }, [output]);
 
   const handleCopy = () => {
-    const currentCode = textareaRef.current?.value || codeRef.current;
+    const currentCode = editorRef.current?.getValue() ?? codeRef.current;
     navigator.clipboard.writeText(currentCode);
     toast({
       title: "Code copied!",
       description: "Code has been copied to clipboard."
+    });
+  };
+
+  const handleClearOutput = () => {
+    setOutput('');
+    saveOutputState('');
+    setExecutionStatus('idle');
+    toast({
+      title: "Output cleared",
+      description: "Console output has been cleared."
     });
   };
 
@@ -882,13 +796,20 @@ const Compiler = () => {
     setOutput('');
     selectionRef.current = { start: 0, end: 0 };
     scrollPositionRef.current = 0;
-    requestAnimationFrame(() => {
-      const textarea = textareaRef.current;
-      if (textarea) {
-        textarea.scrollTop = 0;
-        textarea.setSelectionRange(0, 0);
+    const editor = editorRef.current;
+    if (editor) {
+      const model = editor.getModel();
+      editor.setValue('');
+      if (model) {
+        editor.setSelection({
+          startLineNumber: 1,
+          startColumn: 1,
+          endLineNumber: 1,
+          endColumn: 1
+        });
       }
-    });
+      editor.setScrollTop(0);
+    }
     setIsClearing(false);
     toast({
       title: "Compiler cleared",
@@ -897,7 +818,7 @@ const Compiler = () => {
   };
 
   const handleDownload = () => {
-    const currentCode = textareaRef.current?.value || codeRef.current;
+    const currentCode = editorRef.current?.getValue() ?? codeRef.current;
     const element = document.createElement("a");
     const file = new Blob([currentCode], {type: 'text/plain'});
     element.href = URL.createObjectURL(file);
@@ -999,45 +920,38 @@ const Compiler = () => {
                   </div> 
       
                   {/* Editor */} 
-                  <div className={`relative bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm border border-primary/10 rounded-b-xl overflow-hidden shadow-2xl ${isFullscreen ? 'h-[87vh]' : 'h-[60vh] sm:h-[65vh] md:h-[70vh] lg:h-[75vh]'}`}> 
+                  <div className={`relative bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm border border-primary/10 rounded-b-xl overflow-hidden shadow-2xl ${isFullscreen ? 'h-[90vh]' : 'h-[65vh] sm:h-[70vh] md:h-[75vh] lg:h-[80vh]'}`}> 
                     <div className="flex h-full"> 
-                      {/* Line Numbers */} 
-                      <div className="w-8 sm:w-10 md:w-12 bg-muted/20 border-r border-primary/10 overflow-hidden relative"> 
-                        <LineNumbers textareaRef={textareaRef} lineNumbersRef={lineNumbersRef} />
-                      </div> 
-                      
-                      {/* Code Area */} 
                       <div className="flex-1 relative overflow-hidden"> 
-                        {/* Syntax highlighting removed */}
-                        
-                        <textarea 
-                          ref={textareaRef}
-                          value={code}
-                          onChange={handleCodeChange}
-                          onSelect={handleSelectionChange}
-                          onKeyDown={handleKeyDown}
-                          onKeyUp={handleKeyUp}
-                          onScroll={handleScroll}
-                          className="relative w-full h-full resize-none border-0 bg-black font-mono text-xs sm:text-sm leading-5 sm:leading-6 p-1 sm:p-2 md:p-3 lg:p-4 focus:ring-0 focus:outline-none focus:border-transparent placeholder:text-muted-foreground/50 overflow-y-auto z-10" 
-                          placeholder="Type or paste Java code here..."
-                          style={{ 
-                            minHeight: '100%', 
-                            boxShadow: 'none',
-                            scrollbarWidth: 'thin',
-                            scrollbarColor: 'rgba(156, 163, 175, 0.3) transparent',
-                            caretColor: '#ffffff',
-                            color: '#ffffff'
-                          }}
-                          spellCheck="false"
-                          autoComplete="off"
-                          autoCorrect="off"
-                          autoCapitalize="off"
-                        /> 
-                        
-                        {/* Subtle background gradient */} 
+                        <div data-testid="compiler-editor" className="absolute inset-0">
+                          <Editor
+                            height="100%"
+                            defaultLanguage="java"
+                            theme="vs-dark"
+                            value={code}
+                            onChange={handleCodeChange}
+                            onMount={handleEditorMount}
+                            options={{
+                              automaticLayout: true,
+                              minimap: { enabled: false },
+                              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                              fontSize: 13,
+                              lineHeight: 20,
+                              scrollBeyondLastLine: false,
+                              tabSize: 2,
+                              insertSpaces: true,
+                              wordWrap: 'on',
+                              padding: { top: 12, bottom: 12 },
+                              scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
+                            }}
+                          />
+                        </div>
+                        {!code && (
+                          <div className="absolute left-3 top-3 text-xs sm:text-sm text-muted-foreground/60 pointer-events-none">
+                            Type or paste Java code here...
+                          </div>
+                        )}
                         <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-primary/5 via-transparent to-accent/5 opacity-30"></div> 
-                        
-                        {/* Error indicators removed */}
                       </div> 
                     </div> 
                   </div> 
@@ -1055,9 +969,16 @@ const Compiler = () => {
                         <p className="text-xs sm:text-sm text-muted-foreground">Execution results</p> 
                       </div> 
                     </div> 
+                    <Button
+                      variant="outline"
+                      onClick={handleClearOutput}
+                      className="ml-3 hover:bg-accent/15 active:scale-[0.98] transition-all duration-200 px-2 sm:px-3 text-xs sm:text-sm"
+                    >
+                      Clear Compiler
+                    </Button>
                   </div> 
       
-                  <div className={`bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm border border-accent/10 rounded-b-xl overflow-hidden shadow-2xl ${isFullscreen ? 'h-[35vh]' : 'h-[30vh]'}`}> 
+                  <div className={`bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm border border-accent/10 rounded-b-xl overflow-hidden shadow-2xl ${isFullscreen ? 'h-[45vh]' : 'h-[40vh] sm:h-[42vh] md:h-[45vh]'}`}> 
                     <div className="h-full p-2 sm:p-3 md:p-4 overflow-hidden">
                       <Terminal output={output || ''} wsUrl={terminalWsUrl} dataTestId="compiler-terminal" />
                     </div>

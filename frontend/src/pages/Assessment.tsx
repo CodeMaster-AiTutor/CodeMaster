@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,17 +47,6 @@ const Assessment = () => {
 
   // Get current question
   const currentQuestion = questions[currentQuestionIndex];
-
-  // Timer effect
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (isAssessmentActive && timeLeft > 0 && !isCompleted) {
-      timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-    } else if (timeLeft === 0 && !isCompleted) {
-      handleCompleteAssessment();
-    }
-    return () => clearTimeout(timer);
-  }, [isAssessmentActive, timeLeft, isCompleted]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -121,7 +110,7 @@ const Assessment = () => {
     }
   };
 
-  const handleCompleteAssessment = async () => {
+  const handleCompleteAssessment = useCallback(async () => {
     if (!assessmentId) {
       toast({
         title: "Error",
@@ -166,7 +155,17 @@ const Assessment = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [assessmentId, answers, currentLevel]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isAssessmentActive && timeLeft > 0 && !isCompleted) {
+      timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+    } else if (timeLeft === 0 && !isCompleted) {
+      handleCompleteAssessment();
+    }
+    return () => clearTimeout(timer);
+  }, [isAssessmentActive, timeLeft, isCompleted, handleCompleteAssessment]);
 
   const retakeAssessment = () => {
     setShowResults(false);

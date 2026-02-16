@@ -12,6 +12,22 @@ vi.mock("@/components/layout/AppLayout", () => ({
 vi.mock("@/components/Terminal", () => ({
   default: () => <div data-testid="compiler-terminal" />,
 }));
+vi.mock("@monaco-editor/react", () => ({
+  default: ({
+    value,
+    onChange,
+  }: {
+    value?: string;
+    onChange?: (value?: string) => void;
+  }) => (
+    <textarea
+      data-testid="compiler-editor-textarea"
+      value={value ?? ""}
+      onChange={(event) => onChange?.(event.target.value)}
+      placeholder="Type or paste Java code here..."
+    />
+  ),
+}));
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
@@ -22,7 +38,7 @@ vi.mock("react-router-dom", async () => {
 });
 
 const getTextarea = () =>
-  screen.getByPlaceholderText("Type or paste Java code here...") as HTMLTextAreaElement;
+  screen.getByTestId("compiler-editor-textarea") as HTMLTextAreaElement;
 
 beforeEach(() => {
   localStorage.setItem("access_token", "test-token");
@@ -43,7 +59,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("Compiler textarea behavior", () => {
+describe("Compiler editor behavior", () => {
   it("accepts uninterrupted multi-character input", async () => {
     render(<Compiler />);
     const textarea = getTextarea();
