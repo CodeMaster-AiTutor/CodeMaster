@@ -64,6 +64,16 @@ class JavaExecutor:
             "compilation_time": float
         }
         """
+        java_code = self._normalize_newlines(java_code)
+        validation_errors = self._validate_structure(java_code)
+        if validation_errors:
+            return {
+                "success": False,
+                "output": "",
+                "errors": validation_errors,
+                "execution_time": 0,
+                "compilation_time": 0
+            }
         if self.use_docker:
             return self._execute_with_docker(java_code)
         else:
@@ -76,27 +86,377 @@ class JavaExecutor:
             return match.group(1)
         fallback = re.search(r'\bclass\s+(\w+)', java_code)
         return fallback.group(1) if fallback else 'Main'
+
+    def _normalize_newlines(self, java_code: str) -> str:
+        return java_code.replace('\r\n', '\n').replace('\r', '\n')
     
-    def _parse_compiler_errors(self, error_output: str) -> List[Dict]:
+    def _normalize_line_for_match(self, line: str) -> str:
+        cleaned = []
+        in_string = False
+        in_char = False
+        escape = False
+        string_len = 0
+        char_len = 0
+        for ch in line:
+            if in_string:
+                if escape:
+                    escape = False
+                    string_len += 1
+                    continue
+                if ch == '\\':
+                    escape = True
+                    string_len += 1
+                    continue
+                if ch == '"':
+                    cleaned.append(f'"<str:{string_len}>"')
+                    in_string = False
+                    string_len = 0
+                    continue
+                string_len += 1
+                continue
+            if in_char:
+                if escape:
+                    escape = False
+                    char_len += 1
+                    continue
+                if ch == '\\':
+                    escape = True
+                    char_len += 1
+                    continue
+                if ch == "'":
+                    cleaned.append(f"'<char:{char_len}>'")
+                    in_char = False
+                    char_len = 0
+                    continue
+                char_len += 1
+                continue
+            if ch == '"':
+                in_string = True
+                string_len = 0
+                continue
+            if ch == "'":
+                in_char = True
+                char_len = 0
+                continue
+            cleaned.append(ch)
+        if in_string:
+            cleaned.append(f'"<str:{string_len}>"')
+        if in_char:
+            cleaned.append(f"'<char:{char_len}>'")
+        return re.sub(r'\s+', '', ''.join(cleaned)).strip()
+
+    def _normalize_line_for_fuzzy(self, line: str) -> str:
+        return re.sub(r'\s+', '', line).strip()
+
+    def _strip_ansi(self, text: str) -> str:
+        return re.sub(r'\x1b\[[0-9;]*[A-Za-z]', '', text)
+
+    def _build_line_index(self, java_code: str):
+        lines = []
+        index_map = {}
+        fuzzy_lines = []
+        fuzzy_map = {}
+        try:
+            line_chars = []
+            line_no = 1
+            in_single = False
+            in_multi = False
+            in_string = False
+            in_char = False
+            escape = False
+            index = 0
+            while index < len(java_code):
+                ch = java_code[index]
+                next_ch = java_code[index + 1] if index + 1 < len(java_code) else ''
+                if ch == '\n':
+                    raw_line = ''.join(line_chars)
+                    normalized = self._normalize_line_for_match(raw_line)
+                    fuzzy = self._normalize_line_for_fuzzy(raw_line)
+                    lines.append(normalized)
+                    fuzzy_lines.append(fuzzy)
+                    if normalized:
+                        index_map.setdefault(normalized, []).append(line_no)
+                    if fuzzy:
+                        fuzzy_map.setdefault(fuzzy, []).append(line_no)
+                    line_chars = []
+                    line_no += 1
+                    in_single = False
+                    index += 1
+                    continue
+                if in_single:
+                    index += 1
+                    continue
+                if in_multi:
+                    if ch == '*' and next_ch == '/':
+                        in_multi = False
+                        index += 2
+                        continue
+                    index += 1
+                    continue
+                if in_string:
+                    if escape:
+                        escape = False
+                    elif ch == '\\':
+                        escape = True
+                    elif ch == '"':
+                        in_string = False
+                    line_chars.append(ch)
+                    index += 1
+                    continue
+                if in_char:
+                    if escape:
+                        escape = False
+                    elif ch == '\\':
+                        escape = True
+                    elif ch == "'":
+                        in_char = False
+                    line_chars.append(ch)
+                    index += 1
+                    continue
+                if ch == '/' and next_ch == '/':
+                    in_single = True
+                    index += 2
+                    continue
+                if ch == '/' and next_ch == '*':
+                    in_multi = True
+                    index += 2
+                    continue
+                if ch == '"':
+                    in_string = True
+                    line_chars.append(ch)
+                    index += 1
+                    continue
+                if ch == "'":
+                    in_char = True
+                    line_chars.append(ch)
+                    index += 1
+                    continue
+                line_chars.append(ch)
+                index += 1
+            raw_line = ''.join(line_chars)
+            normalized = self._normalize_line_for_match(raw_line)
+            fuzzy = self._normalize_line_for_fuzzy(raw_line)
+            lines.append(normalized)
+            fuzzy_lines.append(fuzzy)
+            if normalized:
+                index_map.setdefault(normalized, []).append(line_no)
+            if fuzzy:
+                fuzzy_map.setdefault(fuzzy, []).append(line_no)
+        except Exception:
+            return [], {}, [], {}
+        return lines, index_map, fuzzy_lines, fuzzy_map
+
+    def _find_best_line_match(
+        self,
+        normalized_context: str,
+        fuzzy_context: str,
+        reported_line: int,
+        line_keys: List[str],
+        index_map: Dict[str, List[int]],
+        fuzzy_keys: List[str],
+        fuzzy_map: Dict[str, List[int]]
+    ) -> int:
+        if not normalized_context:
+            return reported_line
+        if reported_line > 0 and reported_line <= len(line_keys):
+            if line_keys[reported_line - 1] == normalized_context:
+                return reported_line
+        candidates = index_map.get(normalized_context)
+        if not candidates:
+            if not fuzzy_context:
+                return reported_line
+            if reported_line > 0 and reported_line <= len(fuzzy_keys):
+                if fuzzy_keys[reported_line - 1] == fuzzy_context:
+                    return reported_line
+            fuzzy_candidates = fuzzy_map.get(fuzzy_context)
+            if not fuzzy_candidates:
+                return reported_line
+            if reported_line > 0:
+                return min(fuzzy_candidates, key=lambda value: abs(value - reported_line))
+            return fuzzy_candidates[0]
+        if reported_line > 0:
+            return min(candidates, key=lambda value: abs(value - reported_line))
+        return candidates[0]
+
+    def _parse_compiler_errors(self, error_output: str, java_code: Optional[str] = None) -> List[Dict]:
         """Parse javac error output into structured error objects"""
         errors = []
-        lines = error_output.split('\n')
-        
-        for line in lines:
-            if 'error:' in line.lower():
-                # Pattern: Main.java:5:12: error: cannot find symbol
-                match = re.match(r'(\w+\.java):(\d+):(\d+):\s*error:\s*(.+)', line)
+        line_keys = []
+        index_map = {}
+        fuzzy_keys = []
+        fuzzy_map = {}
+        if java_code:
+            line_keys, index_map, fuzzy_keys, fuzzy_map = self._build_line_index(java_code)
+        cleaned_output = self._strip_ansi(error_output)
+        lines = cleaned_output.splitlines()
+        index = 0
+        while index < len(lines):
+            line = lines[index]
+            line_text = line.strip()
+            if 'error:' in line_text.lower():
+                match = re.search(r'(.+\.java):(\d+)(?::(\d+))?:\s*error:\s*(.+)', line_text)
                 if match:
                     filename, line_num, col_num, message = match.groups()
+                    column = int(col_num) if col_num else 0
+                    if column == 0 and index + 2 < len(lines):
+                        caret_index = lines[index + 2].find('^')
+                        if caret_index != -1:
+                            column = caret_index + 1
+                    normalized_context = ''
+                    fuzzy_context = ''
+                    if java_code and index + 1 < len(lines):
+                        normalized_context = self._normalize_line_for_match(lines[index + 1])
+                        fuzzy_context = self._normalize_line_for_fuzzy(lines[index + 1])
+                    reported_line = int(line_num)
+                    if normalized_context:
+                        reported_line = self._find_best_line_match(
+                            normalized_context,
+                            fuzzy_context,
+                            reported_line,
+                            line_keys,
+                            index_map,
+                            fuzzy_keys,
+                            fuzzy_map
+                        )
                     errors.append({
                         "type": "compilation_error",
                         "severity": "error",
-                        "line": int(line_num),
-                        "column": int(col_num),
+                        "line": reported_line,
+                        "column": column,
                         "message": message.strip(),
                         "file": filename
                     })
-        
+            index += 1
+        return errors
+
+    def _parse_runtime_error(self, error_output: str, class_name: Optional[str] = None) -> Dict:
+        message_lines = [line for line in error_output.split('\n') if line.strip()]
+        message = message_lines[0].strip() if message_lines else "Runtime error"
+        matches = re.findall(r'\(([^)]+\.java):(\d+)\)', error_output)
+        if matches:
+            if class_name:
+                target = f"{class_name}.java"
+                for filename, line_num in matches:
+                    if filename.endswith(target):
+                        return {
+                            "type": "runtime_error",
+                            "line": int(line_num),
+                            "column": 0,
+                            "message": message,
+                            "file": filename
+                        }
+            filename, line_num = matches[0]
+            return {
+                "type": "runtime_error",
+                "line": int(line_num),
+                "column": 0,
+                "message": message,
+                "file": filename
+            }
+        return {
+            "type": "runtime_error",
+            "line": 0,
+            "column": 0,
+            "message": message
+        }
+
+    def _validate_structure(self, java_code: str) -> List[Dict]:
+        errors = []
+        stack = []
+        line = 1
+        column = 0
+        in_single = False
+        in_multi = False
+        in_string = False
+        in_char = False
+        escape = False
+        index = 0
+        while index < len(java_code):
+            ch = java_code[index]
+            next_ch = java_code[index + 1] if index + 1 < len(java_code) else ''
+            if ch == '\n':
+                line += 1
+                column = 0
+                in_single = False
+                index += 1
+                continue
+            column += 1
+            if in_single:
+                index += 1
+                continue
+            if in_multi:
+                if ch == '*' and next_ch == '/':
+                    in_multi = False
+                    index += 2
+                    column += 1
+                    continue
+                index += 1
+                continue
+            if in_string:
+                if escape:
+                    escape = False
+                elif ch == '\\':
+                    escape = True
+                elif ch == '"':
+                    in_string = False
+                index += 1
+                continue
+            if in_char:
+                if escape:
+                    escape = False
+                elif ch == '\\':
+                    escape = True
+                elif ch == "'":
+                    in_char = False
+                index += 1
+                continue
+            if ch == '/' and next_ch == '/':
+                in_single = True
+                index += 2
+                column += 1
+                continue
+            if ch == '/' and next_ch == '*':
+                in_multi = True
+                index += 2
+                column += 1
+                continue
+            if ch == '"':
+                in_string = True
+                index += 1
+                continue
+            if ch == "'":
+                in_char = True
+                index += 1
+                continue
+            if ch == '{' or ch == '(':
+                stack.append((ch, line, column))
+            elif ch == '}' or ch == ')':
+                if not stack:
+                    errors.append({
+                        "type": "compilation_error",
+                        "line": line,
+                        "column": column,
+                        "message": f"Unmatched closing '{ch}'"
+                    })
+                else:
+                    opener, open_line, open_column = stack.pop()
+                    if (opener == '{' and ch != '}') or (opener == '(' and ch != ')'):
+                        errors.append({
+                            "type": "compilation_error",
+                            "line": line,
+                            "column": column,
+                            "message": f"Mismatched closing '{ch}'"
+                        })
+                        stack.append((opener, open_line, open_column))
+            index += 1
+        while stack:
+            opener, open_line, open_column = stack.pop()
+            errors.append({
+                "type": "compilation_error",
+                "line": open_line,
+                "column": open_column,
+                "message": f"Unmatched '{opener}'"
+            })
         return errors
     
     def _execute_with_docker(self, java_code: str) -> Dict:
@@ -109,7 +469,7 @@ class JavaExecutor:
                 f.write(java_code)
             
             # Compile
-            compile_result = self._docker_compile(temp_dir, class_name)
+            compile_result = self._docker_compile(temp_dir, class_name, java_code)
             if not compile_result["success"]:
                 return {
                     "success": False,
@@ -130,7 +490,7 @@ class JavaExecutor:
                 "compilation_time": compile_result["compilation_time"]
             }
     
-    def _docker_compile(self, code_dir: str, class_name: str) -> Dict:
+    def _docker_compile(self, code_dir: str, class_name: str, java_code: str) -> Dict:
         """Compile Java code in Docker container"""
         start_time = time.time()
         container = None
@@ -167,7 +527,7 @@ class JavaExecutor:
             logs = container.logs(stdout=True, stderr=True).decode('utf-8')
             container.remove()
             
-            errors = self._parse_compiler_errors(logs) if exit_code != 0 else []
+            errors = self._parse_compiler_errors(logs, java_code) if exit_code != 0 else []
             if exit_code != 0 and not errors:
                 errors = [{"type": "compilation_error", "line": 0, "column": 0, "message": logs.strip() or "Compilation failed"}]
             
@@ -241,11 +601,11 @@ class JavaExecutor:
                     "execution_time": time.time() - start_time
                 }
             
-            error_message = logs.strip() or "Execution failed with non-zero exit code"
+            runtime_error = self._parse_runtime_error(logs, class_name)
             return {
                 "success": False,
                 "output": logs,
-                "errors": [{"type": "runtime_error", "line": 0, "column": 0, "message": error_message}],
+                "errors": [runtime_error],
                 "execution_time": time.time() - start_time
             }
         except Exception as e:
@@ -272,7 +632,7 @@ class JavaExecutor:
                 f.write(java_code)
             
             # Compile
-            compile_result = self._subprocess_compile(temp_dir, class_name)
+            compile_result = self._subprocess_compile(temp_dir, class_name, java_code)
             if not compile_result["success"]:
                 return {
                     "success": False,
@@ -293,7 +653,7 @@ class JavaExecutor:
                 "compilation_time": compile_result["compilation_time"]
             }
     
-    def _subprocess_compile(self, code_dir: str, class_name: str) -> Dict:
+    def _subprocess_compile(self, code_dir: str, class_name: str, java_code: str) -> Dict:
         """Compile Java code using subprocess"""
         start_time = time.time()
         
@@ -309,7 +669,10 @@ class JavaExecutor:
             
             stdout, stderr = process.communicate(timeout=self.timeout)
             exit_code = process.returncode
-            errors = self._parse_compiler_errors(stderr) if exit_code != 0 else []
+            error_text = stderr or ""
+            errors = self._parse_compiler_errors(error_text, java_code) if exit_code != 0 else []
+            if exit_code != 0 and not errors:
+                errors = [{"type": "compilation_error", "line": 0, "column": 0, "message": error_text.strip() or "Compilation failed"}]
             
             return {
                 "success": exit_code == 0,
@@ -349,9 +712,16 @@ class JavaExecutor:
             exit_code = process.returncode
             output = stdout + (stderr if exit_code != 0 else "")
             
+            if exit_code == 0:
+                return {
+                    "success": True,
+                    "output": output,
+                    "execution_time": time.time() - start_time
+                }
             return {
-                "success": exit_code == 0,
+                "success": False,
                 "output": output,
+                "errors": [self._parse_runtime_error(output, class_name)],
                 "execution_time": time.time() - start_time
             }
         except subprocess.TimeoutExpired:

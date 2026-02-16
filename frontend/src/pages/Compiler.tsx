@@ -48,6 +48,292 @@ type CompilerState = {
   sessionId: string;
 };
 
+type CompilerError = {
+  line?: number;
+  column?: number;
+  message?: string;
+  file?: string;
+};
+
+const normalizeLineForMatch = (line: string) => {
+  const cleaned: string[] = [];
+  let inString = false;
+  let inChar = false;
+  let escape = false;
+  let stringLen = 0;
+  let charLen = 0;
+  for (const ch of line) {
+    if (inString) {
+      if (escape) {
+        escape = false;
+        stringLen += 1;
+        continue;
+      }
+      if (ch === '\\') {
+        escape = true;
+        stringLen += 1;
+        continue;
+      }
+      if (ch === '"') {
+        cleaned.push(`"<str:${stringLen}>"`);
+        inString = false;
+        stringLen = 0;
+        continue;
+      }
+      stringLen += 1;
+      continue;
+    }
+    if (inChar) {
+      if (escape) {
+        escape = false;
+        charLen += 1;
+        continue;
+      }
+      if (ch === '\\') {
+        escape = true;
+        charLen += 1;
+        continue;
+      }
+      if (ch === "'") {
+        cleaned.push(`'<char:${charLen}>'`);
+        inChar = false;
+        charLen = 0;
+        continue;
+      }
+      charLen += 1;
+      continue;
+    }
+    if (ch === '"') {
+      inString = true;
+      stringLen = 0;
+      continue;
+    }
+    if (ch === "'") {
+      inChar = true;
+      charLen = 0;
+      continue;
+    }
+    cleaned.push(ch);
+  }
+  if (inString) {
+    cleaned.push(`"<str:${stringLen}>"`);
+  }
+  if (inChar) {
+    cleaned.push(`'<char:${charLen}>'`);
+  }
+  return cleaned.join('').replace(/\s+/g, '').trim();
+};
+
+const normalizeLineForFuzzy = (line: string) => line.replace(/\s+/g, '').trim();
+
+const buildLineIndex = (code: string) => {
+  const normalized: string[] = [];
+  const normalizedMap = new Map<string, number[]>();
+  const fuzzy: string[] = [];
+  const fuzzyMap = new Map<string, number[]>();
+  const lines = code.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  lines.forEach((line, index) => {
+    const normalizedLine = normalizeLineForMatch(line);
+    const fuzzyLine = normalizeLineForFuzzy(line);
+    normalized.push(normalizedLine);
+    fuzzy.push(fuzzyLine);
+    if (normalizedLine) {
+      const list = normalizedMap.get(normalizedLine) ?? [];
+      list.push(index + 1);
+      normalizedMap.set(normalizedLine, list);
+    }
+    if (fuzzyLine) {
+      const list = fuzzyMap.get(fuzzyLine) ?? [];
+      list.push(index + 1);
+      fuzzyMap.set(fuzzyLine, list);
+    }
+  });
+  return { normalized, normalizedMap, fuzzy, fuzzyMap };
+};
+
+const findBestLineMatch = (
+  normalizedContext: string,
+  fuzzyContext: string,
+  reportedLine: number,
+  normalized: string[],
+  normalizedMap: Map<string, number[]>,
+  fuzzy: string[],
+  fuzzyMap: Map<string, number[]>
+) => {
+  if (normalizedContext) {
+    if (reportedLine > 0 && reportedLine <= normalized.length) {
+      if (normalized[reportedLine - 1] === normalizedContext) {
+        return reportedLine;
+      }
+    }
+    const candidates = normalizedMap.get(normalizedContext);
+    if (candidates && candidates.length > 0) {
+      if (reportedLine > 0) {
+        return candidates.reduce((best, value) => (
+          Math.abs(value - reportedLine) < Math.abs(best - reportedLine) ? value : best
+        ), candidates[0]);
+      }
+      return candidates[0];
+    }
+  }
+  if (fuzzyContext) {
+    if (reportedLine > 0 && reportedLine <= fuzzy.length) {
+      if (fuzzy[reportedLine - 1] === fuzzyContext) {
+        return reportedLine;
+      }
+    }
+    const candidates = fuzzyMap.get(fuzzyContext);
+    if (candidates && candidates.length > 0) {
+      if (reportedLine > 0) {
+        return candidates.reduce((best, value) => (
+          Math.abs(value - reportedLine) < Math.abs(best - reportedLine) ? value : best
+        ), candidates[0]);
+      }
+      return candidates[0];
+    }
+  }
+  return reportedLine;
+};
+
+const buildPointer = (lineText: string, column: number) => {
+  if (!lineText) {
+    return '';
+  }
+  const fallbackIndex = Math.max(lineText.search(/\S/), 0);
+  const index = column > 0 ? Math.max(column - 1, 0) : fallbackIndex;
+  return `${' '.repeat(index)}^`;
+};
+
+const explainError = (message: string) => {
+  const normalized = message.toLowerCase();
+  if (normalized.includes("';' expected")) {
+    return 'Java expects a semicolon at the end of a statement. Add a semicolon after the line shown to terminate the statement.';
+  }
+  if (normalized.includes('cannot find symbol')) {
+    return 'The compiler cannot resolve a name. This usually means a variable, method, or class is misspelled, not declared, or a required import is missing.';
+  }
+  if (normalized.includes('reached end of file while parsing')) {
+    return 'The parser reached the end of the file while still expecting a closing brace, parenthesis, or quote. Check for a missing } ) or " earlier in the file.';
+  }
+  if (normalized.includes('class, interface, or enum expected')) {
+    return 'Code appears outside a class/interface declaration or braces are unbalanced. Make sure all methods and statements are inside a class and braces match.';
+  }
+  if (normalized.includes('illegal start of expression')) {
+    return 'There is a syntax error where an expression is expected. This can be caused by a missing token, extra symbol, or a misplaced statement.';
+  }
+  if (normalized.includes('not a statement')) {
+    return 'Java found an expression that cannot stand alone as a statement. This can happen if operators or parentheses are misplaced.';
+  }
+  if (normalized.includes('missing return statement')) {
+    return 'A method with a non-void return type does not return a value on every path. Add a return statement for all paths.';
+  }
+  if (normalized.includes('incompatible types')) {
+    return 'The types on both sides do not match. Check assignments, method arguments, and return types to ensure they are compatible.';
+  }
+  if (normalized.includes('cannot be applied to')) {
+    return 'A method or constructor call does not match any available signature. Check the number and types of arguments.';
+  }
+  return 'The compiler reports a problem at this location. Review the highlighted line for missing symbols, wrong types, or misplaced syntax.';
+};
+
+const buildErrorBlock = (payload: {
+  file?: string;
+  line: number;
+  column: number;
+  message: string;
+  codeLine?: string;
+}) => {
+  const location = payload.line > 0
+    ? `Line ${payload.line}${payload.column > 0 ? `, Col ${payload.column}` : ''}`
+    : 'Line unknown';
+  const header = payload.file ? `File: ${payload.file}` : 'File: Project';
+  const codeLine = payload.codeLine ?? '';
+  const pointer = buildPointer(codeLine, payload.column);
+  const description = payload.message.trim() || 'Compilation failed';
+  const details = explainError(description);
+  const lines: string[] = [header, `${location}: ${description}`];
+  if (codeLine) {
+    lines.push(codeLine);
+    if (pointer) {
+      lines.push(pointer);
+    }
+  }
+  lines.push(`Description: ${details}`);
+  return lines.join('\n');
+};
+
+const parseJavacOutput = (output: string, code: string) => {
+  const lines = output.split(/\r?\n/);
+  const { normalized, normalizedMap, fuzzy, fuzzyMap } = buildLineIndex(code);
+  const sourceLines = code.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  const results: string[] = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    const lineText = lines[index].trim();
+    if (!lineText.toLowerCase().includes('error:')) {
+      continue;
+    }
+    const match = lineText.match(/(.+\.java):(\d+)(?::(\d+))?:\s*error:\s*(.+)/);
+    if (!match) {
+      continue;
+    }
+    const [, filename, lineNum, , message] = match;
+    const contextLine = lines[index + 1] ?? '';
+    const caretLine = lines[index + 2] ?? '';
+    const caretIndex = caretLine.indexOf('^');
+    const column = caretIndex >= 0 ? caretIndex + 1 : 0;
+    const normalizedContext = normalizeLineForMatch(contextLine);
+    const fuzzyContext = normalizeLineForFuzzy(contextLine);
+    let lineNumber = Number.parseInt(lineNum, 10) || 0;
+    lineNumber = findBestLineMatch(
+      normalizedContext,
+      fuzzyContext,
+      lineNumber,
+      normalized,
+      normalizedMap,
+      fuzzy,
+      fuzzyMap
+    );
+    const codeLine = lineNumber > 0 ? sourceLines[lineNumber - 1] : contextLine;
+    results.push(buildErrorBlock({
+      file: filename,
+      line: lineNumber,
+      column,
+      message,
+      codeLine
+    }));
+  }
+  if (results.length > 0) {
+    return results.join('\n');
+  }
+  return output.trim() || 'Compilation failed';
+};
+
+const formatErrors = (errors?: CompilerError[], code?: string) => {
+  if (!errors || errors.length === 0) {
+    return 'Compilation failed';
+  }
+  if (code) {
+    const raw = errors.find((err) => (err.line ?? 0) <= 0 && (err.message ?? '').includes('.java:') && (err.message ?? '').includes('error:'));
+    if (raw?.message) {
+      return parseJavacOutput(raw.message, code);
+    }
+  }
+  const sourceLines = code ? code.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n') : [];
+  return errors.map((err) => {
+    const line = typeof err.line === 'number' ? err.line : 0;
+    const column = typeof err.column === 'number' ? err.column : 0;
+    const message = err.message?.trim() || 'Compilation failed';
+    const codeLine = line > 0 ? sourceLines[line - 1] : '';
+    return buildErrorBlock({
+      file: err.file,
+      line,
+      column,
+      message,
+      codeLine
+    });
+  }).join('\n');
+};
+
 const getSessionId = () => {
   const existing = sessionStorage.getItem(COMPILER_SESSION_KEY);
   if (existing) {
@@ -733,7 +1019,7 @@ const Compiler = () => {
         });
       } else {
         console.log('[Compiler] Session failed:', result.errors);
-        const errorMessage = result.errors && result.errors.length > 0 ? result.errors.map(err => err.message).join('\n') : 'Compilation failed';
+        const errorMessage = formatErrors(result.errors, currentCode);
         setOutput(errorMessage);
         setExecutionStatus('error');
         saveOutputState(errorMessage);
@@ -947,7 +1233,7 @@ const Compiler = () => {
                           />
                         </div>
                         {!code && (
-                          <div className="absolute left-3 top-3 text-xs sm:text-sm text-muted-foreground/60 pointer-events-none">
+                          <div className="absolute left-[3.75rem] top-3 text-xs sm:text-sm text-muted-foreground/60 pointer-events-none">
                             Type or paste Java code here...
                           </div>
                         )}
