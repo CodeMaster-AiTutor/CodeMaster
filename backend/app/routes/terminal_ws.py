@@ -34,6 +34,91 @@ def terminal_socket(ws):
     else:
         logger.info("[WS_DEBUG] Auth disabled")
     session.touch()
+    if not manager.use_docker:
+        process = session.process
+        if not process or not process.stdin or not process.stdout or not process.stderr:
+            logger.warning("[WS_DEBUG] Reject invalid local session")
+            ws.send("Session invalid")
+            manager.stop_session(session_id)
+            return
+        logger.info(f"[WS_DEBUG] Starting local bidirectional loop for session {session_id}")
+        output_queue = queue.Queue()
+        stop_event = threading.Event()
+        closed_streams = 0
+
+        def stream_reader(stream):
+            while not stop_event.is_set():
+                try:
+                    chunk = stream.read(4096)
+                    if not chunk:
+                        output_queue.put(None)
+                        return
+                    if isinstance(chunk, str):
+                        chunk = chunk.encode("utf-8", errors="replace")
+                    output_queue.put(chunk)
+                except Exception:
+                    output_queue.put(None)
+                    return
+
+        stdout_thread = threading.Thread(target=stream_reader, args=(process.stdout,), daemon=True)
+        stderr_thread = threading.Thread(target=stream_reader, args=(process.stderr,), daemon=True)
+        stdout_thread.start()
+        stderr_thread.start()
+
+        try:
+            while True:
+                if not session.active:
+                    current_app.logger.info("Session inactive, stopping loop")
+                    break
+                if process.poll() is not None and output_queue.empty():
+                    break
+                try:
+                    while True:
+                        chunk = output_queue.get_nowait()
+                        if chunk is None:
+                            closed_streams += 1
+                            if closed_streams >= 2 and process.poll() is not None:
+                                break
+                            continue
+                        logger.info(f"[WS_DEBUG] Local->WS bytes={len(chunk)} preview={chunk[:100]!r}")
+                        session.output_bytes += len(chunk)
+                        session.touch()
+                        try:
+                            ws.send(chunk)
+                            logger.info("[WS_DEBUG] Sent to WebSocket")
+                        except Exception as e:
+                            logger.error(f"WebSocket send failed: {e}")
+                            break
+                except queue.Empty:
+                    pass
+                if closed_streams >= 2 and process.poll() is not None:
+                    break
+                try:
+                    message = ws.receive(timeout=0.01)
+                    if message is not None:
+                        payload = message if isinstance(message, (bytes, bytearray)) else str(message).encode("utf-8")
+                        if payload:
+                            if b'\r' in payload:
+                                payload = payload.replace(b'\r', b'\n')
+                            try:
+                                process.stdin.write(payload)
+                                process.stdin.flush()
+                            except Exception:
+                                break
+                except Exception:
+                    pass
+                time.sleep(0.01)
+        except Exception as e:
+            logger.error(f"Main loop error: {e}")
+        finally:
+            stop_event.set()
+            if stdout_thread.is_alive():
+                stdout_thread.join(timeout=0.2)
+            if stderr_thread.is_alive():
+                stderr_thread.join(timeout=0.2)
+            logger.info(f"Cleaning up session {session_id}")
+            manager.stop_session(session_id)
+        return
     try:
         container = manager.docker_client.containers.get(session.container_id)
         logger.info(f"[WS_DEBUG] Container status {container.status}")
@@ -49,44 +134,14 @@ def terminal_socket(ws):
         manager.stop_session(session_id)
         return
 
-    # On Windows with Docker Desktop, attach_socket returns a distinct socket object
-    # that might need special handling.
-    attach_socket = manager.attach_socket(session_id)
-    if not attach_socket:
+    logger.info(f"[WS_DEBUG] Starting bidirectional loop for session {session_id}")
+    output_queue = session.output_queue
+    attach_socket = session.socket
+    if not output_queue or not attach_socket:
         logger.error("[WS_DEBUG] Socket attach failed")
         ws.send("Unable to attach to session")
         return
-
-    logger.info(f"[WS_DEBUG] Starting bidirectional loop for session {session_id}")
-    output_queue = queue.Queue()
-    stop_event = threading.Event()
     docker_closed = False
-
-    def docker_reader():
-        while not stop_event.is_set():
-            try:
-                chunk = attach_socket.recv(4096)
-                if chunk:
-                    output_queue.put(chunk)
-                else:
-                    time.sleep(0.01)
-            except BlockingIOError:
-                time.sleep(0.01)
-            except TimeoutError:
-                time.sleep(0.01)
-            except Exception as e:
-                if "The pipe has been ended" in str(e) or "109" in str(e):
-                    logger.info("Docker pipe ended")
-                    output_queue.put(None)
-                    return
-                if "timed out" in str(e):
-                    time.sleep(0.01)
-                else:
-                    logger.error(f"Docker read error (ignoring): {e}")
-                    time.sleep(0.01)
-
-    reader_thread = threading.Thread(target=docker_reader, daemon=True)
-    reader_thread.start()
     
     try:
         while True:
@@ -157,8 +212,5 @@ def terminal_socket(ws):
     except Exception as e:
         logger.error(f"Main loop error: {e}")
     finally:
-        stop_event.set()
-        if reader_thread.is_alive():
-            reader_thread.join(timeout=0.2)
         logger.info(f"Cleaning up session {session_id}")
         manager.stop_session(session_id)
