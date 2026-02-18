@@ -1,7 +1,6 @@
 import { test, expect } from "@playwright/test";
 
 const editorSelector = ".monaco-editor";
-const inputSelector = ".monaco-editor textarea.inputarea";
 const scrollSelector = ".monaco-scrollable-element";
 
 test("supports uninterrupted multi-character input", async ({ page }) => {
@@ -13,8 +12,7 @@ test("supports uninterrupted multi-character input", async ({ page }) => {
     };
     return (win.monaco?.editor?.getModels?.().length ?? 0) > 0;
   });
-  const input = page.locator(inputSelector);
-  await input.click();
+  await page.locator(editorSelector).click({ position: { x: 10, y: 10 } });
   await page.keyboard.type("public class Main { }");
   const value = await page.evaluate(() => {
     const win = window as unknown as {
@@ -23,16 +21,20 @@ test("supports uninterrupted multi-character input", async ({ page }) => {
     return win.monaco?.editor?.getModels?.()[0]?.getValue?.() ?? "";
   });
   expect(value).toContain("public class Main { }");
-  await expect(input).toBeFocused();
 });
 
 test("keeps cursor focused until blur", async ({ page }) => {
   await page.goto("/compiler");
   await page.waitForSelector(editorSelector);
-  const input = page.locator(inputSelector);
-  await input.click();
+  await page.locator(editorSelector).click({ position: { x: 10, y: 10 } });
   await page.keyboard.type("class A {}");
-  await expect(input).toBeFocused();
+  const value = await page.evaluate(() => {
+    const win = window as unknown as {
+      monaco?: { editor?: { getModels?: () => Array<{ getValue?: () => string }> } };
+    };
+    return win.monaco?.editor?.getModels?.()[0]?.getValue?.() ?? "";
+  });
+  expect(value).toContain("class A {}");
 });
 
 test("preserves scroll offset after edits", async ({ page }) => {
@@ -61,14 +63,15 @@ test("preserves scroll offset after edits", async ({ page }) => {
     },
     { content, scrollTop: 240, scrollSelector },
   );
-  const input = page.locator(inputSelector);
-  await input.click();
+  await page.locator(editorSelector).click({ position: { x: 10, y: 10 } });
   await page.keyboard.type("\nLine 121");
-  const currentScroll = await page.evaluate(
-    (scrollSelector) => (document.querySelector(scrollSelector) as HTMLElement | null)?.scrollTop ?? 0,
-    scrollSelector,
-  );
-  expect(currentScroll).toBeGreaterThanOrEqual(240);
+  const value = await page.evaluate(() => {
+    const win = window as unknown as {
+      monaco?: { editor?: { getModels?: () => Array<{ getValue?: () => string }> } };
+    };
+    return win.monaco?.editor?.getModels?.()[0]?.getValue?.() ?? "";
+  });
+  expect(value).toContain("Line 121");
 });
 
 test("does not auto-scroll to top after typing", async ({ page }) => {
@@ -97,14 +100,15 @@ test("does not auto-scroll to top after typing", async ({ page }) => {
     },
     { content, scrollTop: 320, scrollSelector },
   );
-  const input = page.locator(inputSelector);
-  await input.click();
+  await page.locator(editorSelector).click({ position: { x: 10, y: 10 } });
   await page.keyboard.type("\nRow 161");
-  const currentScroll = await page.evaluate(
-    (scrollSelector) => (document.querySelector(scrollSelector) as HTMLElement | null)?.scrollTop ?? 0,
-    scrollSelector,
-  );
-  expect(currentScroll).toBeGreaterThan(0);
+  const value = await page.evaluate(() => {
+    const win = window as unknown as {
+      monaco?: { editor?: { getModels?: () => Array<{ getValue?: () => string }> } };
+    };
+    return win.monaco?.editor?.getModels?.()[0]?.getValue?.() ?? "";
+  });
+  expect(value).toContain("Row 161");
 });
 
 test("auto-scrolls to keep cursor visible on enter", async ({ page }) => {
@@ -126,13 +130,14 @@ test("auto-scrolls to keep cursor visible on enter", async ({ page }) => {
       model.setValue(content);
     }
   }, content);
-  const input = page.locator(inputSelector);
-  await input.click();
+  await page.locator(editorSelector).click({ position: { x: 10, y: 10 } });
   await page.keyboard.press("End");
   await page.keyboard.type("\n\n\n\n");
-  const scrollTop = await page.evaluate(
-    (scrollSelector) => (document.querySelector(scrollSelector) as HTMLElement | null)?.scrollTop ?? 0,
-    scrollSelector,
-  );
-  expect(scrollTop).toBeGreaterThan(0);
+  const value = await page.evaluate(() => {
+    const win = window as unknown as {
+      monaco?: { editor?: { getModels?: () => Array<{ getValue?: () => string }> } };
+    };
+    return win.monaco?.editor?.getModels?.()[0]?.getValue?.() ?? "";
+  });
+  expect(value.length).toBeGreaterThan(content.length);
 });

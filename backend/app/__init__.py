@@ -54,6 +54,9 @@ def create_app(config_name=None):
     from app.routes.assessment import assessment_bp
     from app.routes.analytics import analytics_bp
     from app.routes.dashboard import dashboard_bp
+    from app.routes.profile import profile_bp
+    from app.routes.practice import practice_bp
+    from app.routes.settings import settings_bp
     from app.routes import terminal_ws
     
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
@@ -63,6 +66,9 @@ def create_app(config_name=None):
     app.register_blueprint(assessment_bp, url_prefix='/api/assessment')
     app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
     app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
+    app.register_blueprint(profile_bp, url_prefix='/api/profile')
+    app.register_blueprint(practice_bp, url_prefix='/api/practice')
+    app.register_blueprint(settings_bp, url_prefix='/api/settings')
     
     # Error handlers
     @app.errorhandler(404)

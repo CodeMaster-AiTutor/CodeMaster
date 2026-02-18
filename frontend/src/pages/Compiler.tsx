@@ -17,7 +17,7 @@ import type { OnMount } from '@monaco-editor/react';
 import type { editor as MonacoEditor } from 'monaco-editor';
 import { toast } from '@/hooks/use-toast';
 import AppLayout from '@/components/layout/AppLayout';
-import { compilerAPI } from '@/lib/api';
+import { compilerAPI, settingsAPI } from '@/lib/api';
 import Terminal from '@/components/Terminal';
 import {
   AlertDialog,
@@ -37,6 +37,11 @@ const COMPILER_OUTPUT_KEY = 'compiler:output';
 const COMPILER_FALLBACK_KEY = 'compiler:code-fallback';
 const COMPILER_STATE_TTL_MS = 1000 * 60 * 60 * 24 * 7;
 const SAVE_DEBOUNCE_MS = 2500;
+const EDITOR_FONT_SIZE_KEY = 'settings:editor-font-size';
+const EDITOR_THEME_KEY = 'settings:editor-theme';
+const EDITOR_UPDATED_AT_KEY = 'settings:editor-updated-at';
+const SETTINGS_SUPPORTS_EDITOR_THEME_KEY = 'settings:supports-editor-theme';
+const EDITOR_THEME_VALUES = ['vs-dark', 'vs', 'hc-black', 'hc-light', 'github-dark', 'github-light', 'jellyfish'];
 
 type CompilerState = {
   version: 1;
@@ -598,6 +603,52 @@ const getFallbackCode = () => {
   }
 };
 
+const getStoredFontSize = () => {
+  try {
+    const stored = localStorage.getItem(EDITOR_FONT_SIZE_KEY);
+    if (!stored) {
+      return 14;
+    }
+    const parsed = Number(stored);
+    return Number.isFinite(parsed) ? parsed : 14;
+  } catch {
+    return 14;
+  }
+};
+
+const getStoredEditorTheme = () => {
+  try {
+    return localStorage.getItem(EDITOR_THEME_KEY) || 'vs-dark';
+  } catch {
+    return 'vs-dark';
+  }
+};
+
+const getStoredEditorUpdatedAt = () => {
+  try {
+    const stored = localStorage.getItem(EDITOR_UPDATED_AT_KEY);
+    const parsed = stored ? Date.parse(stored) : 0;
+    return Number.isFinite(parsed) ? parsed : 0;
+  } catch {
+    return 0;
+  }
+};
+
+const getStoredEditorThemeSupport = () => {
+  try {
+    const stored = localStorage.getItem(SETTINGS_SUPPORTS_EDITOR_THEME_KEY);
+    if (stored === 'false') {
+      return false;
+    }
+    if (stored === 'true') {
+      return true;
+    }
+    return true;
+  } catch {
+    return true;
+  }
+};
+
 const Compiler = () => {
   const navigate = useNavigate();
   const initialCode = getFallbackCode() ?? '';
@@ -611,8 +662,11 @@ const Compiler = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [terminalSessionId, setTerminalSessionId] = useState<string | null>(null);
   const [terminalWsUrl, setTerminalWsUrl] = useState('');
+  const [editorFontSize, setEditorFontSize] = useState(getStoredFontSize());
+  const [editorTheme, setEditorTheme] = useState(getStoredEditorTheme());
   const compilerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
+  const monacoRef = useRef<Parameters<OnMount>[1] | null>(null);
   const errorDetectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const scrollPositionRef = useRef(0);
   const selectionRef = useRef<{start: number; end: number}>({ start: 0, end: 0 });
@@ -620,6 +674,91 @@ const Compiler = () => {
   const lastSavedStateRef = useRef<Omit<CompilerState, 'version' | 'compressed' | 'updatedAt'> | null>(null);
   const [isClearing, setIsClearing] = useState(false);
   const sessionIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadSettings = async () => {
+      try {
+        const data = await settingsAPI.getSettings();
+        if (!isMounted) {
+          return;
+        }
+        const localUpdatedAt = getStoredEditorUpdatedAt();
+        const apiUpdatedAt = data.updated_at ? Date.parse(data.updated_at) : 0;
+        const apiUpdatedAtValue = Number.isFinite(apiUpdatedAt) ? apiUpdatedAt : 0;
+        const localFontSize = getStoredFontSize();
+        const localTheme = EDITOR_THEME_VALUES.includes(getStoredEditorTheme()) ? getStoredEditorTheme() : 'vs-dark';
+        const localIsNewer = localUpdatedAt && (!apiUpdatedAtValue || localUpdatedAt > apiUpdatedAtValue);
+        if (localIsNewer) {
+          setEditorFontSize(localFontSize);
+          setEditorTheme(localTheme);
+          try {
+            const supportsEditorTheme = getStoredEditorThemeSupport();
+            const payload: { font_size: number; editor_theme?: string } = {
+              font_size: localFontSize
+            };
+            if (supportsEditorTheme) {
+              payload.editor_theme = localTheme;
+            }
+            const response = await settingsAPI.updateSettings(payload);
+            if (response?.updated_at) {
+              localStorage.setItem(EDITOR_UPDATED_AT_KEY, response.updated_at);
+            }
+            localStorage.setItem(EDITOR_FONT_SIZE_KEY, String(localFontSize));
+            localStorage.setItem(EDITOR_THEME_KEY, localTheme);
+          } catch (error) {
+            const message = error instanceof Error ? error.message : '';
+            if (message.includes('Unknown settings: editor_theme')) {
+              localStorage.setItem(SETTINGS_SUPPORTS_EDITOR_THEME_KEY, 'false');
+              try {
+                const response = await settingsAPI.updateSettings({ font_size: localFontSize });
+                if (response?.updated_at) {
+                  localStorage.setItem(EDITOR_UPDATED_AT_KEY, response.updated_at);
+                }
+              } catch {
+                void 0;
+              }
+            }
+          }
+        } else {
+          const nextFontSize = Number(data.font_size ?? 14);
+          const normalizedFontSize = Number.isFinite(nextFontSize) ? nextFontSize : 14;
+          const nextTheme = EDITOR_THEME_VALUES.includes(data.editor_theme) ? data.editor_theme : 'vs-dark';
+          setEditorFontSize(normalizedFontSize);
+          setEditorTheme(nextTheme);
+          try {
+            localStorage.setItem(EDITOR_FONT_SIZE_KEY, String(normalizedFontSize));
+            localStorage.setItem(EDITOR_THEME_KEY, nextTheme);
+            if (data.updated_at) {
+              localStorage.setItem(EDITOR_UPDATED_AT_KEY, data.updated_at);
+            }
+          } catch {
+            void 0;
+          }
+        }
+      } catch {
+        void 0;
+      }
+    };
+    loadSettings();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (editor) {
+      editor.updateOptions({ fontSize: editorFontSize });
+    }
+  }, [editorFontSize]);
+
+  useEffect(() => {
+    const monaco = monacoRef.current;
+    if (monaco) {
+      monaco.editor.setTheme(editorTheme);
+    }
+  }, [editorTheme]);
 
 
 
@@ -769,8 +908,76 @@ const Compiler = () => {
     scheduleSave(nextValue, selectionRef.current, scrollPositionRef.current);
   }, [scheduleSave]);
 
-  const handleEditorMount: OnMount = useCallback((editor) => {
+  const handleEditorMount: OnMount = useCallback((editor, monaco) => {
     editorRef.current = editor;
+    monacoRef.current = monaco;
+    monaco.editor.defineTheme('github-light', {
+      base: 'vs',
+      inherit: true,
+      rules: [
+        { token: 'comment', foreground: '6e7781' },
+        { token: 'keyword', foreground: 'cf222e' },
+        { token: 'string', foreground: '0a3069' },
+        { token: 'number', foreground: '0550ae' },
+        { token: 'type.identifier', foreground: '8250df' },
+        { token: 'identifier', foreground: '24292f' },
+        { token: 'delimiter', foreground: '24292f' }
+      ],
+      colors: {
+        'editor.background': '#ffffff',
+        'editor.foreground': '#24292f',
+        'editorLineNumber.foreground': '#8c959f',
+        'editorCursor.foreground': '#0969da',
+        'editor.selectionBackground': '#b6d7ff',
+        'editor.inactiveSelectionBackground': '#dbe9ff',
+        'editor.lineHighlightBackground': '#f6f8fa'
+      }
+    });
+    monaco.editor.defineTheme('github-dark', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [
+        { token: 'comment', foreground: '8b949e' },
+        { token: 'keyword', foreground: 'ff7b72' },
+        { token: 'string', foreground: 'a5d6ff' },
+        { token: 'number', foreground: '79c0ff' },
+        { token: 'type.identifier', foreground: 'd2a8ff' },
+        { token: 'identifier', foreground: 'c9d1d9' },
+        { token: 'delimiter', foreground: 'c9d1d9' }
+      ],
+      colors: {
+        'editor.background': '#0d1117',
+        'editor.foreground': '#c9d1d9',
+        'editorLineNumber.foreground': '#6e7681',
+        'editorCursor.foreground': '#58a6ff',
+        'editor.selectionBackground': '#1f6feb66',
+        'editor.inactiveSelectionBackground': '#1f6feb33',
+        'editor.lineHighlightBackground': '#161b22'
+      }
+    });
+    monaco.editor.defineTheme('jellyfish', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [
+        { token: 'comment', foreground: '6b7891' },
+        { token: 'keyword', foreground: 'ff7fcf' },
+        { token: 'string', foreground: '9be7ff' },
+        { token: 'number', foreground: '7fc4ff' },
+        { token: 'type.identifier', foreground: '9d7bff' },
+        { token: 'identifier', foreground: 'e6f1ff' },
+        { token: 'delimiter', foreground: 'e6f1ff' }
+      ],
+      colors: {
+        'editor.background': '#151b28',
+        'editor.foreground': '#e6f1ff',
+        'editorLineNumber.foreground': '#5c6b8a',
+        'editorCursor.foreground': '#7fc4ff',
+        'editor.selectionBackground': '#2b4c7e66',
+        'editor.inactiveSelectionBackground': '#2b4c7e33',
+        'editor.lineHighlightBackground': '#1e2738'
+      }
+    });
+    monaco.editor.setTheme(editorTheme);
     const model = editor.getModel();
     if (model && model.getValue() !== codeRef.current) {
       editor.setValue(codeRef.current);
@@ -794,7 +1001,7 @@ const Compiler = () => {
       scrollPositionRef.current = editor.getScrollTop();
       scheduleSave(codeRef.current, selectionRef.current, scrollPositionRef.current);
     });
-  }, [scheduleSave, updateSelectionFromEditor]);
+  }, [editorTheme, scheduleSave, updateSelectionFromEditor]);
 
   // Fullscreen functions
   const exitFullscreen = useCallback(() => {
@@ -929,6 +1136,21 @@ const Compiler = () => {
         setCode('');
         setOutput('');
         return;
+      }
+      if (event.key === EDITOR_FONT_SIZE_KEY && event.newValue) {
+        const parsed = Number(event.newValue);
+        if (Number.isFinite(parsed)) {
+          setEditorFontSize(parsed);
+        }
+      }
+      if (event.key === EDITOR_THEME_KEY && event.newValue) {
+        setEditorTheme(event.newValue);
+      }
+      if (event.key === EDITOR_UPDATED_AT_KEY) {
+        const nextFontSize = getStoredFontSize();
+        const nextTheme = EDITOR_THEME_VALUES.includes(getStoredEditorTheme()) ? getStoredEditorTheme() : 'vs-dark';
+        setEditorFontSize(nextFontSize);
+        setEditorTheme(nextTheme);
       }
       const sessionId = sessionIdRef.current;
       if (!sessionId) {
@@ -1213,7 +1435,7 @@ const Compiler = () => {
                           <Editor
                             height="100%"
                             defaultLanguage="java"
-                            theme="vs-dark"
+                            theme={editorTheme}
                             value={code}
                             onChange={handleCodeChange}
                             onMount={handleEditorMount}
@@ -1221,7 +1443,7 @@ const Compiler = () => {
                               automaticLayout: true,
                               minimap: { enabled: false },
                               fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-                              fontSize: 13,
+                              fontSize: editorFontSize,
                               lineHeight: 20,
                               scrollBeyondLastLine: false,
                               tabSize: 2,

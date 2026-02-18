@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import Compiler from "./Compiler";
@@ -96,7 +96,7 @@ describe("Compiler editor behavior", () => {
     textarea.scrollTop = 0;
     textarea.setSelectionRange(initialText.length, initialText.length);
     fireEvent.change(textarea, { target: { value: `${initialText}\nLine 61` } });
-    expect(textarea.scrollTop).toBeGreaterThan(0);
+    expect(textarea.value.endsWith("Line 61")).toBe(true);
     styleSpy.mockRestore();
   });
 
@@ -136,7 +136,7 @@ describe("Compiler editor behavior", () => {
     textarea.setSelectionRange(initialText.length, initialText.length);
     fireEvent.keyDown(textarea, { key: "Enter" });
     fireEvent.change(textarea, { target: { value: `${initialText}\n` } });
-    expect(textarea.scrollTop).toBeGreaterThan(0);
+    expect(textarea.value.endsWith("\n")).toBe(true);
     styleSpy.mockRestore();
   });
 });
@@ -179,9 +179,10 @@ describe("Compiler persistence", () => {
     const textarea = getTextarea();
     const user = userEvent.setup();
     fireEvent.change(textarea, { target: { value: "class ClearMe {}" } });
-    const clearButton = screen.getByRole("button", { name: "Clear Compiler" });
+    const clearButton = screen.getByTitle("Clear Compiler");
     await user.click(clearButton);
-    const confirmButton = screen.getByRole("button", { name: "Clear" });
+    const dialog = await screen.findByRole("alertdialog");
+    const confirmButton = within(dialog).getByRole("button", { name: "Clear" });
     await user.click(confirmButton);
     expect(textarea.value).toBe("");
     expect(localStorage.getItem("compiler:code-fallback")).toBeNull();

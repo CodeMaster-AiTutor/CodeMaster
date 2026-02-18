@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,52 +6,184 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { User, Mail, Calendar, Trophy, Camera, Upload, Target, BookOpen, CheckCircle2, Flame } from 'lucide-react';
+import { User, Mail, Calendar, Trophy, Upload, Target, BookOpen, Flame } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import AppLayout from '@/components/layout/AppLayout';
+import { API_BASE_URL, profileAPI } from '@/lib/api';
 
-interface Submission {
-  id: string;
-  problemName: string;
-  submissionDate: string;
-  result: 'Passed' | 'Failed';
-  language: string;
-  difficulty: 'Basic' | 'Medium' | 'Advanced';
-}
+type ProfileStats = {
+  beginner: { solved: number; total: number };
+  intermediate: { solved: number; total: number };
+  advanced: { solved: number; total: number };
+};
+
+type ProfileData = {
+  id: number;
+  username: string;
+  email: string;
+  profile_image_url?: string | null;
+  bio?: string | null;
+  skill_level?: string | null;
+  created_at?: string | null;
+  streak_days?: number | null;
+  stats?: {
+    beginner?: { solved?: number; total?: number };
+    intermediate?: { solved?: number; total?: number };
+    advanced?: { solved?: number; total?: number };
+  };
+};
+
+const getCachedProfile = (): ProfileData | null => {
+  try {
+    const cached = localStorage.getItem('profile:cache');
+    if (cached) {
+      return JSON.parse(cached);
+    }
+  } catch (error) {
+    console.warn('Failed to read cached profile', error);
+  }
+  try {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      return {
+        id: user.id ?? 0,
+        username: user.username || 'User',
+        email: user.email || '',
+        profile_image_url: user.profile_image_url ?? null,
+        bio: user.bio ?? null,
+        skill_level: user.skill_level || 'beginner',
+        created_at: user.created_at ?? null,
+        streak_days: user.streak_days ?? null,
+      };
+    }
+  } catch (error) {
+    console.warn('Failed to read user cache', error);
+  }
+  return null;
+};
+
+const initialProfile = getCachedProfile();
 
 const Profile = () => {
-  const [isEditing, setIsEditing] = useState(false);
-  
-  // Mock user data
-  const user = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    level: 'Intermediate',
-    avatar: '',
-    joinDate: new Date('2023-06-15'),
-    problemsSolved: 127,
-    streak: 15,
-    progress: {
-      beginner: { solved: 45, total: 50 },
-      intermediate: { solved: 32, total: 75 },
-      advanced: { solved: 50, total: 100 }
-    }
+  const [profile, setProfile] = useState<ProfileData | null>(initialProfile);
+  const hasCachedProfileRef = useRef(Boolean(initialProfile));
+  const [isUploading, setIsUploading] = useState(false);
+
+  const apiOrigin = API_BASE_URL.replace(/\/api\/?$/, '');
+  const stats: ProfileStats = {
+    beginner: {
+      solved: profile?.stats?.beginner?.solved ?? 0,
+      total: profile?.stats?.beginner?.total ?? 0,
+    },
+    intermediate: {
+      solved: profile?.stats?.intermediate?.solved ?? 0,
+      total: profile?.stats?.intermediate?.total ?? 0,
+    },
+    advanced: {
+      solved: profile?.stats?.advanced?.solved ?? 0,
+      total: profile?.stats?.advanced?.total ?? 0,
+    },
   };
+  const displayName = profile?.username || 'User';
+  const initials = displayName
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+  const joinDate = profile?.created_at ? new Date(profile.created_at) : null;
+  const avatarUrl = profile?.profile_image_url
+    ? profile.profile_image_url.startsWith('http')
+      ? profile.profile_image_url
+      : `${apiOrigin}${profile.profile_image_url}`
+    : '';
 
-  // Mock submission history
-  const submissionHistory: Submission[] = [
-    { id: '1', problemName: "Two Sum", submissionDate: "2024-01-15", result: "Passed", language: "Java", difficulty: "Basic" },
-    { id: '2', problemName: "Reverse String", submissionDate: "2024-01-14", result: "Passed", language: "Java", difficulty: "Basic" },
-    { id: '3', problemName: "Binary Search", submissionDate: "2024-01-13", result: "Failed", language: "Java", difficulty: "Medium" },
-    { id: '4', problemName: "Palindrome Check", submissionDate: "2024-01-12", result: "Passed", language: "Java", difficulty: "Basic" },
-    { id: '5', problemName: "Factorial", submissionDate: "2024-01-11", result: "Passed", language: "Java", difficulty: "Medium" }
-  ];
+  useEffect(() => {
+    const loadProfile = async () => {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        return;
+      }
+      try {
+        const data = await profileAPI.getProfile();
+        setProfile(data);
+        try {
+          localStorage.setItem('profile:cache', JSON.stringify(data));
+          const stored = localStorage.getItem('user');
+          const currentUser = stored ? JSON.parse(stored) : {};
+          localStorage.setItem(
+            'user',
+            JSON.stringify({
+              ...currentUser,
+              id: data.id,
+              username: data.username,
+              email: data.email,
+              profile_image_url: data.profile_image_url,
+              skill_level: data.skill_level,
+              created_at: data.created_at,
+              streak_days: data.streak_days,
+              bio: data.bio,
+            })
+          );
+        } catch (error) {
+          console.warn('Failed to update profile cache', error);
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Please try again later.';
+        if (message.includes('Missing Authorization Header') && hasCachedProfileRef.current) {
+          return;
+        }
+        toast({
+          title: 'Failed to load profile',
+          description: message,
+          variant: 'destructive',
+        });
+      }
+    };
+    loadProfile();
+  }, []);
 
-  const handleAvatarUpload = () => {
-    toast({
-      title: "Avatar upload",
-      description: "Avatar upload functionality will be implemented with backend integration."
-    });
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+    try {
+      const result = await profileAPI.uploadAvatar(file);
+      setProfile((prev) => {
+        if (!prev) return prev;
+        const next = { ...prev, profile_image_url: result.profile_image_url };
+        try {
+          localStorage.setItem('profile:cache', JSON.stringify(next));
+        } catch (error) {
+          console.warn('Failed to update cached avatar', error);
+        }
+        return next;
+      });
+      try {
+        const stored = localStorage.getItem('user');
+        if (stored) {
+          const currentUser = JSON.parse(stored);
+          localStorage.setItem('user', JSON.stringify({ ...currentUser, profile_image_url: result.profile_image_url }));
+        }
+      } catch (error) {
+        console.warn('Failed to sync avatar to local storage', error);
+      }
+      toast({
+        title: 'Avatar updated',
+        description: 'Your profile photo has been updated.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Avatar upload failed',
+        description: error instanceof Error ? error.message : 'Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploading(false);
+      event.target.value = '';
+    }
   };
 
   const handleTakeAssessment = () => {
@@ -85,9 +217,9 @@ const Profile = () => {
                   {/* Avatar Upload */}
                   <div className="flex flex-col items-center space-y-4">
                     <Avatar className="w-24 h-24">
-                      <AvatarImage src={user.avatar} />
+                      <AvatarImage src={avatarUrl} />
                       <AvatarFallback className="text-lg bg-primary text-primary-foreground">
-                        {user.name.split(' ').map(n => n[0]).join('')}
+                        {initials || 'U'}
                       </AvatarFallback>
                     </Avatar>
                     
@@ -103,9 +235,10 @@ const Profile = () => {
                         variant="outline" 
                         size="sm"
                         onClick={() => document.getElementById('avatar-upload')?.click()}
+                        disabled={isUploading}
                       >
                         <Upload className="w-4 h-4 mr-2" />
-                        Upload Photo
+                        {isUploading ? 'Uploading...' : 'Upload Photo'}
                       </Button>
                     </div>
                   </div>
@@ -119,7 +252,7 @@ const Profile = () => {
                         <User className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">Name</span>
                       </div>
-                      <span className="font-medium">{user.name}</span>
+                      <span className="font-medium">{displayName}</span>
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -127,7 +260,7 @@ const Profile = () => {
                         <Mail className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">Email</span>
                       </div>
-                      <span className="font-medium">{user.email}</span>
+                      <span className="font-medium">{profile?.email || '—'}</span>
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -135,7 +268,7 @@ const Profile = () => {
                         <Target className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">Level</span>
                       </div>
-                      <Badge variant="secondary">{user.level}</Badge>
+                      <Badge variant="secondary">{profile?.skill_level || 'beginner'}</Badge>
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -143,7 +276,7 @@ const Profile = () => {
                         <Calendar className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">Joined</span>
                       </div>
-                      <span className="font-medium">{user.joinDate.toDateString()}</span>
+                      <span className="font-medium">{joinDate ? joinDate.toDateString() : '—'}</span>
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -151,7 +284,7 @@ const Profile = () => {
                         <Flame className="w-4 h-4 text-orange-500" />
                         <span className="text-sm text-muted-foreground">Streak</span>
                       </div>
-                      <span className="font-medium text-orange-500">{user.streak} days</span>
+                      <span className="font-medium text-orange-500">{profile?.streak_days ?? 0} days</span>
                     </div>
                   </div>
 
@@ -175,21 +308,21 @@ const Profile = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card className="border-success/20">
                   <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-success mb-1">{user.progress.beginner.solved}</div>
+                    <div className="text-2xl font-bold text-success mb-1">{stats.beginner.solved}</div>
                     <div className="text-sm text-muted-foreground">Beginner Solved</div>
                   </CardContent>
                 </Card>
                 
                 <Card className="border-warning/20">
                   <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-warning mb-1">{user.progress.intermediate.solved}</div>
+                    <div className="text-2xl font-bold text-warning mb-1">{stats.intermediate.solved}</div>
                     <div className="text-sm text-muted-foreground">Intermediate Solved</div>
                   </CardContent>
                 </Card>
                 
                 <Card className="border-destructive/20">
                   <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-destructive mb-1">{user.progress.advanced.solved}</div>
+                    <div className="text-2xl font-bold text-destructive mb-1">{stats.advanced.solved}</div>
                     <div className="text-sm text-muted-foreground">Advanced Solved</div>
                   </CardContent>
                 </Card>
@@ -208,25 +341,25 @@ const Profile = () => {
                     <div>
                       <div className="flex items-center justify-between text-sm mb-2">
                         <span>Beginner Problems</span>
-                        <span>{user.progress.beginner.solved}/{user.progress.beginner.total}</span>
+                        <span>{stats.beginner.solved}/{stats.beginner.total}</span>
                       </div>
-                      <Progress value={(user.progress.beginner.solved / user.progress.beginner.total) * 100} className="h-2" />
+                      <Progress value={stats.beginner.total ? (stats.beginner.solved / stats.beginner.total) * 100 : 0} className="h-2" />
                     </div>
                     
                     <div>
                       <div className="flex items-center justify-between text-sm mb-2">
                         <span>Intermediate Problems</span>
-                        <span>{user.progress.intermediate.solved}/{user.progress.intermediate.total}</span>
+                        <span>{stats.intermediate.solved}/{stats.intermediate.total}</span>
                       </div>
-                      <Progress value={(user.progress.intermediate.solved / user.progress.intermediate.total) * 100} className="h-2" />
+                      <Progress value={stats.intermediate.total ? (stats.intermediate.solved / stats.intermediate.total) * 100 : 0} className="h-2" />
                     </div>
                     
                     <div>
                       <div className="flex items-center justify-between text-sm mb-2">
                         <span>Advanced Problems</span>
-                        <span>{user.progress.advanced.solved}/{user.progress.advanced.total}</span>
+                        <span>{stats.advanced.solved}/{stats.advanced.total}</span>
                       </div>
-                      <Progress value={(user.progress.advanced.solved / user.progress.advanced.total) * 100} className="h-2" />
+                      <Progress value={stats.advanced.total ? (stats.advanced.solved / stats.advanced.total) * 100 : 0} className="h-2" />
                     </div>
                   </div>
                 </CardContent>
@@ -242,45 +375,13 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {submissionHistory.map((submission) => (
-                      <div key={submission.id} className="flex items-center justify-between p-4 rounded-lg border border-border/50">
-                        <div className="flex items-center space-x-4">
-                          <div className={`w-2 h-2 rounded-full ${
-                            submission.result === 'Passed' ? 'bg-success' : 'bg-destructive'
-                          }`} />
-                          
-                          <div>
-                            <div className="font-medium">{submission.problemName}</div>
-                            <div className="text-sm text-muted-foreground flex items-center space-x-2">
-                              <span>{submission.submissionDate}</span>
-                              <span>•</span>
-                              <Badge 
-                                variant={submission.result === 'Passed' ? 'default' : 'destructive'}
-                                className="text-xs"
-                              >
-                                {submission.result}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <CheckCircle2 className={`w-5 h-5 ${
-                            submission.result === 'Passed' ? 'text-success' : 'text-destructive'
-                          }`} />
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {submissionHistory.length === 0 && (
-                      <div className="text-center py-8">
-                        <BookOpen className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                        <h3 className="text-lg font-medium mb-2">No submissions yet</h3>
-                        <p className="text-muted-foreground">
-                          Start solving problems to see your submission history here.
-                        </p>
-                      </div>
-                    )}
+                    <div className="text-center py-8">
+                      <BookOpen className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                      <h3 className="text-lg font-medium mb-2">No submissions yet</h3>
+                      <p className="text-muted-foreground">
+                        Start solving problems to see your submission history here.
+                      </p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

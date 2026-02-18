@@ -5,6 +5,7 @@ from app.middleware.auth import token_required
 from app.services.java_executor import get_java_executor
 from app.services.ai_service import get_ai_service
 from app.services.terminal_sessions import get_terminal_manager
+from app.routes.profile import update_streak_on_submit
 from datetime import datetime
 from app.config import Config
 import uuid
@@ -91,6 +92,9 @@ def execute_code(current_user):
         )
         db.session.add(submission)
         db.session.commit()
+        
+        if result["success"]:
+            update_streak_on_submit(current_user)
         
         # Build response
         response = {

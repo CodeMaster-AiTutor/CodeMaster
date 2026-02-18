@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -24,9 +24,10 @@ import {
   Search
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from 'next-themes';
+import { API_BASE_URL, profileAPI } from '@/lib/api';
 
 interface TopNavigationProps {
   onMenuClick: () => void;
@@ -34,10 +35,15 @@ interface TopNavigationProps {
 
 const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
+  const isSettingsRoute = location.pathname === '/settings';
+  const searchAutoComplete = isSettingsRoute ? 'new-password' : 'off';
+  const searchName = isSettingsRoute ? 'settings-search' : 'nav-search';
   
   // Get user info from localStorage
+  const apiOrigin = API_BASE_URL.replace(/\/api\/?$/, '');
   const getUserInfo = () => {
     try {
       const userStr = localStorage.getItem('user');
@@ -46,13 +52,20 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
         const level = user.skill_level || 'beginner';
         const username = user.username || 'User';
         const initials = username.substring(0, 2).toUpperCase();
+        const storedProfileImage = user.profile_image_url || '';
+        const profileImageUrl = storedProfileImage
+          ? storedProfileImage.startsWith('http')
+            ? storedProfileImage
+            : `${apiOrigin}${storedProfileImage}`
+          : '';
         
         return {
           name: username,
           level: level.charAt(0).toUpperCase() + level.slice(1), // Capitalize first letter
           initials: initials,
-          streak: 0, // Could be fetched from API later
-          notifications: 0 // Could be fetched from API later
+          streak: 0,
+          notifications: 0,
+          profileImageUrl: profileImageUrl,
         };
       }
     } catch (e) {
@@ -64,7 +77,8 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
       level: 'Beginner',
       initials: 'U',
       streak: 0,
-      notifications: 0
+      notifications: 0,
+      profileImageUrl: '',
     };
   };
 
@@ -87,6 +101,42 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
       clearInterval(interval);
     };
   }, []);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const profile = await profileAPI.getProfile();
+        const profileImageUrl = profile.profile_image_url
+          ? profile.profile_image_url.startsWith('http')
+            ? profile.profile_image_url
+            : `${apiOrigin}${profile.profile_image_url}`
+          : '';
+        const nextUser = (() => {
+          try {
+            const stored = localStorage.getItem('user');
+            return stored ? JSON.parse(stored) : null;
+          } catch {
+            return null;
+          }
+        })();
+        const updatedUser = nextUser ? { ...nextUser, profile_image_url: profile.profile_image_url } : null;
+        if (updatedUser) {
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+        }
+        setUserInfo((prev) => ({
+          ...prev,
+          name: profile.username || prev.name,
+          level: profile.skill_level ? profile.skill_level.charAt(0).toUpperCase() + profile.skill_level.slice(1) : prev.level,
+          initials: profile.username ? profile.username.substring(0, 2).toUpperCase() : prev.initials,
+          streak: profile.streak_days ?? prev.streak,
+          profileImageUrl,
+        }));
+      } catch (error) {
+        console.warn('Failed to load profile for nav avatar', error);
+      }
+    };
+    loadProfile();
+  }, [apiOrigin]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
@@ -152,6 +202,23 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input 
               placeholder="Search challenges, tutorials..." 
+              type="search"
+              name={searchName}
+              autoComplete={searchAutoComplete}
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="search"
+              aria-autocomplete="none"
+              data-lpignore="true"
+              data-1p-ignore="true"
+              data-bwignore="true"
+              readOnly={isSettingsRoute}
+              onFocus={(event) => {
+                if (isSettingsRoute) {
+                  event.currentTarget.readOnly = false;
+                }
+              }}
               className="pl-10 bg-muted/50 border-0 focus:bg-background"
             />
           </div>
@@ -195,6 +262,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
+                  <AvatarImage src={userInfo.profileImageUrl} />
                   <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                     {userInfo.initials}
                   </AvatarFallback>

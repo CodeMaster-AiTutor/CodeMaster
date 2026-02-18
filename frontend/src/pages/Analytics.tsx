@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -11,11 +11,21 @@ import {
   Code, 
   CheckCircle,
   XCircle,
-  Calendar,
-  Loader2
+  Calendar
 } from 'lucide-react';
 import { analyticsAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
+
+type AnalyticsOverviewResponse = {
+  total_compilations?: number;
+  success_rate?: number;
+  average_execution_time?: number;
+};
+
+type AnalyticsProgressResponse = {
+  weekly_activity?: Array<{ date: string; count: number }>;
+  skill_progress?: Array<{ skill: string; level: number; max_level: number }>;
+};
 
 const Analytics = () => {
   const [stats, setStats] = useState({
@@ -42,31 +52,31 @@ const Analytics = () => {
     percentage: number;
   }>>([]);
 
-  const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     const fetchAnalyticsData = async () => {
-      setIsLoading(true);
       try {
         const [overviewResponse, progressResponse] = await Promise.all([
           analyticsAPI.getOverview(),
           analyticsAPI.getProgress()
         ]);
 
+        const overview = overviewResponse as AnalyticsOverviewResponse;
+        const progress = progressResponse as AnalyticsProgressResponse;
+
         // Update stats from API response
         setStats({
-          totalProblems: overviewResponse.total_compilations || 0,
-          solvedProblems: Math.round((overviewResponse.success_rate / 100) * (overviewResponse.total_compilations || 0)),
-          successRate: overviewResponse.success_rate || 0,
-          averageTime: Math.round(overviewResponse.average_execution_time || 0),
+          totalProblems: overview.total_compilations || 0,
+          solvedProblems: Math.round(((overview.success_rate || 0) / 100) * (overview.total_compilations || 0)),
+          successRate: overview.success_rate || 0,
+          averageTime: Math.round(overview.average_execution_time || 0),
           streak: 0, // Could be calculated from activity
           weeklyGoal: 10,
           weeklyProgress: 0 // Could be calculated from weekly activity
         });
 
         // Format weekly activity from progress response
-        if (progressResponse.weekly_activity) {
-          const formattedActivity = progressResponse.weekly_activity.map(activity => ({
+        if (progress.weekly_activity) {
+          const formattedActivity = progress.weekly_activity.map(activity => ({
             date: formatDate(activity.date),
             problems: activity.count,
             time: activity.count * 10, // Estimated time
@@ -76,8 +86,8 @@ const Analytics = () => {
         }
 
         // Format skill progress from progress response
-        if (progressResponse.skill_progress) {
-          const formattedProgress = progressResponse.skill_progress.map(skill => ({
+        if (progress.skill_progress) {
+          const formattedProgress = progress.skill_progress.map(skill => ({
             skill: skill.skill,
             completed: skill.level,
             total: skill.max_level,
@@ -92,8 +102,6 @@ const Analytics = () => {
           description: error instanceof Error ? error.message : 'Please try again later.',
           variant: "destructive"
         });
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -115,14 +123,6 @@ const Analytics = () => {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">Analytics Dashboard</h1>
         </div>
-
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <span className="ml-3 text-muted-foreground">Loading analytics...</span>
-          </div>
-        ) : (
-          <>
 
         {/* Key Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -269,8 +269,6 @@ const Analytics = () => {
             </div>
           </CardContent>
         </Card>
-        </>
-        )}
       </div>
     </AppLayout>
   );

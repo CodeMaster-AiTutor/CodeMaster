@@ -1,6 +1,10 @@
 from app import db
 from datetime import datetime
-import bcrypt
+from werkzeug.security import generate_password_hash, check_password_hash
+try:
+    import bcrypt
+except Exception:
+    bcrypt = None
 
 class User(db.Model):
     """User model for authentication and profile"""
@@ -17,6 +21,10 @@ class User(db.Model):
     # User profile
     skill_level = db.Column(db.String(20), default='beginner')  # beginner, intermediate, advanced
     total_points = db.Column(db.Integer, default=0)
+    profile_image_url = db.Column(db.Text, nullable=True)
+    bio = db.Column(db.Text, nullable=True)
+    streak_days = db.Column(db.Integer, default=0)
+    last_active_date = db.Column(db.Date, nullable=True)
     
     # Relationships
     code_submissions = db.relationship('CodeSubmission', backref='user', lazy=True, cascade='all, delete-orphan')
@@ -24,11 +32,18 @@ class User(db.Model):
     
     def set_password(self, password):
         """Hash and set password"""
-        self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        if bcrypt:
+            self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            return
+        self.password_hash = generate_password_hash(password)
     
     def check_password(self, password):
         """Check if password is correct"""
-        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+        if not self.password_hash:
+            return False
+        if bcrypt:
+            return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+        return check_password_hash(self.password_hash, password)
     
     def to_dict(self):
         """Convert to dictionary"""
@@ -38,6 +53,10 @@ class User(db.Model):
             'username': self.username,
             'skill_level': self.skill_level,
             'total_points': self.total_points,
+            'profile_image_url': self.profile_image_url,
+            'bio': self.bio,
+            'streak_days': self.streak_days,
+            'last_active_date': self.last_active_date.isoformat() if self.last_active_date else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'last_login': self.last_login.isoformat() if self.last_login else None
         }

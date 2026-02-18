@@ -1,5 +1,5 @@
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import Terminal from "./Terminal";
 
@@ -8,6 +8,7 @@ vi.mock("xterm", () => {
     loadAddon = vi.fn();
     open = vi.fn();
     write = vi.fn();
+    clear = vi.fn();
     dispose = vi.fn();
     onData = vi.fn(() => ({ dispose: vi.fn() }));
   }
@@ -22,7 +23,7 @@ vi.mock("xterm-addon-fit", () => {
 });
 
 describe("Terminal component", () => {
-  const originalWebSocket = global.WebSocket;
+  const originalWebSocket = globalThis.WebSocket;
   const sockets = [];
 
   beforeEach(() => {
@@ -45,19 +46,21 @@ describe("Terminal component", () => {
         }
       });
     }
-    global.WebSocket = MockWebSocket;
+    (globalThis as typeof globalThis & { WebSocket: typeof WebSocket }).WebSocket = MockWebSocket as unknown as typeof WebSocket;
   });
 
   afterEach(() => {
-    global.WebSocket = originalWebSocket;
+    (globalThis as typeof globalThis & { WebSocket: typeof WebSocket }).WebSocket = originalWebSocket;
   });
 
-  it("creates a WebSocket connection and renders container", () => {
+  it("creates a WebSocket connection and renders container", async () => {
     const { getByTestId, unmount } = render(
       <Terminal wsUrl="ws://localhost:5000/ws/terminal" dataTestId="terminal" />
     );
     expect(getByTestId("terminal")).toBeTruthy();
-    expect(sockets.length).toBe(1);
+    await waitFor(() => {
+      expect(sockets.length).toBe(1);
+    });
     expect(sockets[0].url).toBe("ws://localhost:5000/ws/terminal");
     unmount();
   });

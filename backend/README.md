@@ -24,12 +24,30 @@ Edit `.env` with your database, AI service, and other configurations.
 
 Make sure PostgreSQL is running and update `DATABASE_URL` in `.env`.
 
+Example for PostgreSQL 16 on port 5433:
+
+```bash
+DATABASE_URL=postgresql://postgres:admin@localhost:5433/codemaster
+```
+
+Install the PostgreSQL driver if needed:
+
+```bash
+pip install psycopg2-binary
+```
+
 Then run migrations:
 
 ```bash
 flask db init
 flask db migrate -m "Initial migration"
 flask db upgrade
+```
+
+Create tables and seed the admin user:
+
+```bash
+python flask_bootstrap.py
 ```
 
 ### 4. Run the Application
