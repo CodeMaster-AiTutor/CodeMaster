@@ -115,7 +115,16 @@ const Settings = () => {
         const localEditorTheme = themeValues.has(getStoredEditorTheme()) ? getStoredEditorTheme() : 'vs-dark';
         const localFontSize = getStoredEditorFontSize();
         const localIsNewer = localUpdatedAt && (!apiUpdatedAtValue || localUpdatedAt > apiUpdatedAtValue);
-        const supportsEditorTheme = getStoredEditorThemeSupport();
+        const storedSupportsEditorTheme = getStoredEditorThemeSupport();
+        const apiSupportsEditorTheme = typeof data.editor_theme === 'string' && data.editor_theme.length > 0;
+        if (apiSupportsEditorTheme && !storedSupportsEditorTheme) {
+          try {
+            localStorage.setItem(SETTINGS_SUPPORTS_EDITOR_THEME_KEY, 'true');
+          } catch {
+            void 0;
+          }
+        }
+        const supportsEditorTheme = storedSupportsEditorTheme || apiSupportsEditorTheme;
         if (localIsNewer) {
           setSettings((prev) => ({
             ...prev,

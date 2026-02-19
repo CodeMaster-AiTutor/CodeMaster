@@ -19,7 +19,9 @@ const resolveWebSocketUrl = (providedUrl) => {
   }
   try {
     const parsed = new URL(url);
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+    const token = typeof window !== 'undefined'
+      ? (localStorage.getItem('access_token') || sessionStorage.getItem('access_token'))
+      : null;
     if (token) {
       parsed.searchParams.set('token', token);
     }

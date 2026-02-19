@@ -1194,6 +1194,13 @@ const Compiler = () => {
   const handleRun = async () => {
     let authToken = localStorage.getItem("access_token");
     if (!authToken) {
+      const sessionToken = sessionStorage.getItem("access_token");
+      if (sessionToken) {
+        localStorage.setItem("access_token", sessionToken);
+        authToken = sessionToken;
+      }
+    }
+    if (!authToken) {
       const refreshToken = localStorage.getItem("refresh_token");
       if (refreshToken) {
         try {

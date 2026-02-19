@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from sqlalchemy import inspect, text
 
 from app import db
 from app.middleware.auth import token_required
@@ -18,7 +19,19 @@ DEFAULTS = {
     'language': 'java'
 }
 
+def _ensure_settings_schema() -> None:
+    try:
+        inspector = inspect(db.engine)
+        columns = {column["name"] for column in inspector.get_columns("user_settings")}
+        if "editor_theme" not in columns:
+            db.session.execute(text("ALTER TABLE user_settings ADD COLUMN editor_theme VARCHAR(30)"))
+            db.session.execute(text("UPDATE user_settings SET editor_theme = 'vs-dark' WHERE editor_theme IS NULL"))
+            db.session.commit()
+    except Exception:
+        db.session.rollback()
+
 def _get_or_create_settings(user_id: int) -> UserSettings:
+    _ensure_settings_schema()
     settings = UserSettings.query.filter_by(user_id=user_id).first()
     if not settings:
         settings = UserSettings(user_id=user_id, **DEFAULTS)
