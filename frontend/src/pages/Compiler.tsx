@@ -17,7 +17,7 @@ import type { OnMount } from '@monaco-editor/react';
 import type { editor as MonacoEditor } from 'monaco-editor';
 import { toast } from '@/hooks/use-toast';
 import AppLayout from '@/components/layout/AppLayout';
-import { compilerAPI, settingsAPI } from '@/lib/api';
+import { authAPI, compilerAPI, settingsAPI } from '@/lib/api';
 import Terminal from '@/components/Terminal';
 import {
   AlertDialog,
@@ -1192,7 +1192,18 @@ const Compiler = () => {
 
   // Enhanced handleRun with real compilation
   const handleRun = async () => {
-    const authToken = localStorage.getItem("access_token");
+    let authToken = localStorage.getItem("access_token");
+    if (!authToken) {
+      const refreshToken = localStorage.getItem("refresh_token");
+      if (refreshToken) {
+        try {
+          const refreshed = await authAPI.refresh();
+          authToken = refreshed.access_token;
+        } catch {
+          void 0;
+        }
+      }
+    }
     if (!authToken) {
       setExecutionStatus('error');
       const message = 'Missing Authorization Header. Please log in again.';
@@ -1203,7 +1214,6 @@ const Compiler = () => {
         description: "Please log in to run code.",
         variant: "destructive"
       });
-      navigate('/login');
       return;
     }
     if (terminalSessionId) {
