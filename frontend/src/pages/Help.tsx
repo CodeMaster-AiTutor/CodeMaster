@@ -179,7 +179,7 @@ const Help = () => {
                   <Mail className="h-5 w-5 text-primary" />
                   <div>
                     <div className="font-medium">Email Support</div>
-                    <div className="text-sm text-muted-foreground">support@CodeMaster.com</div>
+                    <div className="text-sm text-muted-foreground">codemaster.aitutor@gmail.com</div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/50">
@@ -193,7 +193,7 @@ const Help = () => {
                   <Phone className="h-5 w-5 text-primary" />
                   <div>
                     <div className="font-medium">Phone Support</div>
-                    <div className="text-sm text-muted-foreground">+1 (555) 123-4567</div>
+                    <div className="text-sm text-muted-foreground">+91 9860791587</div>
                   </div>
                 </div>
               </CardContent>

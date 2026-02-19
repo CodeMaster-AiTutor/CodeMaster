@@ -12,6 +12,9 @@ import string
 
 auth_bp = Blueprint('auth', __name__)
 
+def _password_claim(user: User) -> float:
+    return user.password_updated_at.timestamp() if user.password_updated_at else 0.0
+
 @auth_bp.route('/register', methods=['POST'])
 def register():
     """User registration endpoint"""
@@ -64,19 +67,22 @@ def register():
             total_points=0
         )
         user.set_password(password)
+        user.password_updated_at = datetime.utcnow()
+        user.ensure_csrf_token()
         
         db.session.add(user)
         db.session.commit()
         
         # Create tokens
-        access_token = create_access_token(identity=str(user.id))
+        access_token = create_access_token(identity=str(user.id), additional_claims={'pwd': _password_claim(user)})
         refresh_token = create_refresh_token(identity=str(user.id))
         
         return jsonify({
             'message': 'User registered successfully',
             'user': user.to_dict(),
             'access_token': access_token,
-            'refresh_token': refresh_token
+            'refresh_token': refresh_token,
+            'csrf_token': user.csrf_token
         }), 201
         
     except Exception as e:
@@ -101,22 +107,28 @@ def login():
         # Find user
         user = User.query.filter_by(email=email).first()
         
-        if not user or not user.check_password(password):
+        if not user:
+            return jsonify({'error': 'Invalid email or password'}), 401
+        if user.deleted_at:
+            return jsonify({'error': 'Account deleted'}), 403
+        if not user.check_password(password):
             return jsonify({'error': 'Invalid email or password'}), 401
         
         # Update last login
         user.last_login = datetime.utcnow()
+        user.ensure_csrf_token()
         db.session.commit()
         
         # Create tokens
-        access_token = create_access_token(identity=str(user.id))
+        access_token = create_access_token(identity=str(user.id), additional_claims={'pwd': _password_claim(user)})
         refresh_token = create_refresh_token(identity=str(user.id))
         
         return jsonify({
             'message': 'Login successful',
             'user': user.to_dict(),
             'access_token': access_token,
-            'refresh_token': refresh_token
+            'refresh_token': refresh_token,
+            'csrf_token': user.csrf_token
         }), 200
         
     except Exception as e:
@@ -133,9 +145,11 @@ def refresh():
         
         if not user:
             return jsonify({'error': 'User not found'}), 404
+        if user.deleted_at:
+            return jsonify({'error': 'Account deleted'}), 403
         
         # Create new access token
-        access_token = create_access_token(identity=str(user.id))
+        access_token = create_access_token(identity=str(user.id), additional_claims={'pwd': _password_claim(user)})
         
         return jsonify({
             'access_token': access_token
@@ -160,11 +174,20 @@ def get_current_user(current_user):
 def logout():
     """Logout endpoint (token blacklisting can be added here)"""
     try:
-        # In a production app, you would add the token to a blacklist
-        # For now, we just return success
         return jsonify({'message': 'Logout successful'}), 200
     except Exception as e:
         return jsonify({'error': 'Logout failed', 'message': str(e)}), 500
+
+@auth_bp.route('/csrf', methods=['GET'])
+@token_required
+def get_csrf_token(current_user):
+    try:
+        token = current_user.ensure_csrf_token()
+        db.session.commit()
+        return jsonify({'csrf_token': token}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Failed to generate CSRF token', 'message': str(e)}), 500
 
 @auth_bp.route('/google/url', methods=['GET'])
 def google_auth_url():
@@ -283,25 +306,30 @@ def google_callback():
                 skill_level='beginner',
                 total_points=0
             )
+            user.ensure_csrf_token()
             db.session.add(user)
         else:
+            if user.deleted_at:
+                return jsonify({'error': 'Account deleted'}), 403
             # Update Google ID if not set
             if not user.google_id:
                 user.google_id = google_id
             # Update last login
             user.last_login = datetime.utcnow()
+            user.ensure_csrf_token()
         
         db.session.commit()
         
         # Create JWT tokens
-        jwt_access_token = create_access_token(identity=user.id)
+        jwt_access_token = create_access_token(identity=user.id, additional_claims={'pwd': _password_claim(user)})
         jwt_refresh_token = create_refresh_token(identity=user.id)
         
         return jsonify({
             'message': 'Google authentication successful',
             'user': user.to_dict(),
             'access_token': jwt_access_token,
-            'refresh_token': jwt_refresh_token
+            'refresh_token': jwt_refresh_token,
+            'csrf_token': user.csrf_token
         }), 200
         
     except requests.exceptions.RequestException as e:

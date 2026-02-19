@@ -6,11 +6,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Code, User, Shield, Trash2, Palette, Sun, Moon, Bell, Save } from 'lucide-react';
+import { Code, User, Shield, Trash2, Palette, Sun, Moon, Bell, Save, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import AppLayout from '@/components/layout/AppLayout';
-import { settingsAPI } from '@/lib/api';
+import { authAPI, profileAPI, settingsAPI } from '@/lib/api';
 import { useTheme } from 'next-themes';
+import { useNavigate } from 'react-router-dom';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction
+} from '@/components/ui/alert-dialog';
 
 const EDITOR_FONT_SIZE_KEY = 'settings:editor-font-size';
 const EDITOR_THEME_KEY = 'settings:editor-theme';
@@ -69,8 +81,16 @@ const getStoredEditorThemeSupport = () => {
 
 const Settings = () => {
   const { setTheme } = useTheme();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [deletePassword, setDeletePassword] = useState('');
   const hasLoadedRef = useRef(false);
   const persistTimerRef = useRef<number | null>(null);
   const [settings, setSettings] = useState(() => ({
@@ -321,19 +341,111 @@ const Settings = () => {
     }
   };
 
-  const handleChangePassword = () => {
-    toast({
-      title: "Password change",
-      description: "Password change functionality will be implemented with backend integration."
-    });
+  const ensureCsrfToken = async () => {
+    const stored = localStorage.getItem('csrf_token');
+    if (stored) {
+      return stored;
+    }
+    const data = await authAPI.getCsrfToken();
+    return data.csrf_token;
   };
 
-  const handleDeleteAccount = () => {
-    toast({
-      title: "Account deletion",
-      description: "This feature requires backend integration to implement safely.",
-      variant: "destructive"
+  const clearSessionData = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('csrf_token');
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith('compiler:state:')) {
+        sessionStorage.removeItem(key);
+      }
     });
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('compiler:state:') || key === 'compiler:code' || key === 'compiler:code-fallback') {
+        localStorage.removeItem(key);
+      }
+    });
+    sessionStorage.removeItem('compiler:output');
+    sessionStorage.removeItem('compiler:session-id');
+  };
+
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast({
+        title: "Missing fields",
+        description: "Fill in current password and the new password twice.",
+        variant: "destructive"
+      });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Password mismatch",
+        description: "New password and confirmation do not match.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setIsUpdatingPassword(true);
+    try {
+      await ensureCsrfToken();
+      const response = await profileAPI.updatePassword({
+        current_password: currentPassword,
+        new_password: newPassword
+      });
+      if (response.csrf_token) {
+        localStorage.setItem('csrf_token', response.csrf_token);
+      }
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      clearSessionData();
+      toast({
+        title: "Password updated",
+        description: "Please log in again with your new password."
+      });
+      navigate('/login');
+    } catch (error) {
+      toast({
+        title: "Password update failed",
+        description: error instanceof Error ? error.message : 'Please try again later.',
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!deletePassword) {
+      toast({
+        title: "Password required",
+        description: "Enter your password to delete the account.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      await ensureCsrfToken();
+      await profileAPI.deleteAccount({ password: deletePassword });
+      setDeletePassword('');
+      setIsDeleteDialogOpen(false);
+      clearSessionData();
+      toast({
+        title: "Account deleted",
+        description: "Your account has been removed successfully."
+      });
+      navigate('/');
+    } catch (error) {
+      toast({
+        title: "Account deletion failed",
+        description: error instanceof Error ? error.message : 'Please try again later.',
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -497,6 +609,9 @@ const Settings = () => {
                           id="currentPassword"
                           type="password" 
                           placeholder="Enter current password"
+                          value={currentPassword}
+                          onChange={(event) => setCurrentPassword(event.target.value)}
+                          disabled={isUpdatingPassword}
                         />
                       </div>
                       <div>
@@ -505,6 +620,9 @@ const Settings = () => {
                           id="newPassword"
                           type="password" 
                           placeholder="Enter new password"
+                          value={newPassword}
+                          onChange={(event) => setNewPassword(event.target.value)}
+                          disabled={isUpdatingPassword}
                         />
                       </div>
                       <div>
@@ -513,10 +631,20 @@ const Settings = () => {
                           id="confirmPassword"
                           type="password" 
                           placeholder="Confirm new password"
+                          value={confirmPassword}
+                          onChange={(event) => setConfirmPassword(event.target.value)}
+                          disabled={isUpdatingPassword}
                         />
                       </div>
-                      <Button onClick={handleChangePassword} className="bg-primary">
-                        Update Password
+                      <Button onClick={handleChangePassword} className="bg-primary" disabled={isUpdatingPassword}>
+                        {isUpdatingPassword ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Updating...
+                          </>
+                        ) : (
+                          'Update Password'
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -529,14 +657,49 @@ const Settings = () => {
                       Once you delete your account, there is no going back. Please be certain.
                     </p>
                     
-                    <Button 
-                      variant="destructive" 
-                      onClick={handleDeleteAccount}
-                      className="bg-destructive hover:bg-destructive/90"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete Account
-                    </Button>
+                    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="destructive" 
+                          className="bg-destructive hover:bg-destructive/90"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete Account
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete account</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This permanently deletes your account and data. Enter your password to confirm.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <div className="space-y-2">
+                          <Label htmlFor="deleteAccountPassword">Password</Label>
+                          <Input
+                            id="deleteAccountPassword"
+                            type="password"
+                            placeholder="Enter your password"
+                            value={deletePassword}
+                            onChange={(event) => setDeletePassword(event.target.value)}
+                            disabled={isDeleting}
+                          />
+                        </div>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleDeleteAccount} disabled={isDeleting}>
+                            {isDeleting ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Deleting...
+                              </>
+                            ) : (
+                              'Delete Account'
+                            )}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               </CardContent>

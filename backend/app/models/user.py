@@ -1,5 +1,6 @@
 from app import db
 from datetime import datetime
+import secrets
 from werkzeug.security import generate_password_hash, check_password_hash
 try:
     import bcrypt
@@ -17,6 +18,10 @@ class User(db.Model):
     google_id = db.Column(db.String(255), unique=True, nullable=True, index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime)
+    password_updated_at = db.Column(db.DateTime)
+    deletion_requested_at = db.Column(db.DateTime)
+    deleted_at = db.Column(db.DateTime)
+    csrf_token = db.Column(db.String(128), nullable=True)
     
     # User profile
     skill_level = db.Column(db.String(20), default='beginner')  # beginner, intermediate, advanced
@@ -33,7 +38,7 @@ class User(db.Model):
     def set_password(self, password):
         """Hash and set password"""
         if bcrypt:
-            self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=12)).decode('utf-8')
             return
         self.password_hash = generate_password_hash(password)
     
@@ -44,6 +49,11 @@ class User(db.Model):
         if bcrypt:
             return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
         return check_password_hash(self.password_hash, password)
+
+    def ensure_csrf_token(self):
+        if not self.csrf_token:
+            self.csrf_token = secrets.token_urlsafe(32)
+        return self.csrf_token
     
     def to_dict(self):
         """Convert to dictionary"""

@@ -20,6 +20,8 @@ def validate_password(password: str) -> tuple:
         return False, "Password must contain at least one lowercase letter"
     if not re.search(r'[0-9]', password):
         return False, "Password must contain at least one number"
+    if not re.search(r'[^a-zA-Z0-9]', password):
+        return False, "Password must contain at least one special character"
     return True, None
 
 def validate_username(username: str) -> tuple:
