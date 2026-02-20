@@ -17,10 +17,78 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useToast } from '@/hooks/use-toast';
+import { supportAPI } from '@/lib/api';
 
 const Help = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [isSending, setIsSending] = useState(false);
+  const { toast } = useToast();
+
+  const validateForm = () => {
+    const nextErrors: Record<string, string> = {};
+    if (!formData.name.trim()) {
+      nextErrors.name = 'Name is required';
+    }
+    if (!formData.email.trim()) {
+      nextErrors.email = 'Email is required';
+    } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email.trim())) {
+      nextErrors.email = 'Enter a valid email address';
+    }
+    if (!formData.subject.trim()) {
+      nextErrors.subject = 'Subject is required';
+    }
+    if (!formData.message.trim()) {
+      nextErrors.message = 'Message is required';
+    }
+    setFormErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleFieldChange = (field: 'name' | 'email' | 'subject' | 'message', value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (formErrors[field]) {
+      setFormErrors((prev) => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
+    setIsSending(true);
+    try {
+      await supportAPI.sendMessage({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        subject: formData.subject.trim(),
+        message: formData.message.trim()
+      });
+      toast({
+        title: 'Message sent',
+        description: 'Support has received your message. We will reply soon.'
+      });
+      setFormData({ name: '', email: '', subject: '', message: '' });
+      setFormErrors({});
+    } catch (error) {
+      toast({
+        title: 'Failed to send message',
+        description: error instanceof Error ? error.message : 'Please try again later.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   const faqs = [
     {
@@ -141,28 +209,59 @@ const Help = () => {
                 <CardTitle>Contact Support</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium">Name</label>
-                    <Input placeholder="Your name" />
+                <form className="space-y-4" onSubmit={handleSubmit}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Name</label>
+                      <Input
+                        placeholder="Your name"
+                        value={formData.name}
+                        onChange={(e) => handleFieldChange('name', e.target.value)}
+                      />
+                      {formErrors.name ? (
+                        <p className="text-sm text-destructive">{formErrors.name}</p>
+                      ) : null}
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Email</label>
+                      <Input
+                        type="email"
+                        placeholder="your.email@example.com"
+                        value={formData.email}
+                        onChange={(e) => handleFieldChange('email', e.target.value)}
+                      />
+                      {formErrors.email ? (
+                        <p className="text-sm text-destructive">{formErrors.email}</p>
+                      ) : null}
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium">Email</label>
-                    <Input type="email" placeholder="your.email@example.com" />
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Subject</label>
+                    <Input
+                      placeholder="Brief description of your issue"
+                      value={formData.subject}
+                      onChange={(e) => handleFieldChange('subject', e.target.value)}
+                    />
+                    {formErrors.subject ? (
+                      <p className="text-sm text-destructive">{formErrors.subject}</p>
+                    ) : null}
                   </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Subject</label>
-                  <Input placeholder="Brief description of your issue" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Message</label>
-                  <Textarea 
-                    placeholder="Please describe your issue in detail..."
-                    rows={5}
-                  />
-                </div>
-                <Button className="w-full">Send Message</Button>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Message</label>
+                    <Textarea
+                      placeholder="Please describe your issue in detail..."
+                      rows={5}
+                      value={formData.message}
+                      onChange={(e) => handleFieldChange('message', e.target.value)}
+                    />
+                    {formErrors.message ? (
+                      <p className="text-sm text-destructive">{formErrors.message}</p>
+                    ) : null}
+                  </div>
+                  <Button className="w-full" type="submit" disabled={isSending}>
+                    {isSending ? 'Sending...' : 'Send Message'}
+                  </Button>
+                </form>
               </CardContent>
             </Card>
           </div>

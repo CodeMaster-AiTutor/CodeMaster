@@ -2,7 +2,8 @@ import os
 from datetime import timedelta
 from dotenv import load_dotenv
 
-load_dotenv()
+env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.env'))
+load_dotenv(env_path)
 
 class Config:
     """Base configuration"""
@@ -34,6 +35,7 @@ class Config:
     SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', '')
     SMTP_USE_TLS = os.getenv('SMTP_USE_TLS', 'true').lower() == 'true'
     SMTP_FROM_EMAIL = os.getenv('SMTP_FROM_EMAIL', '')
+    SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL', 'codemaster.aitutor@gmail.com')
     
     # AI Service
     AI_SERVICE = os.getenv('AI_SERVICE', 'ollama')

@@ -114,14 +114,40 @@ The API will be available at `http://localhost:5000`
 
 ## Email Configuration
 
-Set these in `.env` to enable deletion confirmation email:
+Use this section to enable support email delivery (Contact Support form) and account deletion emails.
 
-- `SMTP_HOST`
-- `SMTP_PORT`
-- `SMTP_USERNAME`
-- `SMTP_PASSWORD`
-- `SMTP_USE_TLS`
-- `SMTP_FROM_EMAIL`
+### Step 1: Choose an SMTP provider
+
+You can use Gmail or any SMTP provider. Gmail requires an App Password.
+
+### Step 2: Enable Gmail App Password (Gmail only)
+
+1. Sign in to the support inbox: `codemaster.aitutor@gmail.com`
+2. Go to Google Account → Security → 2‑Step Verification and enable it
+3. Go to Google Account → Security → App passwords
+4. Create a new App Password for Mail and copy the generated password
+
+### Step 3: Add SMTP settings to `.env`
+
+The `.env` file must live in `backend/.env` (next to `run.py`). Add or update these values:
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=codemaster.aitutor@gmail.com
+SMTP_PASSWORD=YOUR_APP_PASSWORD
+SMTP_USE_TLS=true
+SMTP_FROM_EMAIL=codemaster.aitutor@gmail.com
+SUPPORT_EMAIL=codemaster.aitutor@gmail.com
+```
+
+### Step 4: Restart the backend
+
+Stop and restart the Flask server so it reloads the new environment variables.
+
+### Step 5: Verify delivery
+
+Open Help & Support in the web app, send a test message, and confirm it arrives in the support inbox.
 
 ## Development
 
