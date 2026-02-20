@@ -119,7 +119,15 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
             return null;
           }
         })();
-        const updatedUser = nextUser ? { ...nextUser, profile_image_url: profile.profile_image_url } : null;
+        const updatedUser = nextUser
+          ? {
+              ...nextUser,
+              profile_image_url: profile.profile_image_url,
+              skill_level: profile.skill_level,
+              username: profile.username,
+              email: profile.email,
+            }
+          : null;
         if (updatedUser) {
           localStorage.setItem('user', JSON.stringify(updatedUser));
         }

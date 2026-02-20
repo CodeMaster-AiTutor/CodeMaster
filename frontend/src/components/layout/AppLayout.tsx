@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import TopNavigation from './TopNavigation';
 import Sidebar from './Sidebar';
+import { profileAPI } from '@/lib/api';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -21,6 +22,37 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('sidebar-collapsed', JSON.stringify(sidebarCollapsed));
   }, [sidebarCollapsed]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      return;
+    }
+    const syncProfile = async () => {
+      try {
+        const profile = await profileAPI.getProfile();
+        const stored = localStorage.getItem('user');
+        const currentUser = stored ? JSON.parse(stored) : {};
+        localStorage.setItem(
+          'user',
+          JSON.stringify({
+            ...currentUser,
+            id: profile.id,
+            username: profile.username,
+            email: profile.email,
+            profile_image_url: profile.profile_image_url,
+            skill_level: profile.skill_level,
+            created_at: profile.created_at,
+            streak_days: profile.streak_days,
+            bio: profile.bio,
+          })
+        );
+      } catch {
+        void 0;
+      }
+    };
+    syncProfile();
+  }, []);
 
   const handleMenuClick = () => {
     // On mobile, toggle sidebar open/close

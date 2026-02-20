@@ -9,23 +9,37 @@ import {
   Zap, 
   Trophy,
   Target,
-  Book,
-  Star,
   TrendingUp,
-  Calendar,
   Play,
   Clock,
   CheckCircle,
   ArrowRight,
   Flame,
   Users,
-  BarChart3,
-  Loader2
+  BarChart3
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import { dashboardAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
+
+type DashboardStatsResponse = {
+  current_level?: string;
+  streak?: number;
+  successful_compilations?: number;
+  total_submissions?: number;
+  weekly_goal?: number;
+  weekly_progress?: number;
+  total_points?: number;
+};
+
+type ActivityItem = {
+  type?: string;
+  title?: string;
+  status?: string;
+  timestamp?: string;
+  points?: number;
+};
 
 const Dashboard = () => {
   const [userStats, setUserStats] = useState({
@@ -47,16 +61,17 @@ const Dashboard = () => {
     points: number;
   }>>([]);
   
-  const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     const fetchDashboardData = async () => {
-      setIsLoading(true);
       try {
-        const [statsResponse, activityResponse] = await Promise.all([
+        const [statsResponseRaw, activityResponseRaw] = await Promise.all([
           dashboardAPI.getStats(),
           dashboardAPI.getRecentActivity()
         ]);
+        const statsResponse = statsResponseRaw as DashboardStatsResponse;
+        const activityResponse = Array.isArray(activityResponseRaw)
+          ? (activityResponseRaw as ActivityItem[])
+          : [];
 
         // Update user stats from API response
         setUserStats({
@@ -71,12 +86,12 @@ const Dashboard = () => {
         });
 
         // Format recent activity from API response
-        const formattedActivity = activityResponse.map(activity => ({
+        const formattedActivity = activityResponse.map((activity) => ({
           type: activity.type || 'challenge',
           title: activity.title || 'Activity',
           status: activity.status || 'completed',
-          time: formatTimeAgo(activity.timestamp),
-          points: 0 // Could be calculated
+          time: formatTimeAgo(activity.timestamp || new Date().toISOString()),
+          points: activity.points || 0
         }));
 
         setRecentActivity(formattedActivity);
@@ -87,8 +102,6 @@ const Dashboard = () => {
           description: error instanceof Error ? error.message : 'Please try again later.',
           variant: "destructive"
         });
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -137,33 +150,9 @@ const Dashboard = () => {
     }
   ];
 
-  const achievements = [
-    { name: 'First Steps', description: 'Completed first challenge', earned: true },
-    { name: 'Week Warrior', description: '7-day coding streak', earned: true },
-    { name: 'Problem Solver', description: 'Solved 50 problems', earned: false },
-    { name: 'Level Up', description: 'Reached Intermediate level', earned: true }
-  ];
+  const achievements: Array<{ name: string; description: string; earned: boolean }> = [];
 
-  const upcomingChallenges = [
-    {
-      title: 'Dynamic Programming Basics',
-      difficulty: 'Medium',
-      estimatedTime: '45 min',
-      participants: 234
-    },
-    {
-      title: 'Graph Algorithms',
-      difficulty: 'Hard',
-      estimatedTime: '60 min',
-      participants: 156
-    },
-    {
-      title: 'String Manipulation',
-      difficulty: 'Easy',
-      estimatedTime: '30 min',
-      participants: 445
-    }
-  ];
+  const upcomingChallenges: Array<{ title: string; difficulty: string; estimatedTime: string; participants: number }> = [];
 
   return (
     <AppLayout>
@@ -174,13 +163,7 @@ const Dashboard = () => {
               <p className="text-muted-foreground">Ready to continue your coding journey?</p>
             </div>
             
-            {isLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <span className="ml-3 text-muted-foreground">Loading dashboard...</span>
-              </div>
-            ) : (
-              <>
+            <>
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 slide-up">
@@ -307,24 +290,32 @@ const Dashboard = () => {
                 <h2 className="text-2xl font-bold">Achievements</h2>
                 <Card className="card-feature">
                   <div className="space-y-4">
-                    {achievements.map((achievement, index) => (
-                      <div key={index} className={`flex items-center space-x-3 p-4 rounded-lg ${
-                        achievement.earned ? 'bg-success/10' : 'bg-muted/50'
-                      }`}>
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          achievement.earned ? 'bg-success text-white' : 'bg-muted'
-                        }`}>
-                          <Trophy className="w-5 h-5" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className={`font-medium ${achievement.earned ? 'text-success' : 'text-muted-foreground'}`}>
-                            {achievement.name}
-                          </h4>
-                          <p className="text-sm text-muted-foreground">{achievement.description}</p>
-                        </div>
-                        {achievement.earned && <CheckCircle className="w-5 h-5 text-success" />}
+                    {achievements.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Trophy className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <p className="font-medium">No achievements yet</p>
+                        <p className="text-sm mt-1">Complete challenges to earn achievements.</p>
                       </div>
-                    ))}
+                    ) : (
+                      achievements.map((achievement, index) => (
+                        <div key={index} className={`flex items-center space-x-3 p-4 rounded-lg ${
+                          achievement.earned ? 'bg-success/10' : 'bg-muted/50'
+                        }`}>
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                            achievement.earned ? 'bg-success text-white' : 'bg-muted'
+                          }`}>
+                            <Trophy className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className={`font-medium ${achievement.earned ? 'text-success' : 'text-muted-foreground'}`}>
+                              {achievement.name}
+                            </h4>
+                            <p className="text-sm text-muted-foreground">{achievement.description}</p>
+                          </div>
+                          {achievement.earned && <CheckCircle className="w-5 h-5 text-success" />}
+                        </div>
+                      ))
+                    )}
                   </div>
                 </Card>
               </div>
@@ -339,39 +330,48 @@ const Dashboard = () => {
                 </Link>
               </div>
               <div className="grid md:grid-cols-3 gap-6">
-                {upcomingChallenges.map((challenge, index) => (
-                  <Card key={index} className="card-feature">
-                    <div className="space-y-4">
-                      <div className="flex items-start justify-between">
-                        <h3 className="font-semibold">{challenge.title}</h3>
-                        <Badge variant={
-                          challenge.difficulty === 'Easy' ? 'default' :
-                          challenge.difficulty === 'Medium' ? 'secondary' : 'destructive'
-                        }>
-                          {challenge.difficulty}
-                        </Badge>
-                      </div>
-                      <div className="space-y-2 text-sm text-muted-foreground">
-                        <div className="flex items-center">
-                          <Clock className="w-4 h-4 mr-2" />
-                          {challenge.estimatedTime}
-                        </div>
-                        <div className="flex items-center">
-                          <Users className="w-4 h-4 mr-2" />
-                          {challenge.participants} participants
-                        </div>
-                      </div>
-                      <Button className="w-full btn-primary text-white">
-                        <Play className="w-4 h-4 mr-2" />
-                        Start Challenge
-                      </Button>
+                {upcomingChallenges.length === 0 ? (
+                  <Card className="card-feature md:col-span-3">
+                    <div className="text-center py-10 text-muted-foreground">
+                      <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                      <p className="font-medium">No trending challenges yet</p>
+                      <p className="text-sm mt-1">Check back once new challenges are available.</p>
                     </div>
                   </Card>
-                ))}
+                ) : (
+                  upcomingChallenges.map((challenge, index) => (
+                    <Card key={index} className="card-feature">
+                      <div className="space-y-4">
+                        <div className="flex items-start justify-between">
+                          <h3 className="font-semibold">{challenge.title}</h3>
+                          <Badge variant={
+                            challenge.difficulty === 'Easy' ? 'default' :
+                            challenge.difficulty === 'Medium' ? 'secondary' : 'destructive'
+                          }>
+                            {challenge.difficulty}
+                          </Badge>
+                        </div>
+                        <div className="space-y-2 text-sm text-muted-foreground">
+                          <div className="flex items-center">
+                            <Clock className="w-4 h-4 mr-2" />
+                            {challenge.estimatedTime}
+                          </div>
+                          <div className="flex items-center">
+                            <Users className="w-4 h-4 mr-2" />
+                            {challenge.participants} participants
+                          </div>
+                        </div>
+                        <Button className="w-full btn-primary text-white">
+                          <Play className="w-4 h-4 mr-2" />
+                          Start Challenge
+                        </Button>
+                      </div>
+                    </Card>
+                  ))
+                )}
               </div>
             </div>
             </>
-            )}
           </div>
         </AppLayout>
   );

@@ -116,7 +116,8 @@ const Signup = () => {
       await authAPI.register({
         username: formData.username,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        skill_level: formData.skillLevel as "beginner" | "intermediate" | "advanced"
       });
       
       toast({

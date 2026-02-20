@@ -28,6 +28,7 @@ def register():
         email = data.get('email', '').strip().lower()
         username = data.get('username', '').strip()
         password = data.get('password', '')
+        skill_level = str(data.get('skill_level', 'beginner')).strip().lower()
         
         # Validate email
         if not email:
@@ -52,6 +53,9 @@ def register():
         if not password_valid:
             return jsonify({'error': password_error}), 400
         
+        if skill_level not in ('beginner', 'intermediate', 'advanced'):
+            return jsonify({'error': 'Invalid skill_level'}), 400
+
         # Check if user already exists
         if User.query.filter_by(email=email).first():
             return jsonify({'error': 'Email already registered'}), 409
@@ -63,7 +67,7 @@ def register():
         user = User(
             email=email,
             username=username,
-            skill_level='beginner',
+            skill_level=skill_level,
             total_points=0
         )
         user.set_password(password)
