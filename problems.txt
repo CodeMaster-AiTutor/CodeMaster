@@ -1,0 +1,161 @@
+🟢 Beginner
+
+Focus: Variables, Operators, Loops, Conditionals
+
+1. Basic Calculator
+
+2. Even Odd Checker
+
+3. Largest of Three Numbers
+
+4. Leap Year Checker
+
+5. Factorial Calculator
+
+6. Prime Number Checker
+
+7. Fibonacci Series
+
+8. Reverse a Number
+
+9. Palindrome Number
+
+10. Armstrong Number
+
+11. GCD and LCM
+
+12. Multiplication Table
+
+13. Count Digits
+
+14. Sum of Digits
+
+15. Power Calculator
+
+16. Temperature Converter
+
+17. Grade System
+
+18. Pattern – Star Pyramid
+
+19. Pattern – Number Triangle
+
+20. Sum of N Natural Numbers
+
+21. Check Alphabet Type
+
+22. Simple Interest Calculator
+
+23. Swap Without Third Variable
+
+24. Count Vowel
+
+25. Character Frequency
+
+
+
+🟡 Intermediate
+
+1. Find Largest in Array
+
+2. Find Second Largest
+
+3. Reverse Array
+
+4. Sort Array (Bubble Sort)
+
+5. Linear Search
+
+6. Binary Search
+
+7. Remove Duplicates (Array)
+
+8. Array Rotation
+
+9. Sum of Array Elements
+
+10. Count Even and Odd in Array
+
+11. String Reverse
+
+12. Palindrome String
+
+13. Anagram Checker
+
+14. Count Words in Sentence
+
+15. Remove Spaces
+
+16. String Compression
+
+17. Matrix Addition
+
+18. Matrix Multiplication
+
+19. Transpose Matrix
+
+20. Method Overloading Demo
+
+21. Student Result System
+
+22. Employee Salary System
+
+23. Custom Exception Demo
+
+24. Menu Driven Program
+
+25. Number Guessing Game
+
+
+
+🔴 Advance
+
+1. Student Management System
+
+2. Library System
+
+3. Contact Book
+
+4. ATM Simulator
+
+5. Shopping Cart System
+
+6. Quiz Application
+
+7. Voting System
+
+8. Parking Lot System
+
+9. Expense Tracker
+
+10. Bank Account System
+
+11. Inventory System
+
+12. Password Validator
+
+13. Ticket Booking System
+
+14. Restaurant Billing System
+
+15. Task Manager
+
+16. Employee Management System
+
+17. Stack Implementation
+
+18. Queue Implementation
+
+19. Simple Chat Simulation
+
+20. Mini Banking Transaction History
+
+21. Course Enrollment System
+
+22. Simple Login System
+
+23. Hotel Room Booking
+
+24. E-Voting with ID Validation
+
+25. Multi-User Scoreboard System

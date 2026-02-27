@@ -480,6 +480,90 @@ const learningPathConcepts: LearningConcept[] = [
   },
 ];
 
+const practiceProblemSets: Record<LearningConcept['level'], string[]> = {
+  basic: [
+    'Basic Calculator',
+    'Even Odd Checker',
+    'Largest of Three Numbers',
+    'Leap Year Checker',
+    'Factorial Calculator',
+    'Prime Number Checker',
+    'Fibonacci Series',
+    'Reverse a Number',
+    'Palindrome Number',
+    'Armstrong Number',
+    'GCD and LCM',
+    'Multiplication Table',
+    'Count Digits',
+    'Sum of Digits',
+    'Power Calculator',
+    'Temperature Converter',
+    'Grade System',
+    'Pattern – Star Pyramid',
+    'Pattern – Number Triangle',
+    'Sum of N Natural Numbers',
+    'Check Alphabet Type',
+    'Simple Interest Calculator',
+    'Swap Without Third Variable',
+    'Count Vowel',
+    'Character Frequency',
+  ],
+  intermediate: [
+    'Find Largest in Array',
+    'Find Second Largest',
+    'Reverse Array',
+    'Sort Array (Bubble Sort)',
+    'Linear Search',
+    'Binary Search',
+    'Remove Duplicates (Array)',
+    'Array Rotation',
+    'Sum of Array Elements',
+    'Count Even and Odd in Array',
+    'String Reverse',
+    'Palindrome String',
+    'Anagram Checker',
+    'Count Words in Sentence',
+    'Remove Spaces',
+    'String Compression',
+    'Matrix Addition',
+    'Matrix Multiplication',
+    'Transpose Matrix',
+    'Method Overloading Demo',
+    'Student Result System',
+    'Employee Salary System',
+    'Custom Exception Demo',
+    'Menu Driven Program',
+    'Number Guessing Game',
+  ],
+  advanced: [
+    'Student Management System',
+    'Library System',
+    'Contact Book',
+    'ATM Simulator',
+    'Shopping Cart System',
+    'Quiz Application',
+    'Voting System',
+    'Parking Lot System',
+    'Expense Tracker',
+    'Bank Account System',
+    'Inventory System',
+    'Password Validator',
+    'Ticket Booking System',
+    'Restaurant Billing System',
+    'Task Manager',
+    'Employee Management System',
+    'Stack Implementation',
+    'Queue Implementation',
+    'Simple Chat Simulation',
+    'Mini Banking Transaction History',
+    'Course Enrollment System',
+    'Simple Login System',
+    'Hotel Room Booking',
+    'E-Voting with ID Validation',
+    'Multi-User Scoreboard System',
+  ],
+};
+
 const Practice = () => {
   const [activeTab, setActiveTab] = useState('learning-paths');
   const [searchTerm, setSearchTerm] = useState('');
@@ -488,6 +572,7 @@ const Practice = () => {
   const [problems, setProblems] = useState<Problem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [openLevels, setOpenLevels] = useState<string[]>([]);
+  const [openPracticeLevels, setOpenPracticeLevels] = useState<string[]>([]);
   const { toast } = useToast();
   
   const normalizeLevel = (value?: string | null) => {
@@ -625,6 +710,9 @@ const Practice = () => {
   useEffect(() => {
     if (activeTab === 'learning-paths') {
       setOpenLevels([]);
+    }
+    if (activeTab === 'practice-arena') {
+      setOpenPracticeLevels([]);
     }
   }, [activeTab]);
 
@@ -891,6 +979,71 @@ const Practice = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              <Accordion
+                type="multiple"
+                value={openPracticeLevels}
+                onValueChange={setOpenPracticeLevels}
+                className="space-y-4"
+              >
+                {levelOrder.map((level) => {
+                  const sectionLocked = isConceptLocked(level);
+                  const problemsForLevel = practiceProblemSets[level];
+                  return (
+                    <AccordionItem key={level} value={level} className="border border-border/30 rounded-xl bg-gradient-card group">
+                      <AccordionTrigger className="px-6 py-4 hover:no-underline no-underline">
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-3">
+                            <span className={`w-2.5 h-2.5 rounded-full ${levelBulletClass[level]}`} />
+                            <span className="text-lg font-semibold">{levelLabel[level]}</span>
+                            <Badge variant="outline">{problemsForLevel.length} problems</Badge>
+                          </div>
+                          <div className="flex items-center gap-2 text-muted-foreground group-hover:text-primary">
+                            {sectionLocked ? <Lock className="w-4 h-4" /> : null}
+                            <span className="text-sm">{sectionLocked ? 'Locked' : 'Unlocked'}</span>
+                          </div>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="px-6 pb-6">
+                        {sectionLocked ? (
+                          <Card className="border-muted">
+                            <CardContent className="p-6 text-center">
+                              <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
+                                <Lock className="w-4 h-4" />
+                                <span>Locked</span>
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                Unlocks at the {levelLabel[level]} level.
+                              </p>
+                            </CardContent>
+                          </Card>
+                        ) : (
+                          <div className="grid gap-3">
+                            {problemsForLevel.map((title, index) => (
+                              <Card key={`${level}-${title}`} className="border-border/20 bg-background/40">
+                                <CardContent className="p-4">
+                                  <div className="flex items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
+                                        {String(index + 1).padStart(2, '0')}
+                                      </div>
+                                      <div className="text-sm font-medium">{title}</div>
+                                    </div>
+                                    <Button variant="outline" size="sm" className="gap-2">
+                                      <Play className="w-4 h-4" />
+                                      Solve
+                                    </Button>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        )}
+                      </AccordionContent>
+                    </AccordionItem>
+                  );
+                })}
+              </Accordion>
 
               {/* Filters */}
               <Card className="border-muted">
