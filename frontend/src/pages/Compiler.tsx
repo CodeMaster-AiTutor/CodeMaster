@@ -849,6 +849,26 @@ const Compiler = () => {
     }, SAVE_DEBOUNCE_MS);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
+      const sessionId = sessionIdRef.current ?? getSessionId();
+      const currentCode = editorRef.current?.getValue() ?? codeRef.current;
+      if (!sessionId) {
+        return;
+      }
+      void saveCompilerState({
+        code: currentCode,
+        selection: selectionRef.current,
+        scrollTop: scrollPositionRef.current,
+        sessionId
+      });
+    };
+  }, []);
+
   const restoreEditorState = useCallback((state: { code: string; selection: { start: number; end: number }; scrollTop: number }) => {
     codeRef.current = state.code;
     setCode(state.code);
