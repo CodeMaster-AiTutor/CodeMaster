@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packages - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="packages.html" class="topic-link active">19. Packages</a>
+                <div class="page-subtopics">
+                    <a href="#what-package" class="subtopic-link">What is a Package</a>
+                    <a href="#built-in" class="subtopic-link">Built‑in Packages</a>
+                    <a href="#import" class="subtopic-link">import Keyword</a>
+                    <a href="#create" class="subtopic-link">Create Your Package</a>
+                    <a href="#naming" class="subtopic-link">Naming Convention</a>
+                    <a href="#multi-example" class="subtopic-link">Multi‑Package Example</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Packages</h1>
+
+    <h2 id="what-package">What is a Package?</h2>
+    <p>A package is a <b>folder that groups related Java classes together</b>. It keeps large projects organized, avoids name conflicts, and helps access control.</p>
+    <p>Packages also define a <b>namespace</b>. Two classes can have the same name if they are in different packages.</p>
+    <p>Package-level access means members without public/private/protected are visible only inside the same package.</p>
+    <p>Think of packages as the address system for classes. The fully-qualified name (package + class name) uniquely identifies a class in a project or library.</p>
+    <p>Good package design groups classes that change together and separates classes that are used for different purposes.</p>
+    <ul>
+        <li><b>Namespaces</b>: prevent class name clashes across libraries and modules</li>
+        <li><b>Encapsulation</b>: hide helper classes inside a package boundary</li>
+        <li><b>Structure</b>: mirror your project’s domain in a clean hierarchy</li>
+    </ul>
+    <div class="code">
+com.myapp.models      → Student.java, Teacher.java, Course.java
+com.myapp.utils       → MathHelper.java, DateHelper.java
+com.myapp.database    → DBConnection.java, QueryBuilder.java
+    </div>
+    <ul>
+        <li><b>Organization</b>: structured navigation in large projects</li>
+        <li><b>Name conflicts</b>: java.util.Date vs java.sql.Date</li>
+        <li><b>Access control</b>: hide implementation within a package</li>
+    </ul>
+
+    <h2 id="built-in">Built‑in Java Packages</h2>
+    <p>Java ships with many standard packages. <b>java.lang</b> is imported automatically, but most others require an explicit import.</p>
+    <p>Each package targets a specific area: utilities, I/O, networking, time, math, and more.</p>
+    <p>Knowing which package a class lives in helps you find documentation and avoid name conflicts.</p>
+    <ul>
+        <li><b>java.lang</b>: core language classes used in every program</li>
+        <li><b>java.util</b>: collections, utilities, scanners, random, optional</li>
+        <li><b>java.io</b> and <b>java.nio</b>: file and stream I/O</li>
+        <li><b>java.time</b>: modern date/time API</li>
+        <li><b>java.net</b>: sockets and HTTP clients</li>
+    </ul>
+    <div class="code">
+Package     → What it contains
+java.lang   → String, Math, System, Integer (auto‑imported)
+java.util   → ArrayList, Scanner, HashMap, Collections, Arrays
+java.io     → File, BufferedReader, FileWriter
+java.math   → BigInteger, BigDecimal
+java.time   → LocalDate, LocalTime
+java.net    → URL, HttpURLConnection
+    </div>
+    <div class="try">Exam Point: Only java.lang is imported automatically.</div>
+
+    <h2 id="import">The import Keyword</h2>
+    <p><b>import</b> tells the compiler where to find classes so you can use short names in code.</p>
+    <p>Wildcard imports include only classes in that package, not sub‑packages.</p>
+    <p>Imports are compile-time only. At runtime the JVM loads classes by their full package name.</p>
+    <p>If two classes have the same name, you must use the fully-qualified name to avoid ambiguity.</p>
+    <ul>
+        <li><b>Explicit imports</b> make code clearer and avoid name conflicts</li>
+        <li><b>Wildcard imports</b> reduce typing but can hide conflicts</li>
+    </ul>
+    <div class="code">
+// import specific class
+import java.util.Scanner;
+import java.util.ArrayList;
+
+// import entire package
+import java.util.*;  // does not include sub‑packages
+
+// no import (full name)
+java.util.Scanner sc = new java.util.Scanner(System.in);
+    </div>
+    <div class="try">Exam Point: import java.util.* does not import java.util.regex.*</div>
+
+    <h2 id="create">Creating Your Own Package</h2>
+    <p>The <b>package</b> statement must be the first line in the file, and the folder structure must match it.</p>
+    <p>When compiling from the command line, use <b>javac -d</b> to create the correct folder structure.</p>
+    <p>The folder layout must mirror the package name exactly or the compiler and JVM cannot find your classes.</p>
+    <p>IDE projects usually generate this structure for you, but it is important to understand the mapping.</p>
+    <ul>
+        <li><b>package com.app.utils</b> → src/com/app/utils/</li>
+        <li><b>package org.project.models</b> → src/org/project/models/</li>
+    </ul>
+    <div class="code">
+package com.myapp.models;
+
+public class Student {
+    private String name;
+    private int age;
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() { return name; }
+    public int getAge() { return age; }
+}
+    </div>
+    <div class="code">
+project/
+└── src/
+    └── com/
+        └── myapp/
+            └── models/
+                └── Student.java
+    </div>
+
+    <h2 id="naming">Package Naming Conventions</h2>
+    <p>Package names use <b>lowercase</b> and typically follow reverse‑domain style.</p>
+    <p>This avoids clashes across projects and makes packages globally unique.</p>
+    <p>Short, meaningful subpackages indicate responsibility: <b>model</b>, <b>service</b>, <b>util</b>, <b>db</b>.</p>
+    <p>Avoid uppercase letters, underscores, or single-letter package names in real projects.</p>
+    <div class="code">
+com.companyname.projectname.modulename
+com.google.gson
+org.apache.commons.lang
+com.fasterxml.jackson.core
+io.github.username.myproject
+    </div>
+    <div class="try">Exam Point: Reverse‑domain naming ensures global uniqueness.</div>
+
+    <h2 id="multi-example">Complete Multi‑Package Example</h2>
+    <p>Each package focuses on a single responsibility. Import is used to connect them in the main app.</p>
+    <p>This structure keeps models, utilities, and entry points separate, which is easier to maintain.</p>
+    <p>As projects grow, you can add more packages without changing existing code structure.</p>
+    <div class="code">
+StudentApp/
+└── src/
+    ├── com/studentapp/models/
+    │   └── Student.java
+    ├── com/studentapp/utils/
+    │   └── GradeCalculator.java
+    └── com/studentapp/main/
+        └── Main.java
+    </div>
+
+    <div class="code">
+// Student.java
+package com.studentapp.models;
+
+public class Student {
+    private String name;
+    private int age;
+    private double[] marks;
+
+    public Student(String name, int age, double[] marks) {
+        this.name = name;
+        this.age = age;
+        this.marks = marks;
+    }
+
+    public String getName() { return name; }
+    public int getAge() { return age; }
+    public double[] getMarks() { return marks; }
+
+    @Override
+    public String toString() {
+        return "Student{name='" + name + "', age=" + age + "}";
+    }
+}
+    </div>
+
+    <div class="code">
+// GradeCalculator.java
+package com.studentapp.utils;
+
+public class GradeCalculator {
+
+    public static double average(double[] marks) {
+        double sum = 0;
+        for (double m : marks) sum += m;
+        return sum / marks.length;
+    }
+
+    public static String grade(double average) {
+        if (average >= 90) return "A";
+        else if (average >= 75) return "B";
+        else if (average >= 60) return "C";
+        else if (average >= 50) return "D";
+        else return "F";
+    }
+}
+    </div>
+</div>
+
+    </div>
+
+</body>
+</html>

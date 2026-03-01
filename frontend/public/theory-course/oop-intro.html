@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OOP Intro - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link active">10. OOP Intro</a>
+                <div class="page-subtopics">
+                    <a href="#classes-objects" class="subtopic-link">Classes & Objects</a>
+                    <a href="#object-creation" class="subtopic-link">Object creation</a>
+                    <a href="#fields-methods" class="subtopic-link">Fields & Methods</a>
+                    <a href="#real-world-modelling" class="subtopic-link">Real world modelling</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>OOP Intro</h1>
+
+    <h2 id="why-oop">Why Programming Needed OOP</h2>
+    <p>Procedural programs worked for small tasks, but modern systems (banking, reservations, e‑commerce) created <b>software complexity</b>: thousands of global variables, functions modifying unrelated data, and bugs that are hard to trace. OOP solves this by modeling <b>real-world entities</b> instead of just writing steps.</p>
+
+    <h2 id="core-idea">Core Idea of OOP</h2>
+    <p>Real world is made of <b>objects</b> (Car, Student, Book, BankAccount). Each object has <b>state</b> (data) and <b>behavior</b> (actions).</p>
+    <div class="code">
+// Student
+// State  → name, age, marks
+// Behavior → study(), attendClass(), giveExam()
+    </div>
+
+    <h2 id="class">What is a Class</h2>
+    <p>A <b>class</b> is a blueprint or template that defines what data an object will store and what actions it can perform. It is a design, not the real thing.</p>
+    <ul>
+        <li>Building map → Class, Actual house → Object</li>
+        <li>Car design → Class, Actual car → Object</li>
+    </ul>
+    <div class="code">
+class Student {
+    String name;
+    int age;
+
+    void study() {
+        System.out.println(name + " is studying");
+    }
+}
+    </div>
+    <p>This defines how a student looks and behaves; it does <b>not</b> create a student yet.</p>
+
+    <figure class="try">
+        <img src="assets/img1.png" alt="OOP: Class blueprint vs Object real house infographic" style="max-width:100%;height:auto;">
+        <figcaption>Class (blueprint) vs Object (real instance)</figcaption>
+    </figure>
+
+    <h2 id="object">What is an Object</h2>
+    <p>An <b>object</b> is a real instance created from a class.</p>
+    <div class="code">
+Student s1 = new Student(); // create object
+s1.name = "Aayu";
+s1.age = 20;
+s1.study();
+// Output: Aayu is studying
+    </div>
+
+    <h2 id="object-creation">Object Creation in Memory</h2>
+    <p>On <b>new</b>:</p>
+    <ul>
+        <li>Creates a reference variable (e.g., s1)</li>
+        <li>Allocates object memory on the heap</li>
+        <li>Links reference to that object</li>
+    </ul>
+    <p>The variable holds the <b>address</b>, not the object itself.</p>
+
+    <figure class="try">
+        <img src="assets/img2.png" alt="Java memory diagram: stack references s1 and s2 pointing to Student objects on the heap" style="max-width:100%;height:auto;">
+        <figcaption>Java Memory: references on stack, objects on heap</figcaption>
+    </figure>
+
+    <h2 id="multiple-objects">Multiple Objects from Same Class</h2>
+    <div class="code">
+Student s1 = new Student();
+Student s2 = new Student();
+s1.name = "Rahul";
+s2.name = "Priya"; // separate data, no overwrite
+    </div>
+
+    <h2 id="fields-methods">Fields and Methods</h2>
+    <p><b>Fields</b> (variables inside class) store object data; each object gets its own copy. <b>Methods</b> (functions inside class) define behavior and operate on fields.</p>
+    <div class="code">
+class BankAccount {
+    double balance;
+    void deposit(double amt) {
+        balance += amt;
+    }
+}
+    </div>
+
+    <h2 id="why-powerful">Why OOP is Powerful</h2>
+    <p>Without OOP, a bank program might have balance1, balance2, balance3… and withdraw1(), withdraw2(), withdraw3()… Impossible to manage. With OOP, define <b>BankAccount</b> once and create objects per customer — clean and scalable.</p>
+
+    <h2 id="real-modelling">Real World Modeling</h2>
+    <div class="code">
+Real World   →  Class        →  Object
+Student      →  Student      →  Rahul
+Car          →  Car          →  Honda City
+Account      →  BankAccount  →  Account #1234
+    </div>
+
+    <h2 id="interaction">Interaction Between Objects</h2>
+    <p>Objects communicate by calling each other’s methods. Example: an <b>ATM</b> object uses a <b>BankAccount</b> object to withdraw.</p>
+
+    <h2 id="summary">Basic Terminology Summary</h2>
+    <ul>
+        <li><b>Class</b> → Blueprint</li>
+        <li><b>Object</b> → Instance of class</li>
+        <li><b>Field</b> → Data inside object</li>
+        <li><b>Method</b> → Action of object</li>
+        <li><b>Reference</b> → Variable storing object address</li>
+    </ul>
+
+    <h2 id="thinking">Procedural vs Object-Oriented Thinking</h2>
+    <ul>
+        <li><b>Procedural</b>: What steps should the program follow?</li>
+        <li><b>OOP</b>: What real-world things exist and what can they do?</li>
+    </ul>
+    <div class="try">Exam Point: Define class and object; give one example with state and behavior.</div>
+</div>
+
+    </div>
+
+</body>
+</html>

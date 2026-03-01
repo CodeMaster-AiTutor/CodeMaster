@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arrays - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link active">8. Arrays</a>
+                <div class="page-subtopics">
+                    <a href="#array-concept" class="subtopic-link">Array concept</a>
+                    <a href="#creating-array" class="subtopic-link">Creating array</a>
+                    <a href="#iterating-array" class="subtopic-link">Iterating array</a>
+                    <a href="#searching" class="subtopic-link">Searching</a>
+                    <a href="#min-max" class="subtopic-link">Min & Max</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Arrays</h1>
+
+    <h2 id="why-arrays">What Problem Arrays Solve</h2>
+    <p>Real programs store groups of related values: marks of 100 students, daily temperatures, cart prices, scores in a leaderboard. Using separate variables makes code unmanageable, prevents looping, and does not scale. We need one variable that can hold many values: an <b>array</b>.</p>
+
+    <h2 id="definition">Definition of Array</h2>
+    <p>An array is a <b>fixed-size</b> collection of elements of the <b>same data type</b> stored in <b>contiguous memory</b>.</p>
+    <ul>
+        <li><b>Fixed size:</b> decided at creation, cannot change later.</li>
+        <li><b>Same type:</b> int[] stores only ints; no mixing types.</li>
+        <li><b>Contiguous memory:</b> elements are side-by-side, enabling fast access.</li>
+    </ul>
+    <div class="try">Exam Point: Give the three key properties of an array.</div>
+
+    <h2 id="memory-concept">Memory concept</h2>
+    <div class="code">
+int a = 10;              // one memory box
+int[] arr = new int[5];  // 5 connected boxes
+    </div>
+    <p>Each position is reached by an <b>index</b>. Indexing starts from 0.</p>
+
+    <h2 id="index-system">Index system</h2>
+    <ul>
+        <li>Size = 5 → valid indexes: 0,1,2,3,4</li>
+        <li>1st element index = 0; last index = <b>size − 1</b></li>
+        <li>Reason: CPU calculates address as base + index × elementSize</li>
+    </ul>
+
+    <h2 id="declaration">Declaring an array</h2>
+    <p>Declaration creates a reference, not the actual array.</p>
+    <div class="code">
+double[] prices;
+char[] grades;
+String[] names;
+    </div>
+
+    <h2 id="creation">Creating an array</h2>
+    <p>Allocate memory using <b>new</b>:</p>
+    <div class="code">
+int[] marks = new int[5];      // space for 5 ints
+int[] quick = {78, 85, 90, 66, 72}; // direct initialization
+    </div>
+
+    <h2 id="defaults">Default values</h2>
+    <p>Elements are initialized automatically:</p>
+    <ul>
+        <li>int → 0, double/float → 0.0, boolean → false</li>
+        <li>char → '\u0000' (empty), object refs (e.g., String) → null</li>
+    </ul>
+    <div class="code">
+int[] a = new int[3];
+System.out.println(a[0]); // 0
+    </div>
+
+    <h2 id="assign-access">Assigning & accessing</h2>
+    <div class="code">
+int[] marks = new int[5];
+marks[0] = 78;
+marks[1] = 85;
+marks[2] = 90;
+marks[3] = 66;
+marks[4] = 72;
+System.out.println(marks[2]); // 90
+    </div>
+
+    <h2 id="length">Array length property</h2>
+    <p>Use <b>length</b> (property, not a method).</p>
+    <div class="code">
+System.out.println(marks.length); // correct
+// marks.length()  // incorrect
+    </div>
+
+    <h2 id="traversal">Traversing an array</h2>
+    <div class="code">
+int[] arr2 = {2, 4, 6, 8};
+for (int i = 0; i < arr2.length; i++) {
+    System.out.println(arr2[i]);
+}
+
+// Enhanced for-each (no index needed)
+for (int value : arr2) {
+    System.out.println(value);
+}
+    </div>
+
+    <h2 id="searching">Searching (linear search)</h2>
+    <p>Check elements one by one until found. Time complexity: <b>O(n)</b>.</p>
+    <div class="code">
+int key = 90;
+boolean found = false;
+for (int i = 0; i < marks.length; i++) {
+    if (marks[i] == key) {
+        found = true;
+        break;
+    }
+}
+    </div>
+
+    <h2 id="min-max">Finding maximum & minimum</h2>
+    <div class="code">
+int[] a3 = {4, 7, 1, 9};
+int min = a3[0], max = a3[0];
+for (int i = 1; i < a3.length; i++) {
+    if (a3[i] < min) min = a3[i];
+    if (a3[i] > max) max = a3[i];
+}
+System.out.println(min + " " + max);
+    </div>
+
+    <h2 id="bounds">Array Index Out of Bounds</h2>
+    <p>Accessing outside 0..length-1 throws <b>ArrayIndexOutOfBoundsException</b> to protect memory.</p>
+    <div class="code">
+int[] b = new int[3];
+// b[3] = 100; // invalid; valid indexes are 0..2
+    </div>
+
+    <h2 id="performance">Why arrays are fast</h2>
+    <p>Contiguous memory enables constant-time access.</p>
+    <div class="code">
+address = base + (index * sizeOfType)
+// Access time = O(1)
+    </div>
+
+    <h2 id="limitations">Limitations</h2>
+    <ul>
+        <li>Size fixed after creation</li>
+        <li>No mixed types</li>
+        <li>Insertion/deletion in middle is costly</li>
+        <li>Wasted memory if size is overestimated</li>
+    </ul>
+
+    <h2 id="when-to-use">When to use arrays</h2>
+    <ul>
+        <li>Number of elements known beforehand</li>
+        <li>Frequent reading and indexed access</li>
+        <li>Performance critical and memory predictable</li>
+        <li>Examples: marks list, days of week, seat numbers</li>
+    </ul>
+    <div class="try">Exam Point: Give two cases where arrays are better than ArrayList.</div>
+
+    <h2 id="practice">Practice Tasks</h2>
+    <p>Solve these to strengthen array fundamentals.</p>
+
+    <h3>1) Reverse an array in-place</h3>
+    <div class="code">
+int[] a = {1, 2, 3, 4, 5};
+int i = 0, j = a.length - 1;
+while (i < j) {
+    int temp = a[i];
+    a[i] = a[j];
+    a[j] = temp;
+    i++;
+    j--;
+}
+    </div>
+
+    <h3>2) Count frequency of a value</h3>
+    <div class="code">
+int[] marks = {78, 85, 90, 78, 66, 78};
+int key = 78, freq = 0;
+for (int x : marks) {
+    if (x == key) freq++;
+}
+System.out.println(freq);
+    </div>
+
+    <h3>3) Find second largest (distinct)</h3>
+    <div class="code">
+int[] a2 = {5, 9, 2, 9, 4};
+int max1 = Integer.MIN_VALUE, max2 = Integer.MIN_VALUE;
+for (int v : a2) {
+    if (v > max1) { max2 = max1; max1 = v; }
+    else if (v > max2 && v != max1) { max2 = v; }
+}
+System.out.println(max2);
+    </div>
+
+    <h3>4) Merge two sorted arrays (without duplicates)</h3>
+    <div class="code">
+int[] A = {1, 3, 5, 7};
+int[] B = {2, 3, 6, 7};
+int i1 = 0, i2 = 0;
+int[] C = new int[A.length + B.length];
+int k = 0, last = Integer.MIN_VALUE;
+while (i1 < A.length && i2 < B.length) {
+    int v = (A[i1] < B[i2]) ? A[i1++] : (A[i1] > B[i2] ? B[i2++] : B[i2++]+(i1++*0));
+    if (v != last) { C[k++] = v; last = v; }
+}
+while (i1 < A.length) { int v = A[i1++]; if (v != last) { C[k++] = v; last = v; } }
+while (i2 < B.length) { int v = B[i2++]; if (v != last) { C[k++] = v; last = v; } }
+// Result first k elements of C
+    </div>
+</div>
+
+    </div>
+
+</body>
+</html>

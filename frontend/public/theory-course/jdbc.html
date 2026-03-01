@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JDBC - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link active">25. JDBC</a>
+                <div class="page-subtopics">
+                    <a href="#what" class="subtopic-link">What is JDBC</a>
+                    <a href="#how" class="subtopic-link">How JDBC Works</a>
+                    <a href="#setup" class="subtopic-link">Setup</a>
+                    <a href="#connection" class="subtopic-link">Connection</a>
+                    <a href="#select" class="subtopic-link">SELECT Query</a>
+                    <a href="#resultset" class="subtopic-link">ResultSet</a>
+                    <a href="#close" class="subtopic-link">Close Resources</a>
+                    <a href="#update" class="subtopic-link">executeUpdate</a>
+                    <a href="#injection" class="subtopic-link">SQL Injection</a>
+                    <a href="#prepared" class="subtopic-link">PreparedStatement</a>
+                    <a href="#setters" class="subtopic-link">Setter Methods</a>
+                    <a href="#batch" class="subtopic-link">Batch Inserts</a>
+                    <a href="#transactions" class="subtopic-link">Transactions</a>
+                    <a href="#dbutil" class="subtopic-link">DB Utility</a>
+                    <a href="#crud" class="subtopic-link">Full CRUD</a>
+                    <a href="#mistakes" class="subtopic-link">Common Mistakes</a>
+                    <a href="#practice" class="subtopic-link">Practice</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>JDBC</h1>
+
+    <h2 id="what">What is JDBC?</h2>
+    <p><b>JDBC (Java Database Connectivity)</b> is Java’s standard API for connecting to relational databases and running SQL.</p>
+    <p>It provides a consistent way to work with databases using Java code, regardless of the database vendor.</p>
+    <p>JDBC bridges Java programs with SQL databases through drivers.</p>
+    <ul>
+        <li>Connect to a database (MySQL, PostgreSQL, SQLite)</li>
+        <li>Run SQL queries (SELECT, INSERT, UPDATE, DELETE)</li>
+        <li>Read results into Java objects</li>
+        <li>Handle transactions safely</li>
+    </ul>
+
+    <h2 id="how">How JDBC Works</h2>
+    <p>The JDBC API is implemented by database drivers. Your code talks to JDBC, and the driver talks to the database.</p>
+    <p>This separation lets you switch databases with minimal code changes.</p>
+    <div class="code">
+Java Program → JDBC API → JDBC Driver → Database
+    </div>
+    <ul>
+        <li>JDBC API: Connection, Statement, ResultSet</li>
+        <li>JDBC Driver: database-specific implementation</li>
+        <li>Swap driver to switch databases without changing app logic</li>
+    </ul>
+
+    <h2 id="setup">Setup — Add MySQL Driver</h2>
+    <p>Every database needs a driver. Add the driver dependency to your project so JDBC can communicate with the database.</p>
+    <p>Other databases (PostgreSQL, Oracle, SQLite) require their own driver dependencies.</p>
+    <div class="code">
+<dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+    <version>8.0.33</version>
+</dependency>
+    </div>
+    <div class="code">
+CREATE DATABASE school;
+USE school;
+
+CREATE TABLE students (
+    id      INT PRIMARY KEY AUTO_INCREMENT,
+    name    VARCHAR(100),
+    age     INT,
+    grade   CHAR(1)
+);
+
+INSERT INTO students (name, age, grade) VALUES
+('Alice', 20, 'A'),
+('Bob',   22, 'B'),
+('Charlie', 21, 'A'),
+('Diana', 19, 'C');
+    </div>
+
+    <h2 id="connection">Step 1 — Establishing a Connection</h2>
+    <p>A Connection represents an active session with the database. It is expensive to create, so reuse or pool in real applications.</p>
+    <p>The URL encodes host, port, and database name.</p>
+    <div class="code">
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class DBConnection {
+    public static void main(String[] args) {
+        String url      = "jdbc:mysql://localhost:3306/school";
+        String username = "root";
+        String password = "yourpassword";
+
+        try {
+            Connection conn = DriverManager.getConnection(url, username, password);
+            System.out.println("Connected successfully!");
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println("Connection failed: " + e.getMessage());
+        }
+    }
+}
+    </div>
+    <div class="code">
+jdbc:mysql://host:port/databasename
+jdbc:mysql://localhost:3306/school
+    </div>
+
+    <h2 id="select">Step 2 — Executing a SELECT Query</h2>
+    <p>SELECT queries return a ResultSet. Use Statement for simple queries or PreparedStatement for safer parameterized queries.</p>
+    <div class="code">
+import java.sql.*;
+
+public class SelectExample {
+    public static void main(String[] args) {
+        String url  = "jdbc:mysql://localhost:3306/school";
+        String user = "root";
+        String pass = "yourpassword";
+
+        try {
+            Connection conn = DriverManager.getConnection(url, user, pass);
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM students");
+
+            System.out.printf("%-5s %-15s %-5s %-6s%n", "ID", "Name", "Age", "Grade");
+            System.out.println("-".repeat(35));
+
+            while (rs.next()) {
+                int    id    = rs.getInt("id");
+                String name  = rs.getString("name");
+                int    age   = rs.getInt("age");
+                String grade = rs.getString("grade");
+
+                System.out.printf("%-5d %-15s %-5d %-6s%n", id, name, age, grade);
+            }
+
+            rs.close();
+            stmt.close();
+            conn.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+    </div>
+
+    <h2 id="resultset">ResultSet Methods</h2>
+    <p>ResultSet is a cursor over rows. Use next() to move row by row, then read columns by name or index.</p>
+    <p>Column names are clearer, but indexes can be slightly faster for large loops.</p>
+    <div class="code">
+rs.getInt("column")
+rs.getString("column")
+rs.getDouble("column")
+rs.getBoolean("column")
+rs.next()
+    </div>
+    <div class="code">
+int id = rs.getInt(1);
+String name = rs.getString(2);
+    </div>
+
+    <h2 id="close">Always Close Resources</h2>
+    <p>Not closing connections wastes resources and can crash your app over time.</p>
+    <p>Use try‑with‑resources to close Connection, Statement, and ResultSet automatically.</p>
+    <div class="code">
+try (
+    Connection conn = DriverManager.getConnection(url, user, pass);
+    Statement  stmt = conn.createStatement();
+    ResultSet  rs   = stmt.executeQuery("SELECT * FROM students")
+) {
+    while (rs.next()) {
+        System.out.println(rs.getString("name"));
+    }
+} catch (SQLException e) {
+    e.printStackTrace();
+}
+    </div>
+
+    <h2 id="update">executeUpdate() — INSERT, UPDATE, DELETE</h2>
+    <p>Use <b>executeQuery()</b> for SELECT, and <b>executeUpdate()</b> for INSERT/UPDATE/DELETE.</p>
+    <p>executeUpdate returns the number of rows affected, which is useful for verifying changes.</p>
+    <div class="code">
+String sql = "INSERT INTO students (name, age, grade) VALUES ('Eve', 20, 'B')";
+int rowsAffected = stmt.executeUpdate(sql);
+    </div>
+    <div class="code">
+String sql = "UPDATE students SET grade = 'A' WHERE name = 'Bob'";
+int rows = stmt.executeUpdate(sql);
+    </div>
+    <div class="code">
+String sql = "DELETE FROM students WHERE id = 4";
+int rows = stmt.executeUpdate(sql);
+    </div>
+
+    <h2 id="injection">The Problem with Statement — SQL Injection</h2>
+    <p>String concatenation allows attackers to inject SQL. This can expose or modify data.</p>
+    <p>Always use parameterized queries to prevent injection.</p>
+    <div class="code">
+String name = "Alice' OR '1'='1";
+String sql  = "SELECT * FROM students WHERE name = '" + name + "'";
+    </div>
+
+    <h2 id="prepared">PreparedStatement — Safe and Better</h2>
+    <p>PreparedStatement precompiles SQL with placeholders and safely binds parameters.</p>
+    <p>It improves security and can improve performance for repeated queries.</p>
+    <div class="code">
+String sql = "SELECT * FROM students WHERE grade = ?";
+
+try (Connection conn = DriverManager.getConnection(url, user, pass);
+     PreparedStatement ps = conn.prepareStatement(sql)) {
+
+    ps.setString(1, "A");
+    ResultSet rs = ps.executeQuery();
+
+    while (rs.next()) {
+        System.out.println(rs.getString("name") + " — " + rs.getString("grade"));
+    }
+} catch (SQLException e) {
+    e.printStackTrace();
+}
+    </div>
+    <div class="code">
+String sql = "INSERT INTO students (name, age, grade) VALUES (?, ?, ?)";
+
+try (Connection conn = DriverManager.getConnection(url, user, pass);
+     PreparedStatement ps = conn.prepareStatement(sql)) {
+
+    ps.setString(1, "Frank");
+    ps.setInt(2, 23);
+    ps.setString(3, "B");
+
+    int rows = ps.executeUpdate();
+    System.out.println("Inserted: " + rows + " row(s)");
+} catch (SQLException e) {
+    e.printStackTrace();
+}
+    </div>
+    <div class="code">
+String sql = "UPDATE students SET age = ? WHERE name = ?";
+
+try (Connection conn = DriverManager.getConnection(url, user, pass);
+     PreparedStatement ps = conn.prepareStatement(sql)) {
+
+    ps.setInt(1, 25);
+    ps.setString(2, "Alice");
+    int rows = ps.executeUpdate();
+    System.out.println("Updated: " + rows + " row(s)");
+}
+    </div>
+
+    <h2 id="setters">PreparedStatement Setter Methods</h2>
+    <p>Setters bind Java values into SQL placeholders in order. Index starts at 1.</p>
+    <p>Use setNull when a column should be stored as NULL.</p>
+    <div class="code">
+ps.setInt(index, value)
+ps.setString(index, value)
+ps.setDouble(index, value)
+ps.setBoolean(index, value)
+ps.setNull(index, Types.VARCHAR)
+    </div>
+    <p>Index starts at <b>1</b>, not 0.</p>
+
+    <h2 id="batch">Batch Inserts — Multiple Rows at Once</h2>
+    <p>Batching reduces network round‑trips by sending multiple statements together.</p>
+    <p>It is faster for inserting large datasets.</p>
+    <div class="code">
+String sql = "INSERT INTO students (name, age, grade) VALUES (?, ?, ?)";
+
+try (Connection conn = DriverManager.getConnection(url, user, pass);
+     PreparedStatement ps = conn.prepareStatement(sql)) {
+
+    String[][] data = {
+        {"Grace", "21", "A"},
+        {"Henry", "22", "B"},
+        {"Iris",  "20", "A"}
+    };
+
+    for (String[] row : data) {
+        ps.setString(1, row[0]);
+        ps.setInt(2, Integer.parseInt(row[1]));
+        ps.setString(3, row[2]);
+        ps.addBatch();
+    }
+
+    int[] results = ps.executeBatch();
+    System.out.println("Batch inserted: " + results.length + " rows");
+} catch (SQLException e) {
+    e.printStackTrace();
+}
+    </div>
+
+    <h2 id="transactions">Transactions</h2>
+    <p>A <b>transaction</b> groups multiple statements into one unit. Either all succeed or all are rolled back.</p>
+    <p>Use transactions for money transfers or multi‑step updates that must stay consistent.</p>
+    <div class="code">
+Connection conn = null;
+
+try {
+    conn = DriverManager.getConnection(url, user, pass);
+    conn.setAutoCommit(false);
+
+    PreparedStatement debit = conn.prepareStatement(
+        "UPDATE accounts SET balance = balance - ? WHERE id = ?");
+    debit.setDouble(1, 500);
+    debit.setInt(2, 1);
+    debit.executeUpdate();
+
+    PreparedStatement credit = conn.prepareStatement(
+        "UPDATE accounts SET balance = balance + ? WHERE id = ?");
+    credit.setDouble(1, 500);
+    credit.setInt(2, 2);
+    credit.executeUpdate();
+
+    conn.commit();
+    System.out.println("Transfer successful!");
+
+} catch (SQLException e) {
+    if (conn != null) {
+        conn.rollback();
+        System.out.println("Transfer failed. Rolled back.");
+    }
+    e.printStackTrace();
+} finally {
+    if (conn != null) conn.close();
+}
+    </div>
+    <div class="code">
+conn.setAutoCommit(false)
+conn.commit()
+conn.rollback()
+    </div>
+
+    <h2 id="dbutil">DB Utility Class</h2>
+    <p>A utility class centralizes connection creation and cleanup logic.</p>
+    <p>This keeps JDBC code cleaner and avoids duplication.</p>
+    <div class="code">
+import java.sql.*;
+
+public class DBUtil {
+    private static final String URL  = "jdbc:mysql://localhost:3306/school";
+    private static final String USER = "root";
+    private static final String PASS = "yourpassword";
+
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASS);
+    }
+
+    public static void close(Connection conn, PreparedStatement ps, ResultSet rs) {
+        try {
+            if (rs   != null) rs.close();
+            if (ps   != null) ps.close();
+            if (conn != null) conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+    </div>
+
+    <h2 id="crud">Full CRUD Example: Student Manager</h2>
+    <p>This example shows how to create, read, update, and delete records using PreparedStatement.</p>
+    <p>It demonstrates a basic DAO pattern often used in real applications.</p>
+    <div class="code">
+import java.sql.*;
+
+public class StudentDAO {
+
+    public static void addStudent(String name, int age, String grade) throws SQLException {
+        String sql = "INSERT INTO students (name, age, grade) VALUES (?, ?, ?)";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            ps.setInt(2, age);
+            ps.setString(3, grade);
+            ps.executeUpdate();
+            System.out.println("Added: " + name);
+        }
+    }
+
+    public static void getAllStudents() throws SQLException {
+        String sql = "SELECT * FROM students ORDER BY id";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            System.out.printf("%-5s %-15s %-5s %-6s%n", "ID", "Name", "Age", "Grade");
+            System.out.println("-".repeat(35));
+            while (rs.next()) {
+                System.out.printf("%-5d %-15s %-5d %-6s%n",
+                    rs.getInt("id"), rs.getString("name"),
+                    rs.getInt("age"), rs.getString("grade"));
+            }
+        }
+    }
+
+    public static void updateGrade(int id, String grade) throws SQLException {
+        String sql = "UPDATE students SET grade = ? WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, grade);
+            ps.setInt(2, id);
+            int rows = ps.executeUpdate();
+            System.out.println(rows > 0 ? "Updated!" : "Student not found.");
+        }
+    }
+
+    public static void deleteStudent(int id) throws SQLException {
+        String sql = "DELETE FROM students WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            int rows = ps.executeUpdate();
+            System.out.println(rows > 0 ? "Deleted!" : "Student not found.");
+        }
+    }
+
+    public static void main(String[] args) throws SQLException {
+        addStudent("Zara", 21, "A");
+        addStudent("Sam",  23, "B");
+
+        getAllStudents();
+
+        updateGrade(1, "A+");
+        deleteStudent(2);
+
+        System.out.println("\nAfter changes:");
+        getAllStudents();
+    }
+}
+    </div>
+
+    <h2 id="mistakes">Common Mistakes</h2>
+    <p>Common errors include leaking connections, building SQL with string concatenation, and skipping transactions.</p>
+    <div class="code">
+Connection conn = DriverManager.getConnection(...);
+// forgot conn.close()
+
+stmt.executeQuery("SELECT * WHERE name = '" + input + "'");
+// use PreparedStatement instead
+
+stmt.executeUpdate("UPDATE accounts ...");
+stmt.executeUpdate("UPDATE accounts ...");
+// should be in a transaction
+    </div>
+
+    <h2 id="practice">Practice Exercises</h2>
+    <ul>
+        <li>Connect to your database and print "Connection successful" with proper exception handling.</li>
+        <li>Create a products table and fetch all rows.</li>
+        <li>Fetch only students with grade 'A'.</li>
+        <li>Print total students using SELECT COUNT(*).</li>
+        <li>Try connecting with wrong password and read the SQLException.</li>
+        <li>Insert 3 students using PreparedStatement.</li>
+        <li>Update a student grade using user input.</li>
+        <li>Delete a student by ID using PreparedStatement.</li>
+        <li>Search students by grade using PreparedStatement.</li>
+        <li>Batch insert 5 students in one round-trip.</li>
+    </ul>
+</div>
+
+    </div>
+
+</body>
+</html>

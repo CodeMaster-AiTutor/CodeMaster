@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Output - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link active">3. Input Output</a>
+                <div class="page-subtopics">
+                    <a href="#scanner-class" class="subtopic-link">Scanner class</a>
+                    <a href="#taking-integer-input" class="subtopic-link">Taking integer input</a>
+                    <a href="#taking-string-input" class="subtopic-link">Taking string input</a>
+                    <a href="#multiple-inputs" class="subtopic-link">Multiple inputs</a>
+                    <a href="#formatting-output" class="subtopic-link">Formatting output</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Input Output</h1>
+
+    <h2 id="scanner-class">Scanner class</h2>
+    <p>The <b>Scanner</b> class reads input from the keyboard. It is in the <b>java.util</b> package, so you must import it.</p>
+    <p>Scanner breaks input into tokens, which are pieces of data separated by spaces or new lines.</p>
+    <p>You usually create one Scanner object and reuse it for the entire program.</p>
+    <div class="code">
+import java.util.Scanner;
+Scanner sc = new Scanner(System.in);
+</div>
+    <div class="try">Exam Point: Write the import statement for Scanner.</div>
+    <h2 id="taking-integer-input">Taking integer input</h2>
+    <p>Use <b>nextInt()</b> to read an integer.</p>
+    <p>This method expects a valid whole number, so typing text will cause an input error.</p>
+    <p>After reading, the value is stored in an int variable for later use.</p>
+    <div class="code">
+int age;
+age = sc.nextInt();
+System.out.println("Age: " + age);
+</div>
+    <div class="try">Exam Point: Which Scanner method reads an int?</div>
+    <h2 id="taking-string-input">Taking string input</h2>
+    <p>Use <b>next()</b> for a single word and <b>nextLine()</b> for a full line including spaces.</p>
+    <p>next() stops reading at the first space, so it cannot capture full names with spaces.</p>
+    <p>nextLine() reads the entire line, which is useful for full names or sentences.</p>
+    <div class="code">
+String name = sc.next();
+String city = sc.nextLine();
+</div>
+    <div class="try">Exam Point: Difference between next() and nextLine().</div>
+    <h2 id="multiple-inputs">Multiple inputs</h2>
+    <p>You can read multiple values in sequence. Inputs are read in the order typed.</p>
+    <p>Each method consumes only the part of input it needs, so order matters.</p>
+    <p>Mixing nextInt and nextLine requires care because nextInt leaves a newline behind.</p>
+    <div class="code">
+int roll = sc.nextInt();
+String name = sc.next();
+double marks = sc.nextDouble();
+</div>
+    <div class="try">Exam Point: What happens if input order is wrong?</div>
+    <h2 id="formatting-output">Formatting output</h2>
+    <p>Use <b>printf</b> for formatted output. It allows control over decimals and alignment.</p>
+    <p>Format specifiers like %d, %f, and %s tell Java what type of value to print.</p>
+    <p>%.2f means show two digits after the decimal point.</p>
+    <div class="code">
+System.out.printf("Marks: %.2f", 89.456);
+System.out.printf("\nName: %s", "Riya");
+</div>
+    <div class="try">Exam Point: Explain the role of %.2f.</div>
+</div>
+
+    </div>
+
+</body>
+</html>

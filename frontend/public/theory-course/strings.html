@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strings - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link active">9. Strings</a>
+                <div class="page-subtopics">
+                    <a href="#string-basics" class="subtopic-link">String basics</a>
+                    <a href="#length-" class="subtopic-link">length()</a>
+                    <a href="#equals-" class="subtopic-link">equals()</a>
+                    <a href="#substring-" class="subtopic-link">substring()</a>
+                    <a href="#touppercase-" class="subtopic-link">toUpperCase()</a>
+                    <a href="#string-comparison" class="subtopic-link">string comparison</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Strings</h1>
+
+    <h2 id="string-basics">String basics & immutability</h2>
+    <p>A String is a sequence of characters inside double quotes. Strings are <b>immutable</b>—once created, their content cannot change. Any “change” creates a new String.</p>
+    <div class="code">
+String s1 = "Java";            // literal in String Pool
+String s2 = new String("Java"); // new object on heap
+s1 = s1 + " Rocks";            // creates a new String
+    </div>
+    <div class="try">Exam Point: Why is immutability useful? (thread-safety, caching, security)</div>
+
+    <h2 id="equals-vs-operator">equals() vs ==</h2>
+    <p><b>equals()</b> compares content; <b>==</b> compares references.</p>
+    <div class="code">
+String a = "Hello";
+String b = "Hello";         // may refer to same pool object
+String c = new String("Hello");
+System.out.println(a.equals(c)); // true
+System.out.println(a == c);      // false
+    </div>
+    <div class="try">Exam Point: Always use equals() for content comparison.</div>
+
+    <h2 id="creation-concat">Creation & concatenation</h2>
+    <div class="code">
+String name = "Asha";
+String msg = "Welcome";
+String full = msg + ", " + name;      // + operator
+String joined = String.join(" ", msg, name); // join multiple
+    </div>
+
+    <h2 id="essential-methods">Essential methods</h2>
+    <div class="code">
+String s = " Programming ";
+int n = s.length();                 // 13
+char ch = s.charAt(1);              // 'r'
+int p = s.indexOf("gram");         // 4
+int lp = s.lastIndexOf("g");       // 10
+String sub = s.substring(1, 5);     // "rogr"
+String up = s.toUpperCase();        // " PROGRAMMING "
+String low = s.toLowerCase();
+String t = s.trim();                // removes ends spaces
+String rep = s.replace("m", "MM");
+boolean st = s.startsWith(" ");
+boolean en = s.endsWith(" ");
+boolean has = s.contains("Pro");
+    </div>
+    <div class="try">Exam Point: substring(end index is excluded)</div>
+
+    <h2 id="comparison">Comparison</h2>
+    <div class="code">
+String x = "Apple", y = "banana";
+int cmp = x.compareTo(y);            // dictionary order
+boolean eqi = x.equalsIgnoreCase("apple");
+    </div>
+    <div class="try">Exam Point: compareTo returns 0 if contents are equal.</div>
+
+    <h2 id="split-join">Split & Join</h2>
+    <div class="code">
+String data = "red,green,blue";
+String[] parts = data.split(",");
+String back = String.join("-", parts); // "red-green-blue"
+    </div>
+
+    <h2 id="stringbuilder">StringBuilder (for performance)</h2>
+    <p>Use <b>StringBuilder</b> when building strings in loops to avoid creating many temporary objects.</p>
+    <div class="code">
+StringBuilder sb = new StringBuilder();
+for (int i = 1; i <= 3; i++) {
+    sb.append(i).append(", ");
+}
+String res = sb.toString();
+    </div>
+    <div class="try">Exam Point: StringBuilder is mutable; String is immutable.</div>
+
+    <h2 id="formatting">Formatting</h2>
+    <div class="code">
+String line = String.format("Name: %s, Marks: %d", "Asha", 92);
+    </div>
+
+    <h2 id="conversions">Conversions</h2>
+    <div class="code">
+int num = Integer.parseInt("123");
+String sNum = String.valueOf(456);
+char[] arr = "ABCD".toCharArray();
+String fromArr = new String(arr);
+    </div>
+</div>
+
+    </div>
+
+</body>
+</html>

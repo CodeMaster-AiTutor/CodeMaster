@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multithreading - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link active">24. Multithreading</a>
+                <div class="page-subtopics">
+                    <a href="#what" class="subtopic-link">What is Multithreading</a>
+                    <a href="#thread-class" class="subtopic-link">Thread Class</a>
+                    <a href="#runnable" class="subtopic-link">Runnable</a>
+                    <a href="#lambda" class="subtopic-link">Lambda</a>
+                    <a href="#lifecycle" class="subtopic-link">Thread Lifecycle</a>
+                    <a href="#methods" class="subtopic-link">Thread Methods</a>
+                    <a href="#join" class="subtopic-link">join()</a>
+                    <a href="#race" class="subtopic-link">Race Condition</a>
+                    <a href="#synchronized" class="subtopic-link">synchronized</a>
+                    <a href="#volatile" class="subtopic-link">volatile</a>
+                    <a href="#atomic" class="subtopic-link">AtomicInteger</a>
+                    <a href="#deadlock" class="subtopic-link">Deadlock</a>
+                    <a href="#wait-notify" class="subtopic-link">wait/notify</a>
+                    <a href="#executor" class="subtopic-link">ExecutorService</a>
+                    <a href="#mistakes" class="subtopic-link">Common Mistakes</a>
+                    <a href="#quick-ref" class="subtopic-link">Quick Reference</a>
+                    <a href="#practice" class="subtopic-link">Practice</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Multithreading</h1>
+
+    <h2 id="what">What is Multithreading?</h2>
+    <p>A <b>thread</b> is the smallest unit of execution in a program. By default, Java runs on one thread (the main thread). <b>Multithreading</b> means running multiple threads concurrently so work can overlap.</p>
+    <p>This improves responsiveness (UI doesn’t freeze) and can use multiple CPU cores for faster processing.</p>
+    <ul>
+        <li>Games: render, input, physics simultaneously</li>
+        <li>Servers: handle many clients at once</li>
+        <li>Apps: background tasks without blocking UI</li>
+        <li>Data processing: split work across cores</li>
+    </ul>
+
+    <h2 id="thread-class">Creating a Thread — Extend Thread</h2>
+    <p>Extend <b>Thread</b> and override <b>run()</b>. Call <b>start()</b> to begin execution in a new thread.</p>
+    <p>Use this only when you don’t need to extend any other class.</p>
+    <div class="code">
+public class MyThread extends Thread {
+    private String name;
+
+    public MyThread(String name) { this.name = name; }
+
+    @Override
+    public void run() {
+        for (int i = 1; i <= 5; i++) {
+            System.out.println(name + " — step " + i);
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        MyThread t1 = new MyThread("Thread-A");
+        MyThread t2 = new MyThread("Thread-B");
+        t1.start();
+        t2.start();
+    }
+}
+    </div>
+    <div class="try">Exam Point: Always call start(), not run().</div>
+
+    <h2 id="runnable">Creating a Thread — Runnable</h2>
+    <p><b>Runnable</b> is preferred because Java supports single inheritance. It lets your class extend another class and still run on a thread.</p>
+    <div class="code">
+public class MyTask implements Runnable {
+    private String taskName;
+
+    public MyTask(String taskName) { this.taskName = taskName; }
+
+    @Override
+    public void run() {
+        for (int i = 1; i <= 4; i++) {
+            System.out.println(taskName + " executing step " + i);
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Thread t1 = new Thread(new MyTask("Download"));
+        Thread t2 = new Thread(new MyTask("Upload"));
+        t1.start();
+        t2.start();
+    }
+}
+    </div>
+
+    <h2 id="lambda">Way 3: Lambda</h2>
+    <p>Since <b>Runnable</b> is a functional interface, you can use a lambda for the shortest syntax.</p>
+    <div class="code">
+public class Main {
+    public static void main(String[] args) {
+        Thread t1 = new Thread(() -> {
+            for (int i = 1; i <= 3; i++)
+                System.out.println("Task 1 — step " + i);
+        });
+
+        Thread t2 = new Thread(() -> {
+            for (int i = 1; i <= 3; i++)
+                System.out.println("Task 2 — step " + i);
+        });
+
+        t1.start();
+        t2.start();
+    }
+}
+    </div>
+
+    <h2 id="lifecycle">Thread Lifecycle</h2>
+    <p>A thread moves through well-defined states from creation to completion.</p>
+    <div class="code">
+NEW → RUNNABLE → RUNNING → (BLOCKED/WAITING) → TERMINATED
+    </div>
+    <div class="code">
+NEW: created, not started
+RUNNABLE: ready for CPU
+RUNNING: executing
+BLOCKED/WAITING: waiting for lock/resource
+TERMINATED: finished
+    </div>
+
+    <h2 id="methods">Useful Thread Methods</h2>
+    <p>These methods help manage thread execution, naming, priority, and pausing.</p>
+    <div class="code">
+Thread t = new Thread(() -> System.out.println("Running"));
+
+ t.start();
+ t.getName();
+ t.setName("MyThread");
+ t.getPriority();
+ t.setPriority(Thread.MAX_PRIORITY);
+ t.isAlive();
+ Thread.currentThread().getName();
+
+ Thread.sleep(1000); // pause current thread
+    </div>
+    <div class="code">
+Thread t2 = new Thread(() -> {
+    for (int i = 1; i <= 3; i++) {
+        System.out.println("Tick " + i);
+        try { Thread.sleep(1000); } catch (InterruptedException e) {
+            System.out.println("Thread interrupted");
+        }
+    }
+});
+t2.start();
+    </div>
+
+    <h2 id="join">join() — Wait for a Thread</h2>
+    <p><b>join()</b> makes the current thread wait until another thread finishes. Use it when you need a result before continuing.</p>
+    <div class="code">
+Thread t1 = new Thread(() -> {
+    System.out.println("Downloading...");
+    try { Thread.sleep(2000); } catch (InterruptedException e) {}
+    System.out.println("Download complete!");
+});
+
+t1.start();
+t1.join();
+System.out.println("Now processing the downloaded file.");
+    </div>
+
+    <h2 id="race">The Race Condition Problem</h2>
+    <p>A <b>race condition</b> happens when multiple threads access and modify shared data without proper synchronization.</p>
+    <p>Operations like <b>count++</b> are not atomic. Internally they read the value, add 1, and write it back. Two threads can interleave these steps and overwrite each other.</p>
+    <p>The result is unpredictable and may differ each run even with the same inputs.</p>
+    <div class="code">
+public class Counter {
+    int count = 0;
+    void increment() { count++; }
+}
+
+public class Main {
+    public static void main(String[] args) throws InterruptedException {
+        Counter counter = new Counter();
+
+        Thread t1 = new Thread(() -> {
+            for (int i = 0; i < 1000; i++) counter.increment();
+        });
+        Thread t2 = new Thread(() -> {
+            for (int i = 0; i < 1000; i++) counter.increment();
+        });
+
+        t1.start();
+        t2.start();
+        t1.join();
+        t2.join();
+
+        System.out.println("Count: " + counter.count);
+    }
+}
+    </div>
+
+    <h2 id="synchronized">synchronized — The Fix</h2>
+    <p><b>synchronized</b> allows only one thread at a time inside the protected method or block, preventing data corruption.</p>
+    <p>When a thread enters a synchronized section, it acquires a lock. Other threads must wait until the lock is released.</p>
+    <p>Use a synchronized block when you want to lock only a small part of the method for better performance.</p>
+    <div class="code">
+public class Counter {
+    int count = 0;
+
+    synchronized void increment() {
+        count++;
+    }
+}
+    </div>
+    <div class="code">
+public class Counter2 {
+    int count = 0;
+    Object lock = new Object();
+
+    void increment() {
+        synchronized (lock) {
+            count++;
+        }
+    }
+}
+    </div>
+
+    <h2 id="volatile">volatile — Visibility Between Threads</h2>
+    <p><b>volatile</b> ensures that all threads read the latest value from main memory instead of using a cached copy.</p>
+    <p>It guarantees visibility of changes but does <b>not</b> make compound operations atomic.</p>
+    <p>Use it for simple stop flags or state checks, not for increments or multi-step updates.</p>
+    <div class="code">
+public class FlagExample {
+    volatile boolean running = true;
+
+    public void stop() { running = false; }
+
+    public void run() {
+        while (running) {
+            System.out.println("Working...");
+        }
+        System.out.println("Stopped.");
+    }
+}
+    </div>
+
+    <h2 id="atomic">AtomicInteger — Thread-safe Counter</h2>
+    <p><b>AtomicInteger</b> provides lock-free, thread-safe updates for counters.</p>
+    <p>Methods like <b>incrementAndGet()</b> run atomically using CPU-level compare-and-swap, so no updates are lost.</p>
+    <p>It is faster than synchronized for simple counters and avoids contention for small shared numeric state.</p>
+    <div class="code">
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class SafeCounter {
+    AtomicInteger count = new AtomicInteger(0);
+    void increment() { count.incrementAndGet(); }
+}
+    </div>
+
+    <h2 id="deadlock">Deadlock</h2>
+    <p>A <b>deadlock</b> happens when two or more threads each hold a lock the other needs. Everyone waits forever, so no progress is made.</p>
+    <p>This usually occurs when locks are acquired in different orders across threads.</p>
+    <ul>
+        <li>Always acquire locks in a consistent order across the codebase</li>
+        <li>Keep synchronized blocks short and avoid nested locks when possible</li>
+        <li>Use timeout-based locks from java.util.concurrent when appropriate</li>
+    </ul>
+    <div class="code">
+Object lockA = new Object();
+Object lockB = new Object();
+
+Thread t1 = new Thread(() -> {
+    synchronized (lockA) {
+        System.out.println("T1 holds A, waiting for B");
+        try { Thread.sleep(100); } catch (InterruptedException e) {}
+        synchronized (lockB) {
+            System.out.println("T1 got both locks");
+        }
+    }
+});
+
+Thread t2 = new Thread(() -> {
+    synchronized (lockB) {
+        System.out.println("T2 holds B, waiting for A");
+        try { Thread.sleep(100); } catch (InterruptedException e) {}
+        synchronized (lockA) {
+            System.out.println("T2 got both locks");
+        }
+    }
+});
+    </div>
+
+    <h2 id="wait-notify">wait() and notify()</h2>
+    <p><b>wait()</b> makes a thread pause and release the lock so other threads can enter the synchronized block.</p>
+    <p><b>notify()</b> wakes one waiting thread; <b>notifyAll()</b> wakes all of them. These calls must happen inside synchronized code.</p>
+    <p>Use a <b>while</b> loop to recheck the condition after waking to avoid spurious wakeups.</p>
+    <div class="code">
+public class SharedBox {
+    private int value;
+    private boolean hasValue = false;
+
+    public synchronized int consume() throws InterruptedException {
+        while (!hasValue) {
+            wait();
+        }
+        hasValue = false;
+        notify();
+        return value;
+    }
+
+    public synchronized void produce(int val) throws InterruptedException {
+        while (hasValue) {
+            wait();
+        }
+        value = val;
+        hasValue = true;
+        System.out.println("Produced: " + val);
+        notify();
+    }
+}
+    </div>
+    <div class="code">
+SharedBox box = new SharedBox();
+
+Thread producer = new Thread(() -> {
+    for (int i = 1; i <= 5; i++) {
+        try { box.produce(i); } catch (InterruptedException e) {}
+    }
+});
+
+Thread consumer = new Thread(() -> {
+    for (int i = 1; i <= 5; i++) {
+        try {
+            int val = box.consume();
+            System.out.println("Consumed: " + val);
+        } catch (InterruptedException e) {}
+    }
+});
+
+producer.start();
+consumer.start();
+    </div>
+
+    <h2 id="executor">ExecutorService — Thread Pool</h2>
+    <p><b>ExecutorService</b> manages a pool of reusable threads and schedules tasks for you.</p>
+    <p>This avoids the overhead of creating a new Thread for each task and gives better control over concurrency.</p>
+    <p>Always call <b>shutdown()</b> to stop accepting new tasks and allow the JVM to exit cleanly.</p>
+    <div class="code">
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+ExecutorService executor = Executors.newFixedThreadPool(3);
+
+for (int i = 1; i <= 6; i++) {
+    int taskId = i;
+    executor.submit(() -> {
+        System.out.println("Task " + taskId + " running on "
+            + Thread.currentThread().getName());
+    });
+}
+
+executor.shutdown();
+    </div>
+    <div class="code">
+Executors.newFixedThreadPool(4);
+Executors.newSingleThreadExecutor();
+Executors.newCachedThreadPool();
+    </div>
+
+    <h2 id="mistakes">Common Mistakes</h2>
+    <p>These errors cause missing threads, wrong results, or programs that never exit.</p>
+    <div class="code">
+t.run();   // wrong
+// t.start();
+
+// t1.start();
+// System.out.println(result);
+// t1.join();
+
+executor.submit(task);
+// executor.shutdown();
+    </div>
+
+    <h2 id="quick-ref">Quick Reference</h2>
+    <p>Use this as a quick checklist of the most common thread APIs and synchronization tools.</p>
+    <div class="code">
+new Thread(runnable).start()
+Thread.sleep(ms)
+thread.join()
+synchronized(obj) { }
+volatile boolean flag
+new AtomicInteger(0)
+Executors.newFixedThreadPool(n)
+executor.submit(runnable)
+executor.shutdown()
+object.wait()
+object.notify()
+    </div>
+
+    <h2 id="practice">Practice Exercises</h2>
+    <p>Practice these to observe scheduling differences, data races, and correct synchronization.</p>
+    <ul>
+        <li>Create two threads (Runnable) — even 2–10, odd 1–9.</li>
+        <li>Countdown from 5 with 500ms sleep; then "Blast off!"</li>
+        <li>Print Thread.currentThread().getName() in run().</li>
+        <li>Create 3 threads with priorities 1, 5, 10 and print them.</li>
+        <li>Use join() and without join(); compare output order.</li>
+        <li>Race condition demo with 2 threads incrementing 500 times.</li>
+        <li>Fix race condition with synchronized.</li>
+        <li>BankAccount with synchronized deposit/withdraw.</li>
+        <li>AtomicInteger counter vs synchronized counter.</li>
+        <li>volatile stop flag demo.</li>
+        <li>Deadlock then fix by lock ordering.</li>
+        <li>Producer-consumer with wait/notify.</li>
+        <li>Thread pool of 4, submit 10 tasks.</li>
+        <li>Shared counter 5 threads * 200, unsync then sync.</li>
+        <li>SingleThreadExecutor runs tasks in order.</li>
+    </ul>
+</div>
+
+    </div>
+
+</body>
+</html>

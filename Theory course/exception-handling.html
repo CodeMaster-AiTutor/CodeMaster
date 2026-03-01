@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exception Handling - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link active">17. Exception Handling</a>
+                <div class="page-subtopics">
+                    <a href="#what-is-exception" class="subtopic-link">What is exception</a>
+                    <a href="#try-catch" class="subtopic-link">try catch</a>
+                    <a href="#multiple-catch" class="subtopic-link">Multiple catch</a>
+                    <a href="#finally" class="subtopic-link">finally</a>
+                    <a href="#built-in-exceptions" class="subtopic-link">Built-in</a>
+                    <a href="#throw" class="subtopic-link">throw</a>
+                    <a href="#throws" class="subtopic-link">throws</a>
+                    <a href="#checked-unchecked" class="subtopic-link">Checked vs unchecked</a>
+                    <a href="#exception-hierarchy" class="subtopic-link">Hierarchy</a>
+                    <a href="#multi-catch" class="subtopic-link">Multi-catch</a>
+                    <a href="#custom-exceptions" class="subtopic-link">Custom exceptions</a>
+                    <a href="#try-with-resources" class="subtopic-link">try-with-resources</a>
+                    <a href="#full-example" class="subtopic-link">Full example</a>
+                    <a href="#common-mistakes" class="subtopic-link">Common mistakes</a>
+                    <a href="#practice-exercises" class="subtopic-link">Practice</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Exception Handling</h1>
+
+    <h2 id="what-is-exception">What is an Exception?</h2>
+    <p>An exception is an unexpected event that disrupts the normal flow of a program. Unlike a syntax error, which prevents the code from compiling, an exception occurs while the program is running (runtime). Common examples include trying to divide by zero, accessing an invalid array index, or trying to read a missing file. If these events are not handled properly, the Java Virtual Machine (JVM) will abruptly terminate the program and print a stack trace. Exception handling allows you to catch these errors and respond gracefully instead of crashing.</p>
+    <div class="code">
+int[] arr = {1, 2, 3};
+System.out.println(arr[5]);
+</div>
+    <p>In the code above, accessing index 5 of a 3-element array causes an `ArrayIndexOutOfBoundsException`, crashing the program immediately.</p>
+
+    <h2 id="try-catch">try-catch</h2>
+    <p>The `try-catch` block is the most basic mechanism for handling exceptions. You place the risky code (code that might throw an exception) inside the `try` block. If an exception occurs, the flow of control jumps immediately to the `catch` block, skipping the rest of the `try` block. The `catch` block contains the code to handle the error, such as logging a message or providing a fallback value. This prevents the program from terminating unexpectedly.</p>
+    <div class="code">
+try {
+    int result = 10 / 0;
+    System.out.println(result);
+} catch (ArithmeticException e) {
+    System.out.println("Error: " + e.getMessage());
+}
+System.out.println("Program continues...");
+</div>
+    <p>Because the exception was caught, the final print statement executes normally, proving the program did not crash.</p>
+
+    <h2 id="multiple-catch">Multiple catch Blocks</h2>
+    <p>A single piece of code can throw different types of exceptions, and you might want to handle each one differently. You can chain multiple `catch` blocks after a single `try` block to handle specific exception types. Java checks the catch blocks in order, from top to bottom, and executes the first one that matches the exception type. It is important to order them from most specific to most general (e.g., catch `ArithmeticException` before `Exception`) to avoid unreachable code errors.</p>
+    <div class="code">
+public class Main {
+    public static void main(String[] args) {
+        String[] names = {"Alice", null, "Bob"};
+        int[] nums = {10, 20, 30};
+
+        for (int i = 0; i <= 4; i++) {
+            try {
+                String upper = names[i].toUpperCase();
+                int num = nums[i];
+                System.out.println(upper + " — " + num);
+            } catch (NullPointerException e) {
+                System.out.println("Null found at index " + i);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                System.out.println("Index " + i + " out of bounds");
+            }
+        }
+    }
+}
+</div>
+    <p>In this loop, one iteration triggers a `NullPointerException` and another triggers an `ArrayIndexOutOfBoundsException`, but the loop continues processing the remaining items.</p>
+
+    <h2 id="finally">finally — Always Runs</h2>
+    <p>The `finally` block is optional and follows the `try` and `catch` blocks. The code inside `finally` is guaranteed to execute whether an exception occurred or not, and whether it was caught or not. This makes it the perfect place for cleanup code, such as closing files, releasing database connections, or unlocking resources. Even if the `try` block has a `return` statement, the `finally` block will run before the method actually returns.</p>
+    <div class="code">
+try {
+    int result = 10 / 2;
+    System.out.println("Result: " + result);
+} catch (ArithmeticException e) {
+    System.out.println("Math error.");
+} finally {
+    System.out.println("This always runs.");
+}
+</div>
+
+    <h2 id="built-in-exceptions">Common Built-in Exceptions</h2>
+    <p>Java provides a rich hierarchy of built-in exceptions to cover most common error scenarios. Understanding these helps you identify bugs quickly. `ArithmeticException` usually involves math errors like division by zero. `NullPointerException` happens when you try to use a reference that points to nothing. `ArrayIndexOutOfBoundsException` means you went past the end of an array. `ClassCastException` occurs when you force an object into an incompatible type.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <table>
+        <thead>
+            <tr>
+                <th>Exception</th>
+                <th>Cause</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>ArithmeticException</td>
+                <td>Divide by zero</td>
+            </tr>
+            <tr>
+                <td>NullPointerException</td>
+                <td>Using null reference</td>
+            </tr>
+            <tr>
+                <td>ArrayIndexOutOfBoundsException</td>
+                <td>Invalid array index</td>
+            </tr>
+            <tr>
+                <td>NumberFormatException</td>
+                <td>Integer.parseInt("abc")</td>
+            </tr>
+            <tr>
+                <td>ClassCastException</td>
+                <td>Invalid type cast</td>
+            </tr>
+            <tr>
+                <td>StackOverflowError</td>
+                <td>Infinite recursion</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h2 id="throw">throw — Manually Throwing an Exception</h2>
+    <p>You can use the `throw` keyword to explicitly trigger an exception in your code. This is useful for enforcing business logic rules, such as preventing a bank withdrawal if funds are insufficient or rejecting a negative age input. When you throw an exception, you typically create a new instance of an exception class and pass a descriptive message. This stops the current method execution and signals the error to the calling code.</p>
+    <div class="code">
+public class Student {
+    private String name;
+    private int age;
+
+    public void setAge(int age) {
+        if (age < 1 || age > 120) {
+            throw new IllegalArgumentException("Invalid age: " + age);
+        }
+        this.age = age;
+    }
+
+    public void setName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be empty.");
+        }
+        this.name = name;
+    }
+}
+</div>
+
+    <h2 id="throws">throws — Declaring Exceptions</h2>
+    <p>The `throws` keyword is used in a method signature to indicate that the method might throw one or more exceptions. This warns any code calling this method that it needs to be prepared to handle those exceptions. For "checked" exceptions (like `IOException`), using `throws` is mandatory if you don't handle the exception locally. It effectively passes the responsibility of handling the error up the call stack.</p>
+    <div class="code">
+public int divide(int a, int b) throws ArithmeticException {
+    if (b == 0) throw new ArithmeticException("Cannot divide by zero");
+    return a / b;
+}
+</div>
+
+    <h2 id="checked-unchecked">Checked vs Unchecked Exceptions</h2>
+    <p>Java distinguishes between two main types of exceptions: checked and unchecked. <b>Unchecked exceptions</b> (subclasses of `RuntimeException`) usually represent programming errors (like bugs in logic) and the compiler does not force you to handle them. <b>Checked exceptions</b> (subclasses of `Exception` but not `RuntimeException`) represent external failure conditions (like missing files or network issues) and the compiler <i>requires</i> you to handle them with try-catch or declare them with throws.</p>
+    <div class="code">
+int[] arr = new int[3];
+arr[5] = 10;
+
+public void readFile(String path) throws IOException {
+    FileReader fr = new FileReader(path);
+}
+</div>
+
+    <h2 id="exception-hierarchy">Exception Hierarchy</h2>
+    <p>All exceptions in Java inherit from the `Throwable` class. The two main branches are `Error` and `Exception`. `Error` represents serious system-level problems (like `OutOfMemoryError`) that applications should not try to catch. `Exception` is the parent of all checked and unchecked exceptions that your program might want to handle. `RuntimeException` is a special subclass of `Exception` for unchecked exceptions.</p>
+    <div class="code">
+Throwable
+├── Error
+│   └── StackOverflowError
+│   └── OutOfMemoryError
+└── Exception
+    ├── IOException
+    ├── SQLException
+    └── RuntimeException
+        ├── NullPointerException
+        ├── ArithmeticException
+        ├── IllegalArgumentException
+        └── ArrayIndexOutOfBoundsException
+</div>
+
+    <h2 id="multi-catch">Multi-catch (Java 7+)</h2>
+    <p>If you have several exception types that require the exact same handling logic, you can combine them into a single `catch` block using the pipe (`|`) symbol. This feature, introduced in Java 7, reduces code duplication and makes the code cleaner. The exception parameter in a multi-catch block is implicitly final, meaning you cannot assign a new value to it. It is a great way to handle multiple related errors (like different types of database exceptions) in one place.</p>
+    <div class="code">
+try {
+    String s = null;
+    int[] arr = new int[3];
+    s.length();
+    arr[10] = 1;
+} catch (NullPointerException | ArrayIndexOutOfBoundsException e) {
+    System.out.println("Caught: " + e.getMessage());
+}
+</div>
+
+    <h2 id="custom-exceptions">Custom Exceptions</h2>
+    <p>Sometimes the built-in Java exceptions don't accurately describe the error in your specific domain. In such cases, you can create your own custom exceptions by extending the `Exception` (for checked) or `RuntimeException` (for unchecked) class. This allows you to give your errors meaningful names like `InsufficientFundsException` or `InvalidUserException`. Custom exceptions can also store additional data, such as the amount of money that was missing.</p>
+    <div class="code">
+public class InsufficientFundsException extends RuntimeException {
+    private double amount;
+
+    public InsufficientFundsException(double amount) {
+        super("Insufficient funds. Needed: $" + amount);
+        this.amount = amount;
+    }
+
+    public double getAmount() { return amount; }
+}
+
+public class InvalidAgeException extends Exception {
+    public InvalidAgeException(int age) {
+        super("Invalid age: " + age + ". Must be between 1 and 120.");
+    }
+}
+</div>
+
+    <h2 id="try-with-resources">try-with-resources</h2>
+    <p>The `try-with-resources` statement allows you to declare resources (like streams, sockets, or database connections) that should be closed automatically. Any object that implements `AutoCloseable` can be used here. Java ensures that the `close()` method is called on each resource at the end of the block, even if an exception occurs. This eliminates the need for verbose `finally` blocks just to close resources and prevents resource leaks.</p>
+    <div class="code">
+try (FileReader fr = new FileReader("data.txt");
+     BufferedReader br = new BufferedReader(fr)) {
+    String line;
+    while ((line = br.readLine()) != null) {
+        System.out.println(line);
+    }
+} catch (IOException e) {
+    System.out.println("File error: " + e.getMessage());
+}
+</div>
+
+    <h2 id="full-example">Full Example: Student Validation System</h2>
+    <p>This comprehensive example demonstrates how to create a custom checked exception and use it for data validation. The `validate` method checks inputs and throws `InvalidStudentException` with specific messages if constraints are violated. The `main` method processes a list of raw data, catching and logging any validation errors while allowing the loop to continue for valid records. This is a common pattern in batch processing applications.</p>
+    <div class="code">
+public class InvalidStudentException extends Exception {
+    public InvalidStudentException(String message) { super(message); }
+}
+
+public class StudentValidator {
+    public static void validate(String name, int age, double marks)
+            throws InvalidStudentException {
+        if (name == null || name.trim().isEmpty())
+            throw new InvalidStudentException("Name cannot be empty.");
+        if (age < 1 || age > 120)
+            throw new InvalidStudentException("Invalid age: " + age);
+        if (marks < 0 || marks > 100)
+            throw new InvalidStudentException("Marks out of range: " + marks);
+        System.out.println("Valid student: " + name);
+    }
+}
+</div>
+
+    <h2 id="common-mistakes">Common Mistakes</h2>
+    <p>A very common mistake is catching the generic `Exception` class, which can hide bugs by catching everything, including unexpected runtime errors. Another bad practice is leaving a catch block empty ("swallowing" the exception), which makes debugging impossible since you never see the error. Using exceptions for normal control flow (like loop termination) is also discouraged because it is slow and confusing.</p>
+    <div class="code">
+catch (Exception e) { }
+catch (ArithmeticException e) { }
+
+catch (Exception e) { }
+catch (Exception e) { System.out.println(e.getMessage()); }
+</div>
+
+    <h2 id="practice-exercises">Practice Exercises</h2>
+    <p>These exercises will help you become comfortable with throwing, catching, and defining exceptions. Start by writing simple try-catch blocks for arithmetic and array operations. Then move on to creating your own custom exceptions to enforce rules in a small application. Finally, practice using `try-with-resources` to manage file I/O safely and cleanly.</p>
+    <ul>
+        <li>Handle divide by zero with try-catch.</li>
+        <li>Use try-catch for null values in an array.</li>
+        <li>Catch NumberFormatException for invalid input.</li>
+        <li>Use multiple catch blocks for different exceptions.</li>
+        <li>Add a finally block for cleanup.</li>
+        <li>Use throw and throws in a validation method.</li>
+        <li>Show difference between checked and unchecked exceptions.</li>
+        <li>Use multi-catch for two exceptions.</li>
+        <li>Create and use a custom exception.</li>
+        <li>Use try-with-resources to read a file.</li>
+    </ul>
+    <p>Next topic: File Handling — reading and writing files safely.</p>
+</div>
+
+    </div>
+
+</body>
+</html>

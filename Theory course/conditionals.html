@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conditionals - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link active">5. Conditionals</a>
+                <div class="page-subtopics">
+                    <a href="#if-statement" class="subtopic-link">if statement</a>
+                    <a href="#if-else" class="subtopic-link">if-else</a>
+                    <a href="#nested-if" class="subtopic-link">nested if</a>
+                    <a href="#switch-statement" class="subtopic-link">switch statement</a>
+                    <a href="#real-life-decision-examples" class="subtopic-link">real life decision examples</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Conditionals</h1>
+
+    <h2 id="why-conditionals-exist">Why Conditionals Exist</h2>
+    <p>A computer is extremely fast and extremely literal. If you never tell it when to do something, it will try to do everything. Programs must be able to choose different paths depending on situations. That ability is called <b>control flow</b>.</p>
+    <p>Conditionals are the decision-making part of control flow. They decide which block of code should run and which should be skipped.</p>
+    <p>Without conditionals, every program would follow one fixed path, making it useless for real-world problems.</p>
+    <ul>
+        <li>Imagine an ATM without conditions: Enter wrong PIN → money still comes out. Disaster.</li>
+        <li>Conditionals allow a program to ask: <b>Is this situation true?</b> If yes → do something; if no → do something else.</li>
+    </ul>
+
+    <h2 id="boolean-logic">Boolean Logic (The Brain Behind Conditionals)</h2>
+    <p>Every decision becomes a <b>boolean</b> value: <b>true</b> or <b>false</b>. Computers never think “maybe”.</p>
+    <p>Relational operators (<, >, ==, !=, <=, >=) produce boolean results.</p>
+    <p>Logical operators (&&, ||, !) combine boolean values to build complex conditions.</p>
+    <div class="code">
+5 > 3   // true
+5 < 3   // false
+int age = 18;
+age >= 18  // true or false
+    </div>
+    <p>Conditionals always depend on expressions that return boolean.</p>
+
+    <h2 id="if-statement">if statement</h2>
+    <h3>Concept</h3>
+    <p>The <b>if</b> statement runs code only when the condition is true.</p>
+    <p>If the condition is false, Java skips the block completely and continues to the next line.</p>
+    <p>Use a single if for one decision without an alternate path.</p>
+    <h3>Syntax</h3>
+    <div class="code">
+if (condition) {
+    // statements
+}
+    </div>
+    <h3>Execution Flow</h3>
+    <ul>
+        <li>Evaluate condition</li>
+        <li>If true → block executes</li>
+        <li>If false → block is skipped</li>
+    </ul>
+    <h3>Example 1</h3>
+    <div class="code">
+int age = 20;
+if (age >= 18) {
+    System.out.println("You can vote");
+}
+// Output: You can vote
+    </div>
+    <h3>Example 2</h3>
+    <div class="code">
+int age = 15;
+if (age >= 18) {
+    System.out.println("You can vote");
+}
+// Output: (no output) because condition is false
+    </div>
+    <h3>Important Rule</h3>
+    <p>The parentheses must contain a boolean expression.</p>
+    <div class="code">
+// Wrong
+// if (5)  // error
+
+// Correct
+if (5 > 2) {
+}
+    </div>
+    <div class="try">Exam Point: Java is strict; conditions must evaluate to boolean.</div>
+
+    <h2 id="if-else">if – else</h2>
+    <h3>Concept</h3>
+    <p>If the condition is false, we need an alternative path.</p>
+    <p>This guarantees exactly one block runs, either the true block or the false block.</p>
+    <p>Use if‑else when there are only two outcomes.</p>
+    <h3>Syntax</h3>
+    <div class="code">
+if (condition) {
+    // true block
+} else {
+    // false block
+}
+    </div>
+    <h3>Example</h3>
+    <div class="code">
+int marks = 40;
+if (marks >= 40) {
+    System.out.println("Pass");
+} else {
+    System.out.println("Fail");
+}
+    </div>
+
+    <h2 id="if-else-if">if – else if – else Ladder</h2>
+    <p>Used when multiple possibilities exist. Java checks top-to-bottom and stops at the first true condition.</p>
+    <p>Only one block runs in a ladder, even if multiple conditions are true.</p>
+    <p>Put the most specific or highest-value conditions first to avoid incorrect matches.</p>
+    <div class="code">
+int marks = 82;
+if (marks >= 90) {
+    System.out.println("Grade A");
+} else if (marks >= 75) {
+    System.out.println("Grade B");
+} else if (marks >= 60) {
+    System.out.println("Grade C");
+} else if (marks >= 40) {
+    System.out.println("Grade D");
+} else {
+    System.out.println("Fail");
+}
+// Output: Grade B  (because 82 >= 75)
+    </div>
+    <h3>Important Observation</h3>
+    <p>Order matters. Wrong ordering can make later conditions unreachable.</p>
+    <div class="code">
+// Wrong
+if (marks >= 40) {
+    System.out.println("Pass");
+} else if (marks >= 90) {
+    System.out.println("Grade A");
+}
+// "Grade A" will never execute because 90 is already >= 40
+    </div>
+
+    <h2 id="nested-if">Nested if</h2>
+    <p>Decision inside another decision. Use when the second test only matters after the first is true.</p>
+    <p>This mirrors real logic: you check step 1, then check step 2 only if step 1 passes.</p>
+    <p>Nested if makes the flow explicit and easier to debug for beginners.</p>
+    <div class="code">
+String username = "admin";
+String password = "1234";
+
+if (username.equals("admin")) {
+    if (password.equals("1234")) {
+        System.out.println("Login successful");
+    } else {
+        System.out.println("Wrong password");
+    }
+} else {
+    System.out.println("User not found");
+}
+    </div>
+    <p>You can also combine conditions:</p>
+    <div class="code">
+if (username.equals("admin") && password.equals("1234")) {
+    System.out.println("Login successful");
+}
+    </div>
+    <div class="try">Tip: Nested if may be clearer for beginners and debugging.</div>
+
+    <h2 id="switch-statement">switch statement</h2>
+    <h3>Why switch Exists</h3>
+    <p>If you have many else-if checks for one variable, <b>switch</b> is cleaner and faster to read.</p>
+    <p>It is best when you compare one value against fixed constants such as menu choices or days of the week.</p>
+    <p>Switch compares one expression and jumps directly to the matching case.</p>
+    <h3>Syntax</h3>
+    <div class="code">
+switch (variable) {
+    case value1:
+        // statements
+        break;
+    case value2:
+        // statements
+        break;
+    default:
+        // statements
+}
+    </div>
+    <h3>Example: Menu System</h3>
+    <div class="code">
+int choice = 2;
+switch (choice) {
+    case 1:
+        System.out.println("Deposit");
+        break;
+    case 2:
+        System.out.println("Withdraw");
+        break;
+    case 3:
+        System.out.println("Balance");
+        break;
+    default:
+        System.out.println("Invalid option");
+}
+// Output: Withdraw
+    </div>
+    <h3>The break Statement (Extremely Important)</h3>
+    <p>Without <b>break</b>, Java continues executing next cases (fall-through).</p>
+    <p>Fall-through can be useful in rare cases but usually causes bugs when you forget break.</p>
+    <p>Use break to stop execution at the end of a matched case.</p>
+    <div class="code">
+int day = 1;
+switch (day) {
+    case 1:
+        System.out.println("Monday");
+    case 2:
+        System.out.println("Tuesday");
+    case 3:
+        System.out.println("Wednesday");
+}
+// Output:
+// Monday
+// Tuesday
+// Wednesday
+    </div>
+    <p><b>default</b> runs when no case matches (like else).</p>
+
+    <h2 id="when-to-use-what">When to Use What</h2>
+    <p>Choose the structure that matches the type of decision you need to make.</p>
+    <ul>
+        <li>Two outcomes → <b>if-else</b></li>
+        <li>Range checking → <b>if – else if – else</b></li>
+        <li>Nested decisions → <b>nested if</b></li>
+        <li>Fixed menu choices → <b>switch</b></li>
+    </ul>
+
+    <h2 id="real-life-decision-examples">Real Life Decision Examples</h2>
+    <p>ATM Withdrawal:</p>
+    <p>This is a layered decision, so nested if is a natural fit.</p>
+    <ul>
+        <li>Card valid?</li>
+        <li>PIN correct?</li>
+        <li>Balance sufficient?</li>
+    </ul>
+    <p>Multiple layered decisions → use nested if or combine with logical operators.</p>
+    <div class="try">Exam Point: Write a condition for “age >= 18 and has ID”.</div>
+</div>
+
+    </div>
+
+</body>
+</html>

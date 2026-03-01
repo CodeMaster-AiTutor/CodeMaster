@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generics - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link active">21. Generics</a>
+                <div class="page-subtopics">
+                    <a href="#what" class="subtopic-link">What are Generics</a>
+                    <a href="#problem" class="subtopic-link">Problem Solved</a>
+                    <a href="#conventions" class="subtopic-link">Type Conventions</a>
+                    <a href="#generic-classes" class="subtopic-link">Generic Classes</a>
+                    <a href="#two-params" class="subtopic-link">Two Type Parameters</a>
+                    <a href="#diamond" class="subtopic-link">Diamond Operator</a>
+                    <a href="#generic-methods" class="subtopic-link">Generic Methods</a>
+                    <a href="#bounded" class="subtopic-link">Bounded Types</a>
+                    <a href="#multiple-bounds" class="subtopic-link">Multiple Bounds</a>
+                    <a href="#wildcards" class="subtopic-link">Wildcards</a>
+                    <a href="#generic-interfaces" class="subtopic-link">Generic Interfaces</a>
+                    <a href="#full-example" class="subtopic-link">Full Example</a>
+                    <a href="#mistakes" class="subtopic-link">Common Mistakes</a>
+                    <a href="#best-practices" class="subtopic-link">Best Practices</a>
+                    <a href="#quick-ref" class="subtopic-link">Quick Reference</a>
+                    <a href="#practice" class="subtopic-link">Practice</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Generics</h1>
+
+    <h2 id="what">What are Generics?</h2>
+    <p>Generics let you write <b>classes, interfaces, and methods that work with any type</b>, while the compiler checks type correctness at compile time.</p>
+    <p>This means you can reuse the same code for different data types without losing type safety.</p>
+    <p>Generics reduce casting and runtime errors by moving type checks to compile time.</p>
+    <div class="code">
+ArrayList<String> names = new ArrayList<>();
+HashMap<String, Integer> scores = new HashMap<>();
+    </div>
+
+    <h2 id="problem">The Problem Generics Solve</h2>
+    <p>Before Java 5, developers used <b>Object</b> for any type, which allowed unsafe casts and runtime crashes.</p>
+    <p>The compiler could not stop you from putting the wrong type into a container.</p>
+    <p>Generics fix this by locking the type at compile time.</p>
+    <div class="code">
+public class Box {
+    private Object value;
+    public void set(Object value) { this.value = value; }
+    public Object get() { return value; }
+}
+
+Box box = new Box();
+box.set("Hello");
+String s = (String) box.get();
+Integer n = (Integer) box.get();
+    </div>
+    <p>With generics, the compiler blocks wrong types.</p>
+    <div class="code">
+public class Box<T> {
+    private T value;
+    public void set(T value) { this.value = value; }
+    public T get() { return value; }
+}
+
+Box<String> box2 = new Box<>();
+box2.set("Hello");
+String s2 = box2.get();
+    </div>
+
+    <h2 id="conventions">Type Parameter Conventions</h2>
+    <p>Single-letter type names are a convention that makes generic code short and readable.</p>
+    <p>Use meaningful letters that indicate purpose (key, value, element).</p>
+    <div class="code">
+T → Type (general)
+E → Element (collections)
+K → Key (maps)
+V → Value (maps)
+    </div>
+
+    <h2 id="generic-classes">Generic Classes</h2>
+    <p>A generic class defines one or more type parameters that are fixed when you create an object.</p>
+    <p>This ensures every field and method in that object uses the same type consistently.</p>
+    <div class="code">
+public class Box<T> {
+    private T value;
+
+    public Box(T value) { this.value = value; }
+    public void set(T value) { this.value = value; }
+    public T get() { return value; }
+
+    @Override
+    public String toString() { return "Box[" + value + "]"; }
+}
+    </div>
+    <div class="code">
+Box<String>  strBox = new Box<>("Hello");
+Box<Integer> intBox = new Box<>(42);
+Box<Double>  dblBox = new Box<>(3.14);
+
+System.out.println(strBox.get());
+System.out.println(intBox.get());
+System.out.println(dblBox.get());
+    </div>
+
+    <h2 id="two-params">Two Type Parameters</h2>
+    <p>Multiple type parameters let you model pairs, entries, or mappings with different types.</p>
+    <p>This pattern is common in maps and key-value structures.</p>
+    <div class="code">
+public class Pair<K, V> {
+    private K key;
+    private V value;
+
+    public Pair(K key, V value) { this.key = key; this.value = value; }
+    public K getKey()   { return key; }
+    public V getValue() { return value; }
+
+    @Override
+    public String toString() { return "(" + key + ", " + value + ")"; }
+}
+    </div>
+    <div class="code">
+Pair<String, Integer> student = new Pair<>("Alice", 92);
+System.out.println(student);
+
+Pair<String, String> capital = new Pair<>("India", "New Delhi");
+System.out.println(capital);
+    </div>
+
+    <h2 id="diamond">Diamond Operator and Primitives</h2>
+    <p>The diamond operator <b>&lt;&gt;</b> lets the compiler infer type parameters to reduce repetition.</p>
+    <p>Generics do not work with primitives, so use wrapper types like Integer, Double, and Boolean.</p>
+    <div class="code">
+Box<String> box3 = new Box<>("Hello");
+
+Box<Integer> box4 = new Box<>(5);
+int val = box4.get();
+    </div>
+    <div class="try">Exam Point: Generics work with wrapper classes, not primitives.</div>
+
+    <h2 id="generic-methods">Generic Methods</h2>
+    <p>A generic method declares its own type parameters, even inside a non-generic class.</p>
+    <p>This is useful for utility logic like printing, swapping, or searching arrays of any type.</p>
+    <div class="code">
+public class Utils {
+
+    public static <T> void printArray(T[] array) {
+        System.out.print("[");
+        for (int i = 0; i < array.length; i++) {
+            System.out.print(array[i]);
+            if (i < array.length - 1) System.out.print(", ");
+        }
+        System.out.println("]");
+    }
+
+    public static <T> T getFirst(T[] array) {
+        return (array == null || array.length == 0) ? null : array[0];
+    }
+
+    public static <T> void swap(T[] arr, int i, int j) {
+        T temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+}
+
+Integer[] nums  = {1, 2, 3, 4, 5};
+String[]  names2 = {"Alice", "Bob", "Charlie"};
+
+Utils.printArray(nums);
+Utils.printArray(names2);
+System.out.println(Utils.getFirst(names2));
+Utils.swap(nums, 0, 4);
+Utils.printArray(nums);
+    </div>
+
+    <h2 id="bounded">Bounded Type Parameters</h2>
+    <p>Bounds restrict which types are allowed, so you can safely call methods on the type.</p>
+    <p>For example, <b>extends Number</b> guarantees numeric methods like doubleValue().</p>
+    <div class="code">
+public static <T extends Number> double sum(T a, T b) {
+    return a.doubleValue() + b.doubleValue();
+}
+
+public static <T extends Comparable<T>> T findMax(T[] arr) {
+    T max = arr[0];
+    for (T item : arr)
+        if (item.compareTo(max) > 0) max = item;
+    return max;
+}
+
+System.out.println(sum(5, 10));
+System.out.println(sum(3.5, 2.5));
+
+Integer[] nums2  = {3, 7, 1, 9};
+String[]  words = {"Charlie", "Alice", "Bob"};
+System.out.println(findMax(nums2));
+System.out.println(findMax(words));
+    </div>
+
+    <h2 id="multiple-bounds">Multiple Bounds</h2>
+    <div class="code">
+public static <T extends Number & Comparable<T>> T clamp(T val, T min, T max) {
+    if (val.compareTo(min) < 0) return min;
+    if (val.compareTo(max) > 0) return max;
+    return val;
+}
+
+System.out.println(clamp(5,  1, 10));
+System.out.println(clamp(-3, 1, 10));
+System.out.println(clamp(15, 1, 10));
+    </div>
+
+    <h2 id="wildcards">Wildcards</h2>
+    <p>Wildcards allow flexibility when you do not know the exact type parameter.</p>
+    <p><b>? extends T</b> is a producer, <b>? super T</b> is a consumer, and <b>?</b> is unknown.</p>
+    <div class="code">
+public static double sumList(ArrayList<? extends Number> list) {
+    double total = 0;
+    for (Number n : list) total += n.doubleValue();
+    return total;
+}
+
+ArrayList<Integer> ints = new ArrayList<>(Arrays.asList(1, 2, 3));
+ArrayList<Double> dbls  = new ArrayList<>(Arrays.asList(1.5, 2.5));
+
+System.out.println(sumList(ints));
+System.out.println(sumList(dbls));
+    </div>
+    <div class="code">
+public static void fillNumbers(ArrayList<? super Integer> list) {
+    list.add(10); list.add(20); list.add(30);
+}
+
+public static void printList(ArrayList<?> list) {
+    for (Object item : list) System.out.print(item + " ");
+    System.out.println();
+}
+    </div>
+    <div class="code">
+PECS → Producer Extends, Consumer Super
+<?>               → reading only
+<? extends T>     → reading
+<? super T>       → writing
+    </div>
+
+    <h2 id="generic-interfaces">Generic Interfaces</h2>
+    <div class="code">
+public interface Repository<T, ID> {
+    void save(T item);
+    T findById(ID id);
+    void delete(ID id);
+    int count();
+}
+    </div>
+    <div class="code">
+public class StudentRepository implements Repository<Student, Integer> {
+    private HashMap<Integer, Student> store = new HashMap<>();
+    private int nextId = 1;
+
+    @Override
+    public void save(Student s) {
+        store.put(nextId++, s);
+        System.out.println("Saved: " + s.getName());
+    }
+
+    @Override
+    public Student findById(Integer id) {
+        return store.getOrDefault(id, null);
+    }
+
+    @Override
+    public void delete(Integer id) {
+        store.remove(id);
+        System.out.println("Deleted id: " + id);
+    }
+
+    @Override
+    public int count() { return store.size(); }
+}
+    </div>
+    <div class="code">
+StudentRepository repo = new StudentRepository();
+repo.save(new Student("Alice", 20));
+repo.save(new Student("Bob", 22));
+
+System.out.println("Total: " + repo.count());
+System.out.println(repo.findById(1));
+repo.delete(1);
+System.out.println("Total: " + repo.count());
+    </div>
+
+    <h2 id="full-example">Full Example: Generic Registry</h2>
+    <div class="code">
+public class Registry<T extends Comparable<T>> {
+    private ArrayList<T> items = new ArrayList<>();
+    private String label;
+
+    public Registry(String label) { this.label = label; }
+
+    public void add(T item)    { items.add(item); }
+    public int  size()         { return items.size(); }
+    public boolean has(T item) { return items.contains(item); }
+
+    public T getMin() {
+        T min = items.get(0);
+        for (T item : items) if (item.compareTo(min) < 0) min = item;
+        return min;
+    }
+
+    public T getMax() {
+        T max = items.get(0);
+        for (T item : items) if (item.compareTo(max) > 0) max = item;
+        return max;
+    }
+
+    public ArrayList<T> sorted() {
+        ArrayList<T> copy = new ArrayList<>(items);
+        Collections.sort(copy);
+        return copy;
+    }
+
+    public void print() {
+        System.out.println("--- " + label + " ---");
+        items.forEach(item -> System.out.println("  " + item));
+    }
+}
+    </div>
+    <div class="code">
+Registry<String> names3 = new Registry<>("Students");
+names3.add("Charlie"); names3.add("Alice"); names3.add("Bob");
+
+names3.print();
+System.out.println("Min: " + names3.getMin());
+System.out.println("Max: " + names3.getMax());
+System.out.println(names3.sorted());
+
+Registry<Integer> scores2 = new Registry<>("Scores");
+scores2.add(78); scores2.add(95); scores2.add(62);
+
+System.out.println("Min: " + scores2.getMin());
+System.out.println("Max: " + scores2.getMax());
+System.out.println(scores2.sorted());
+    </div>
+
+    <h2 id="mistakes">Common Mistakes</h2>
+    <p>These errors happen because of type erasure and restrictions on generics in Java.</p>
+    <p>You cannot create generic arrays or instantiate type parameters directly.</p>
+    <div class="code">
+ArrayList list = new ArrayList();
+ArrayList<String> list2 = new ArrayList<>();
+
+T obj = new T();
+
+T[] arr = new T[10];
+Object[] arr2 = new Object[10];
+
+if (x instanceof Box<String>) { }
+if (x instanceof Box<?>) { }
+    </div>
+
+    <h2 id="best-practices">Best Practices</h2>
+    <div class="code">
+List<String> list3 = new ArrayList<>();
+Map<String, Integer> map = new HashMap<>();
+
+void process(ArrayList<? extends Number> list) { }
+
+Box<String> box5 = new Box<>();
+    </div>
+
+    <h2 id="quick-ref">Quick Reference</h2>
+    <div class="code">
+class Box<T> { }
+class Pair<K, V> { }
+static <T> void print(T item) { }
+<T extends Number> double sum(T a, T b)
+<T extends A & B> ...
+ArrayList<?>
+ArrayList<? extends Number>
+ArrayList<? super Integer>
+    </div>
+
+    <h2 id="practice">Practice Exercises</h2>
+    <ul>
+        <li>Create Container&lt;T&gt; with get(), set(), toString(); test with String, Integer, Boolean.</li>
+        <li>Create Triple&lt;A, B, C&gt; holding 3 values; add getters and toString().</li>
+        <li>Why does Box&lt;int&gt; fail? What do you use instead?</li>
+        <li>Make Pair&lt;String, ArrayList&lt;Integer&gt;&gt; for student name + marks.</li>
+        <li>Write &lt;T&gt; int countOccurrences(T[] arr, T target).</li>
+        <li>Write &lt;T extends Comparable&lt;T&gt;&gt; T findMin(T[] arr).</li>
+        <li>Write printList(ArrayList&lt;?&gt; list).</li>
+        <li>Write &lt;T extends Number&gt; double average(ArrayList&lt;T&gt; list).</li>
+        <li>Difference between ArrayList&lt;?&gt; and ArrayList&lt;Object&gt;?</li>
+        <li>Create interface Transformer&lt;T, R&gt; and StringToLength.</li>
+        <li>Build SortedList&lt;T extends Comparable&lt;T&gt;&gt; that stays sorted.</li>
+        <li>Write &lt;T&gt; ArrayList&lt;T&gt; removeDuplicates(ArrayList&lt;T&gt; list).</li>
+        <li>Create NumberBox&lt;T extends Number&gt; with helpers.</li>
+        <li>Build Stack&lt;T&gt; with push/pop/peek/isEmpty.</li>
+    </ul>
+</div>
+
+    </div>
+
+</body>
+</html>

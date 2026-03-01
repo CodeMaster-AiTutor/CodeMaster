@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encapsulation - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link active">12. Encapsulation</a>
+                <div class="page-subtopics">
+                    <a href="#what-is-encapsulation" class="subtopic-link">What is encapsulation</a>
+                    <a href="#without-encapsulation" class="subtopic-link">Without encapsulation</a>
+                    <a href="#with-encapsulation" class="subtopic-link">With encapsulation</a>
+                    <a href="#getter-setter-names" class="subtopic-link">Getter/setter names</a>
+                    <a href="#read-only-fields" class="subtopic-link">Read-only fields</a>
+                    <a href="#encapsulation-constructors" class="subtopic-link">Constructors</a>
+                    <a href="#access-modifiers" class="subtopic-link">Access modifiers</a>
+                    <a href="#private-helpers" class="subtopic-link">Private helpers</a>
+                    <a href="#full-example" class="subtopic-link">Full example</a>
+                    <a href="#benefits" class="subtopic-link">Benefits</a>
+                    <a href="#common-mistakes" class="subtopic-link">Common mistakes</a>
+                    <a href="#practice-exercises" class="subtopic-link">Practice</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Encapsulation</h1>
+
+    <h2 id="what-is-encapsulation">What is Encapsulation?</h2>
+    <p>Encapsulation is one of the four fundamental concepts of Object-Oriented Programming (OOP). It refers to the bundling of data (fields) and methods that operate on that data into a single unit, called a class. More importantly, it restricts direct access to some of an object's components, which is a means of preventing accidental interference and misuse of the methods and data. This controlled access is typically achieved by making fields private and exposing them only through public methods known as getters and setters.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <ul>
+        <li>Make fields <b>private</b> to hide them from the outside world.</li>
+        <li>Provide <b>public</b> getters and setters to control how data is accessed and modified.</li>
+    </ul>
+    </div>
+
+    <h2 id="without-encapsulation">The Problem Without Encapsulation</h2>
+    <p>When fields are public, any part of your program can change them to any value, valid or not. For example, a student's age could be set to a negative number, or their name could be set to an empty string. This lack of control leads to inconsistent data and bugs that are hard to track down. Without encapsulation, the class cannot guarantee the integrity of its own state.</p>
+    <div class="code">
+public class Student {
+    public String name;
+    public int age;
+    public double marks;
+}
+
+Student s = new Student();
+s.age = -5;
+s.marks = 150;
+s.name = "";
+</div>
+    <p>In the example above, the `Student` object is left in a corrupted state because invalid data was assigned directly. There is no protection mechanism to stop this.</p>
+
+    <h2 id="with-encapsulation">With Encapsulation</h2>
+    <p>By making fields private and using public setter methods, the class takes control over its own data. The setter method acts as a gatekeeper, checking if the new value is valid before assigning it to the field. If the value is invalid, the setter can reject it, throw an error, or assign a default value. This ensures that the object always remains in a valid and consistent state.</p>
+    <div class="code">
+public class Student {
+    private String name;
+    private int age;
+    private double marks;
+
+    public String getName() { return name; }
+    public int getAge() { return age; }
+    public double getMarks() { return marks; }
+
+    public void setName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            System.out.println("Name cannot be empty.");
+            return;
+        }
+        this.name = name;
+    }
+
+    public void setAge(int age) {
+        if (age < 1 || age > 120) {
+            System.out.println("Invalid age: " + age);
+            return;
+        }
+        this.age = age;
+    }
+
+    public void setMarks(double marks) {
+        if (marks < 0 || marks > 100) {
+            System.out.println("Marks must be between 0 and 100.");
+            return;
+        }
+        this.marks = marks;
+    }
+}
+</div>
+    <p>Notice how the logic for validation lives inside the class itself. This means you don't have to repeat validation checks every time you use the object in different parts of your code.</p>
+
+    <h2 id="getter-setter-names">Getter and Setter Naming Convention</h2>
+    <p>Java follows a strict naming convention for getters and setters (JavaBeans standard). This consistency allows frameworks and libraries to interact with your objects automatically. Getters start with `get` followed by the capitalized field name, while setters start with `set`. For boolean fields, the getter often starts with `is` instead of `get` to read more naturally.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <table>
+        <thead>
+            <tr>
+                <th>Field</th>
+                <th>Getter</th>
+                <th>Setter</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>name</td>
+                <td>getName()</td>
+                <td>setName()</td>
+            </tr>
+            <tr>
+                <td>age</td>
+                <td>getAge()</td>
+                <td>setAge()</td>
+            </tr>
+            <tr>
+                <td>active (boolean)</td>
+                <td>isActive()</td>
+                <td>setActive()</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h2 id="read-only-fields">Read-Only Fields</h2>
+    <p>Sometimes you want a field to be set once (usually in the constructor) and never changed again. You can achieve this by providing a public getter method but omitting the setter method. This effectively makes the field "read-only" to the outside world, while keeping it private internally. This pattern is crucial for creating immutable objects, which are safer to use in multi-threaded environments.</p>
+    <div class="code">
+public class Student {
+    private int id;
+
+    public Student(int id) { this.id = id; }
+    public int getId() { return id; }
+}
+</div>
+
+    <h2 id="encapsulation-constructors">Encapsulation with Constructors</h2>
+    <p>Constructors are the first line of defense for your object's integrity. Instead of assigning parameters directly to fields, a constructor should often call the class's setter methods. This ensures that validation logic runs immediately when the object is created, preventing it from ever existing in an invalid state. If you bypass setters in the constructor, you might accidentally initialize an object with bad data.</p>
+    <div class="code">
+public class Student {
+    private int id;
+    private String name;
+    private int age;
+    private double marks;
+
+    public Student(int id, String name, int age, double marks) {
+        this.id = id;
+        setName(name);
+        setAge(age);
+        setMarks(marks);
+    }
+
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public int getAge() { return age; }
+    public double getMarks() { return marks; }
+
+    public void setName(String name) {
+        if (name == null || name.trim().isEmpty()) { System.out.println("Invalid name."); return; }
+        this.name = name;
+    }
+
+    public void setAge(int age) {
+        if (age < 1 || age > 120) { System.out.println("Invalid age."); return; }
+        this.age = age;
+    }
+
+    public void setMarks(double marks) {
+        if (marks < 0 || marks > 100) { System.out.println("Invalid marks."); return; }
+        this.marks = marks;
+    }
+
+    public String getGrade() {
+        if (marks >= 90) return "A";
+        if (marks >= 75) return "B";
+        if (marks >= 60) return "C";
+        return "F";
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[%d] %-12s Age: %-4d Marks: %-6.1f Grade: %s", id, name, age, marks, getGrade());
+    }
+}
+</div>
+
+    <h2 id="access-modifiers">Access Modifiers Summary</h2>
+    <p>Access modifiers determine the visibility of classes, fields, and methods. `private` restricts access to the defining class only, which is the cornerstone of encapsulation. `public` allows access from anywhere, making it suitable for methods that define the object's interface. `protected` and default (package-private) offer intermediate levels of visibility useful for inheritance and package-level organization.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <table>
+        <thead>
+            <tr>
+                <th>Modifier</th>
+                <th>Same Class</th>
+                <th>Same Package</th>
+                <th>Subclass</th>
+                <th>Anywhere</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>private</td>
+                <td>✅</td>
+                <td>❌</td>
+                <td>❌</td>
+                <td>❌</td>
+            </tr>
+            <tr>
+                <td>(default)</td>
+                <td>✅</td>
+                <td>✅</td>
+                <td>❌</td>
+                <td>❌</td>
+            </tr>
+            <tr>
+                <td>protected</td>
+                <td>✅</td>
+                <td>✅</td>
+                <td>✅</td>
+                <td>❌</td>
+            </tr>
+            <tr>
+                <td>public</td>
+                <td>✅</td>
+                <td>✅</td>
+                <td>✅</td>
+                <td>✅</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+    <p>For strict encapsulation: fields should almost always be <b>private</b>, while methods intended for external use are <b>public</b>.</p>
+
+    <h2 id="private-helpers">Private Helper Methods</h2>
+    <p>Not all methods in a class need to be exposed to the outside world. If a method is only used internally by other methods of the same class, it should be marked as `private`. These "helper" methods decompose complex logic into smaller, manageable pieces without cluttering the public API. This keeps the class interface clean and easy to understand for other developers.</p>
+    <div class="code">
+public class Student {
+    private double marks;
+
+    public void setMarks(double marks) {
+        if (isValidMarks(marks)) this.marks = marks;
+        else System.out.println("Invalid marks.");
+    }
+
+    private boolean isValidMarks(double marks) {
+        return marks >= 0 && marks <= 100;
+    }
+}
+</div>
+
+    <h2 id="full-example">Full Example: BankAccount</h2>
+    <p>This example demonstrates a fully encapsulated class. The `balance` field is private, protecting it from arbitrary modification. Money can only be added or removed via `deposit` and `withdraw` methods, which enforce rules like preventing negative amounts or overdrafts. Even the constructor uses these methods to ensure the initial state is valid.</p>
+    <div class="code">
+public class BankAccount {
+    private int accountNo;
+    private String owner;
+    private double balance;
+
+    public BankAccount(int accountNo, String owner, double initialDeposit) {
+        this.accountNo = accountNo;
+        setOwner(owner);
+        deposit(initialDeposit);
+    }
+
+    public int getAccountNo() { return accountNo; }
+    public String getOwner() { return owner; }
+    public double getBalance() { return balance; }
+
+    public void setOwner(String owner) {
+        if (owner == null || owner.trim().isEmpty()) { System.out.println("Owner name cannot be empty."); return; }
+        this.owner = owner;
+    }
+
+    public void deposit(double amount) {
+        if (!isValidAmount(amount)) return;
+        balance += amount;
+        System.out.printf("Deposited: $%.2f | Balance: $%.2f%n", amount, balance);
+    }
+
+    public void withdraw(double amount) {
+        if (!isValidAmount(amount)) return;
+        if (amount > balance) { System.out.println("Insufficient funds."); return; }
+        balance -= amount;
+        System.out.printf("Withdrew:  $%.2f | Balance: $%.2f%n", amount, balance);
+    }
+
+    private boolean isValidAmount(double amount) {
+        if (amount <= 0) { System.out.println("Amount must be greater than zero."); return false; }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Acc#%d | Owner: %s | Balance: $%.2f", accountNo, owner, balance);
+    }
+}
+</div>
+
+    <h2 id="benefits">Benefits of Encapsulation</h2>
+    <p>Encapsulation offers several long-term benefits for software development. It protects data from corruption, makes code easier to maintain by localizing validation logic, and allows implementation details to change without affecting other parts of the system. For example, you could change how `balance` is stored (e.g., from double to BigDecimal) without changing how external code calls `getBalance()`.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <table>
+        <thead>
+            <tr>
+                <th>Benefit</th>
+                <th>Explanation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Data protection</td>
+                <td>Invalid values are rejected</td>
+            </tr>
+            <tr>
+                <td>Flexibility</td>
+                <td>Change internal logic without breaking outside code</td>
+            </tr>
+            <tr>
+                <td>Readability</td>
+                <td>Clear what can and cannot be accessed</td>
+            </tr>
+            <tr>
+                <td>Maintainability</td>
+                <td>One place to update validation rules</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h2 id="common-mistakes">Common Mistakes</h2>
+    <p>A common mistake is creating public fields for convenience, which breaks encapsulation immediately. Another is writing "lazy" setters that just assign values without any validation, missing the point of having a setter. Finally, failing to use setters inside constructors can lead to objects that start their life with invalid data.</p>
+    <div class="code">
+public double balance;
+private double balance;
+
+public void setAge(int age) { this.age = age; }
+public void setAge(int age) { if (age > 0 && age < 120) this.age = age; }
+
+public Student(String name, int age) {
+    this.name = name;
+    this.age = age;
+}
+
+public Student(String name, int age) {
+    setName(name);
+    setAge(age);
+}
+</div>
+    <div class="try">Exam Point: Identify the mistake in each example.</div>
+
+    <h2 id="practice-exercises">Practice Exercises</h2>
+    <p>These exercises will help you practice designing classes that protect their internal state. Start by identifying which fields need protection and what rules should apply to them. Then, implement the class with private fields and public methods that enforce those rules. Testing your class with both valid and invalid data is key to verifying your encapsulation logic.</p>
+    <ul>
+        <li>Create a BankAccount class with private balance and deposit/withdraw validation.</li>
+        <li>Create a Person class with private name, age, email and validate age and email.</li>
+        <li>Create a Temperature class with private celsius and a getFahrenheit() method.</li>
+        <li>Show why private fields are safer than public fields.</li>
+        <li>Create a Product with read-only id and settable price with validation.</li>
+        <li>Create a BankAccount with constructor + setters and a private helper method.</li>
+        <li>Create a Circle with private radius and public area/perimeter methods.</li>
+        <li>Create an Employee with salary and a raiseSalary method with limits.</li>
+        <li>Create a Hospital patient class with validated blood type and age.</li>
+        <li>Create a Vehicle class with speed limits and accelerate/brake methods.</li>
+        <li>Refactor a class to add encapsulation and explain the benefits.</li>
+    </ul>
+    <p>Next topic: Inheritance — letting one class acquire fields and methods from another.</p>
+</div>
+
+    </div>
+
+</body>
+</html>

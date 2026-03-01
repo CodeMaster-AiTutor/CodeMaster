@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operators - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link active">4. Operators</a>
+                <div class="page-subtopics">
+                    <a href="#operator-types" class="subtopic-link">Operator types</a>
+                    <a href="#arithmetic-operators" class="subtopic-link">Arithmetic operators</a>
+                    <a href="#assignment-operators" class="subtopic-link">Assignment operators</a>
+                    <a href="#relational-operators" class="subtopic-link">Relational operators</a>
+                    <a href="#logical-operators" class="subtopic-link">Logical operators</a>
+                    <a href="#increment-decrement" class="subtopic-link">Increment & Decrement</a>
+                    <a href="#unary-operators" class="subtopic-link">Unary operators</a>
+                    <a href="#ternary-operator" class="subtopic-link">Ternary operator</a>
+                    <a href="#bitwise-operators" class="subtopic-link">Bitwise operators</a>
+                    <a href="#shift-operators" class="subtopic-link">Shift operators</a>
+                    <a href="#instanceof-operator" class="subtopic-link">instanceof operator</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Operators</h1>
+    <p>An <b>operator</b> is a symbol that tells Java to perform an action on one or more values (called operands). The result of that action is usually a new value.</p>
+    <p>Operators are grouped by the kind of work they do. Learning the groups helps you choose the right operator and avoid logic mistakes.</p>
+    <h2 id="operator-types">Types of Operators (Overview)</h2>
+    <p><b>Arithmetic</b>: math on numbers like +, -, *, /, %.</p>
+    <p><b>Assignment</b>: store or update values like =, +=, -=, *=, /=, %=.</p>
+    <p><b>Relational</b>: compare values and return true/false like ==, !=, >, <, >=, <=.</p>
+    <p><b>Logical</b>: combine boolean results like &&, ||, !.</p>
+    <p><b>Increment/Decrement</b>: add or subtract 1 using ++ and --.</p>
+    <p><b>Unary</b>: work on a single operand, like +x, -x, !x, and ++x.</p>
+    <p><b>Ternary</b>: a short if‑else using ?:.</p>
+    <p><b>Bitwise</b>: operate on bits in integers like &, |, ^, ~.</p>
+    <p><b>Shift</b>: move bits left or right using <<, >>, >>>.</p>
+    <p><b>Type check</b>: instanceof checks whether an object is of a given type.</p>
+
+    <h2 id="arithmetic-operators">Arithmetic operators</h2>
+    <p>Arithmetic operators perform basic math: <b>+</b>, <b>-</b>, <b>*</b>, <b>/</b>, <b>%</b> (modulus).</p>
+    <p><b>+</b> adds, <b>-</b> subtracts, <b>*</b> multiplies, <b>/</b> divides, and <b>%</b> gives the remainder.</p>
+    <p>When both numbers are integers, division drops the decimal part: 10 / 3 becomes 3.</p>
+    <p>If any number is decimal (double), the result keeps decimals: 10.0 / 3 gives 3.333...</p>
+    <p>Modulus is useful for checking even/odd or repeating patterns, like every 5th item.</p>
+    <div class="code">
+int a = 10;
+int b = 3;
+System.out.println(a + b);
+System.out.println(a / b);
+System.out.println(a % b);
+</div>
+    <div class="try">Exam Point: What is the remainder of 10 % 3?</div>
+    <h2 id="assignment-operators">Assignment operators</h2>
+    <p>Assignment operators store values in variables. Short forms combine operation and assignment.</p>
+    <p><b>=</b> assigns a value, while <b>+=</b>, <b>-=</b>, <b>*=</b>, <b>/=</b>, and <b>%=</b> update the same variable.</p>
+    <p>Example: x += 3 is the same as x = x + 3.</p>
+    <p>Assignment happens right to left: in a = b = 5, both a and b become 5.</p>
+    <div class="code">
+int x = 5;
+x += 3;
+x *= 2;
+</div>
+    <div class="try">Exam Point: Expand x += 3 into its full form.</div>
+    <h2 id="relational-operators">Relational operators</h2>
+    <p>Relational operators compare two values and return <b>true</b> or <b>false</b>.</p>
+    <p>They include <b>==</b> (equal), <b>!=</b> (not equal), <b>></b>, <b><</b>, <b>>=</b>, and <b><=</b>.</p>
+    <p>Use them for numeric comparisons like scores, ages, or limits.</p>
+    <p>For objects like String, use <b>equals()</b> to compare content, not <b>==</b>.</p>
+    <div class="code">
+int a = 7;
+int b = 10;
+System.out.println(a < b);
+System.out.println(a == b);
+</div>
+    <div class="try">Exam Point: List all relational operators in Java.</div>
+    <h2 id="logical-operators">Logical operators</h2>
+    <p>Logical operators combine conditions: <b>&&</b> (AND), <b>||</b> (OR), <b>!</b> (NOT).</p>
+    <p><b>&&</b> is true only when both sides are true. <b>||</b> is true if at least one side is true.</p>
+    <p><b>!</b> flips the result, so !true becomes false and !false becomes true.</p>
+    <p>Java uses short‑circuit evaluation: in (A && B), if A is false, B is not checked.</p>
+    <p>Use parentheses to make complex conditions easier to read and avoid mistakes.</p>
+    <div class="code">
+boolean pass = true;
+boolean attendance = false;
+System.out.println(pass && attendance);
+System.out.println(pass || attendance);
+</div>
+    <div class="try">Exam Point: When does AND return true?</div>
+    <h2 id="increment-decrement">Increment & Decrement</h2>
+    <p>Increment <b>++</b> adds 1 and decrement <b>--</b> subtracts 1. They can be prefix or postfix.</p>
+    <p><b>Prefix</b> (++n) changes the value first, then uses it in the expression.</p>
+    <p><b>Postfix</b> (n++) uses the current value first, then updates it.</p>
+    <p>When used alone in a line, both prefix and postfix give the same final value.</p>
+    <div class="code">
+int n = 5;
+System.out.println(++n);
+System.out.println(n--);
+</div>
+    <div class="try">Exam Point: Differentiate prefix and postfix with output.</div>
+
+    <h2 id="unary-operators">Unary operators</h2>
+    <p>Unary operators work with a single operand. They change the value or its meaning without needing a second value.</p>
+    <p><b>+</b> keeps the value as positive, <b>-</b> changes the sign, <b>!</b> flips boolean, and <b>++/--</b> change numbers by 1.</p>
+    <div class="code">
+int num = 7;
+System.out.println(-num);
+boolean isOpen = false;
+System.out.println(!isOpen);
+</div>
+    <div class="try">Exam Point: Write one example each for unary +, unary -, and !.</div>
+
+    <h2 id="ternary-operator">Ternary operator</h2>
+    <p>The ternary operator is a short form of if‑else that returns a value.</p>
+    <p>Syntax: <b>condition ? valueIfTrue : valueIfFalse</b></p>
+    <p>It is best for simple decisions, like choosing a label or message.</p>
+    <div class="code">
+int age = 20;
+String result = (age >= 18) ? "Adult" : "Minor";
+System.out.println(result);
+</div>
+    <div class="try">Exam Point: Convert an if‑else into a ternary expression.</div>
+
+    <h2 id="bitwise-operators">Bitwise operators</h2>
+    <p>Bitwise operators work on the binary form of integers. They compare or change each bit.</p>
+    <p><b>&</b> (AND), <b>|</b> (OR), <b>^</b> (XOR), and <b>~</b> (NOT) are used for low‑level operations.</p>
+    <p>Bitwise operators are common in masking, flags, and performance‑critical code.</p>
+    <div class="code">
+int a = 5;
+int b = 3;
+System.out.println(a & b);
+System.out.println(a | b);
+System.out.println(a ^ b);
+System.out.println(~a);
+</div>
+    <div class="try">Exam Point: What does XOR return when bits are different?</div>
+
+    <h2 id="shift-operators">Shift operators</h2>
+    <p>Shift operators move bits left or right, which is similar to multiplying or dividing by powers of 2.</p>
+    <p><b>&lt;&lt;</b> shifts left, <b>&gt;&gt;</b> shifts right with sign, and <b>&gt;&gt;&gt;</b> shifts right with zero fill.</p>
+    <p>Example: 5 &lt;&lt; 1 gives 10, because bits move one place left.</p>
+    <div class="code">
+int x = 5;
+System.out.println(x << 1);
+System.out.println(x >> 1);
+System.out.println(x >>> 1);
+</div>
+    <div class="try">Exam Point: Why is right shift different for negative numbers?</div>
+
+    <h2 id="instanceof-operator">instanceof operator</h2>
+    <p><b>instanceof</b> checks whether an object belongs to a class or interface type.</p>
+    <p>It returns true if the object can be safely treated as that type.</p>
+    <div class="code">
+String name = "Asha";
+System.out.println(name instanceof String);
+</div>
+    <div class="try">Exam Point: When does instanceof return false?</div>
+</div>
+
+    </div>
+
+</body>
+</html>

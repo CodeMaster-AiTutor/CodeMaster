@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inheritance - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link active">13. Inheritance</a>
+                <div class="page-subtopics">
+                    <a href="#what-is-inheritance" class="subtopic-link">What is inheritance</a>
+                    <a href="#without-inheritance" class="subtopic-link">Without inheritance</a>
+                    <a href="#extends-keyword" class="subtopic-link">extends keyword</a>
+                    <a href="#super-keyword" class="subtopic-link">super keyword</a>
+                    <a href="#method-overriding" class="subtopic-link">Method overriding</a>
+                    <a href="#override-annotation" class="subtopic-link">@Override</a>
+                    <a href="#polymorphism" class="subtopic-link">Polymorphism</a>
+                    <a href="#instanceof" class="subtopic-link">instanceof</a>
+                    <a href="#overriding-rules" class="subtopic-link">Overriding rules</a>
+                    <a href="#inheritance-types" class="subtopic-link">Types</a>
+                    <a href="#final" class="subtopic-link">final</a>
+                    <a href="#full-example" class="subtopic-link">Full example</a>
+                    <a href="#common-mistakes" class="subtopic-link">Common mistakes</a>
+                    <a href="#practice-exercises" class="subtopic-link">Practice</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Inheritance</h1>
+
+    <h2 id="what-is-inheritance">What is Inheritance?</h2>
+    <p>Inheritance is a fundamental mechanism in Object-Oriented Programming that allows a new class to acquire the properties and behaviors of an existing class. The class that inherits is called the <b>subclass</b> (or child), and the class being inherited from is the <b>superclass</b> (or parent). This relationship promotes code reusability because you define common attributes once in the parent and share them across all children. It also establishes an "is-a" relationship, such as "a Dog is an Animal".</p>
+    <div class="code">
+Animal (parent)
+  ├── Dog (child)
+  ├── Cat (child)
+  └── Bird (child)
+</div>
+    <p>In this hierarchy, Dog, Cat, and Bird all share the common traits defined in Animal, but they can also have their own unique features.</p>
+
+    <h2 id="without-inheritance">The Problem Without Inheritance</h2>
+    <p>Without inheritance, you would have to copy-paste the same code into multiple classes. If you had 10 different types of animals, you would repeat the `eat()` and `sleep()` methods 10 times. This duplication makes the code hard to maintain because if you need to change how `eat()` works, you have to update it in 10 different places. Inheritance solves this by keeping the common logic in one central place.</p>
+    <div class="code">
+public class Dog {
+    String name;
+    int age;
+    void eat() { System.out.println(name + " is eating."); }
+    void bark() { System.out.println(name + " is barking."); }
+}
+
+public class Cat {
+    String name;
+    int age;
+    void eat() { System.out.println(name + " is eating."); }
+    void meow() { System.out.println(name + " is meowing."); }
+}
+</div>
+    <p>Notice how `name`, `age`, and `eat()` are identical in both classes. This redundancy is a clear sign that inheritance should be used.</p>
+
+    <h2 id="extends-keyword">extends — Creating a Child Class</h2>
+    <p>The `extends` keyword is used to create a subclass that inherits from a superclass. When `Dog extends Animal`, the `Dog` class automatically gets all non-private fields and methods from `Animal`. You can then add new fields (like `breed`) and new methods (like `bark`) that are specific only to dogs. This keeps the `Animal` class clean and general, while the `Dog` class focuses on dog-specific logic.</p>
+    <div class="code">
+public class Animal {
+    String name;
+    int age;
+
+    public Animal(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public void eat() { System.out.println(name + " is eating."); }
+    public void sleep() { System.out.println(name + " is sleeping."); }
+
+    @Override
+    public String toString() {
+        return name + " (age " + age + ")";
+    }
+}
+
+public class Dog extends Animal {
+    String breed;
+
+    public Dog(String name, int age, String breed) {
+        super(name, age);
+        this.breed = breed;
+    }
+
+    public void bark() { System.out.println(name + " is barking!"); }
+}
+
+public class Cat extends Animal {
+    boolean isIndoor;
+
+    public Cat(String name, int age, boolean isIndoor) {
+        super(name, age);
+        this.isIndoor = isIndoor;
+    }
+
+    public void meow() { System.out.println(name + " says meow!"); }
+}
+</div>
+
+    <h2 id="super-keyword">super — Accessing the Parent</h2>
+    <p>The `super` keyword refers to the direct parent class of the current object. It is most commonly used to call the parent's constructor to ensure that inherited fields are initialized correctly. You can also use it to call a method in the parent class that has been overridden in the child class. This is useful when you want to keep the parent's behavior and just add a little bit more to it, rather than replacing it entirely.</p>
+    <div class="code">
+public Dog(String name, int age, String breed) {
+    super(name, age);
+    this.breed = breed;
+}
+
+@Override
+public void eat() {
+    super.eat();
+    System.out.println("...and asking for more!");
+}
+</div>
+
+    <h2 id="method-overriding">Method Overriding</h2>
+    <p>Method overriding happens when a child class provides a specific implementation for a method that is already defined in its parent. This allows the child to modify or completely replace the behavior inherited from the parent. For example, all animals make a sound, but a dog barks and a cat meows. The method signature (name, return type, and parameters) must be exactly the same as in the parent class.</p>
+    <div class="code">
+public class Animal {
+    String name;
+    public Animal(String name) { this.name = name; }
+    public void makeSound() { System.out.println(name + " makes a sound."); }
+}
+
+public class Dog extends Animal {
+    public Dog(String name) { super(name); }
+    @Override
+    public void makeSound() { System.out.println(name + " barks: Woof!"); }
+}
+
+public class Cat extends Animal {
+    public Cat(String name) { super(name); }
+    @Override
+    public void makeSound() { System.out.println(name + " meows: Meow!"); }
+}
+</div>
+
+    <h2 id="override-annotation">@Override Annotation</h2>
+    <p>The `@Override` annotation is a safety feature that tells the compiler you intend to override a method. If you make a mistake, like checking the spelling or parameter list, the compiler will generate an error to alert you. While it is optional, using it is considered a best practice because it makes your code easier to read and less prone to bugs. It clearly signals to other developers that this method replaces one from the parent class.</p>
+
+    <h2 id="polymorphism">Polymorphism with Inheritance</h2>
+    <p>Inheritance enables polymorphism, which means you can treat different child objects as instances of their parent class. You can create an array of `Animal` references that holds `Dog`, `Cat`, and `Bird` objects. When you call a method like `makeSound()` on these references, Java automatically executes the correct version for the actual object (e.g., the Dog's bark). This makes your code flexible and scalable, as you can add new animal types without changing the loop logic.</p>
+    <div class="code">
+Animal a1 = new Dog("Rex");
+Animal a2 = new Cat("Whiskers");
+
+a1.makeSound();
+a2.makeSound();
+
+Animal[] animals = { new Dog("Rex"), new Cat("Whiskers") };
+for (Animal a : animals) { a.makeSound(); }
+</div>
+    <p>Even though the reference type is `Animal`, the actual behavior is determined by the object type at runtime.</p>
+
+    <h2 id="instanceof">instanceof — Checking the Real Type</h2>
+    <p>The `instanceof` operator checks if an object is an instance of a specific class or subclass. This is useful when you have a parent reference (like `Animal`) but need to access child-specific methods (like `bark`). Before casting the object to `Dog`, you should always check `if (a instanceof Dog)` to avoid a `ClassCastException`. This ensures that your type conversions are safe and valid.</p>
+    <div class="code">
+Animal a = new Dog("Rex");
+System.out.println(a instanceof Animal);
+System.out.println(a instanceof Dog);
+System.out.println(a instanceof Cat);
+
+if (a instanceof Dog) {
+    Dog d = (Dog) a;
+    d.bark();
+}
+</div>
+
+    <h2 id="overriding-rules">Rules of Overriding</h2>
+    <p>Overriding is powerful but comes with strict rules to ensure consistency. The method name, return type, and parameter list must match the parent's method exactly. You cannot reduce the visibility of the method (e.g., making a public method private), but you can increase it. Also, methods marked as `final` or `static` cannot be overridden, as their behavior is fixed or belongs to the class rather than the instance.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <table>
+        <thead>
+            <tr>
+                <th>Rule</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Same name</td>
+                <td>Must match parent method name exactly</td>
+            </tr>
+            <tr>
+                <td>Same parameters</td>
+                <td>Same number and types</td>
+            </tr>
+            <tr>
+                <td>Same or wider access</td>
+                <td>protected can become public, not private</td>
+            </tr>
+            <tr>
+                <td>Cannot override final</td>
+                <td>final methods cannot be changed</td>
+            </tr>
+            <tr>
+                <td>Cannot override static</td>
+                <td>Static methods are hidden, not overridden</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h2 id="inheritance-types">Types of Inheritance in Java</h2>
+    <p>Java supports several types of inheritance structures. <b>Single inheritance</b> is when a class extends one other class. <b>Multilevel inheritance</b> involves a chain, like `BabyDog extends Dog extends Animal`. <b>Hierarchical inheritance</b> is when one parent has multiple children, like `Cat` and `Dog` both extending `Animal`. However, Java does <b>not</b> support multiple inheritance (one class extending two classes) to avoid ambiguity and complexity.</p>
+    <div class="code">
+Single:
+class Animal { }
+class Dog extends Animal { }
+
+Multilevel:
+class Animal { }
+class Mammal extends Animal { }
+class Dog extends Mammal { }
+
+Hierarchical:
+class Animal { }
+class Dog extends Animal { }
+class Cat extends Animal { }
+class Bird extends Animal { }
+</div>
+    <p>The lack of multiple inheritance is a design choice to keep the language simple and avoid the "Diamond Problem".</p>
+
+    <h2 id="final">final — Preventing Inheritance or Overriding</h2>
+    <p>The `final` keyword can be used to restrict inheritance features. If you mark a class as `final`, no other class can extend it (e.g., the `String` class). If you mark a method as `final`, no subclass can override it. This is useful when you want to guarantee that a specific behavior remains unchanged and secure across your entire application.</p>
+    <div class="code">
+public final class MathUtils {
+    public static int square(int n) { return n * n; }
+}
+
+public class Animal {
+    public final void breathe() { System.out.println("Breathing..."); }
+}
+</div>
+
+    <h2 id="full-example">Full Example: Employee Hierarchy</h2>
+    <p>This example models a company structure with a base `Employee` class and specialized `Manager` and `Intern` subclasses. The `calculateSalary()` method is overridden to provide different logic for each role. The `Manager` gets a bonus, while the `Intern` gets a reduced salary. Using an array of `Employee` references allows us to process the entire payroll in a single loop, demonstrating polymorphism in action.</p>
+    <div class="code">
+public class Employee {
+    private String name;
+    private int id;
+    private double baseSalary;
+
+    public Employee(String name, int id, double baseSalary) {
+        this.name = name;
+        this.id = id;
+        this.baseSalary = baseSalary;
+    }
+
+    public String getName() { return name; }
+    public int getId() { return id; }
+    public double getBaseSalary() { return baseSalary; }
+
+    public double calculateSalary() { return baseSalary; }
+
+    @Override
+    public String toString() {
+        return String.format("[%d] %-12s Salary: $%.2f", id, name, calculateSalary());
+    }
+}
+
+public class Manager extends Employee {
+    private double bonus;
+
+    public Manager(String name, int id, double baseSalary, double bonus) {
+        super(name, id, baseSalary);
+        this.bonus = bonus;
+    }
+
+    @Override
+    public double calculateSalary() { return getBaseSalary() + bonus; }
+}
+
+public class Intern extends Employee {
+    public Intern(String name, int id, double baseSalary) {
+        super(name, id, baseSalary);
+    }
+
+    @Override
+    public double calculateSalary() { return getBaseSalary() * 0.6; }
+}
+
+Employee[] staff = {
+    new Employee("Alice", 1, 50000),
+    new Manager("Bob", 2, 50000, 15000),
+    new Intern("Charlie", 3, 30000)
+};
+
+for (Employee e : staff) { System.out.println(e); }
+</div>
+
+    <h2 id="common-mistakes">Common Mistakes</h2>
+    <p>A frequent mistake is forgetting to call `super()` in the child constructor, which leads to compilation errors if the parent doesn't have a default constructor. Another error is trying to extend multiple classes, which Java forbids. Beginners also often confuse overriding with overloading, or forget that private fields are not directly accessible in the child class (you must use getters).</p>
+    <div class="code">
+class Animal {
+    public Animal(String name) { }
+}
+class Dog extends Animal {
+    public Dog() { }
+}
+
+class Dog extends Animal, Pet { }
+
+class Dog extends Animal {
+    void show() {
+        System.out.println(name);
+        System.out.println(getName());
+    }
+}
+</div>
+
+    <h2 id="practice-exercises">Practice Exercises</h2>
+    <p>These exercises focus on building class hierarchies and understanding method overriding. Start by creating simple parent-child relationships and then add more complexity with multilevel inheritance. Pay attention to how constructors chain together using `super`. Testing your classes with polymorphic arrays will help reinforce the concept of treating different objects uniformly.</p>
+    <ul>
+        <li>Create Vehicle → Car/Bike with extra fields and methods.</li>
+        <li>Create Shape → Circle/Square and override area().</li>
+        <li>Call super.eat() in a child and add extra behavior.</li>
+        <li>Create Animal → Mammal → Dog and add fields and methods at each level.</li>
+        <li>Create Shape → Circle/Rectangle/Triangle and override area().</li>
+        <li>Create Vehicle → Car → ElectricCar and override fuelType().</li>
+        <li>Try overriding a final method and observe the error.</li>
+        <li>Build Employee → Manager/Developer/Intern and override calculateSalary().</li>
+        <li>Use Employee[] and find the highest-paid.</li>
+    </ul>
+    <p>Next topic: Polymorphism — using one reference type for many object types.</p>
+</div>
+
+    </div>
+
+</body>
+</html>

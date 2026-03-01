@@ -12,6 +12,8 @@ import Compiler from "./pages/Compiler";
 import Explainer from "./pages/Explainer";
 import Generator from "./pages/Generator";
 import Practice from "./pages/Practice";
+import PracticeSolve from "./pages/PracticeSolve";
+import TheoryCourse from "./pages/TheoryCourse";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Assessment from "./pages/Assessment";
@@ -43,6 +45,8 @@ const App = () => {
           <Route path="/explainer" element={<Explainer />} />
           <Route path="/generator" element={<Generator />} />
           <Route path="/practice" element={<Practice />} />
+          <Route path="/practice/solve/:level/:title" element={<PracticeSolve />} />
+          <Route path="/theory-course" element={<TheoryCourse />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/assessment" element={<Assessment />} />

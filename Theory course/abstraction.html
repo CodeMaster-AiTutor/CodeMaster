@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abstraction - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link active">15. Abstraction</a>
+                <div class="page-subtopics">
+                    <a href="#what-is-abstraction" class="subtopic-link">What is abstraction</a>
+                    <a href="#abstract-classes" class="subtopic-link">Abstract classes</a>
+                    <a href="#abstract-rules" class="subtopic-link">Abstract rules</a>
+                    <a href="#when-abstract" class="subtopic-link">When to use</a>
+                    <a href="#interfaces" class="subtopic-link">Interfaces</a>
+                    <a href="#implements" class="subtopic-link">implements</a>
+                    <a href="#multiple-interfaces" class="subtopic-link">Multiple interfaces</a>
+                    <a href="#default-methods" class="subtopic-link">default methods</a>
+                    <a href="#interface-rules" class="subtopic-link">Interface rules</a>
+                    <a href="#abstract-vs-interface" class="subtopic-link">Abstract vs interface</a>
+                    <a href="#full-example" class="subtopic-link">Full example</a>
+                    <a href="#common-mistakes" class="subtopic-link">Common mistakes</a>
+                    <a href="#practice-exercises" class="subtopic-link">Practice</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Abstraction</h1>
+
+    <h2 id="what-is-abstraction">What is Abstraction?</h2>
+    <p>Abstraction is the concept of hiding complex implementation details and showing only the essential features of an object. It allows you to focus on <i>what</i> an object does rather than <i>how</i> it does it. For example, when you drive a car, you know that pressing the gas pedal makes it go faster, but you don't need to understand the intricate mechanics of fuel injection or combustion. In Java, abstraction is achieved using <b>abstract classes</b> (0 to 100% abstraction) and <b>interfaces</b> (100% abstraction). It helps reduce complexity and increases security by preventing direct access to internal logic.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <ul>
+        <li><b>Abstract Class:</b> Use when classes share a common identity ("is-a").</li>
+        <li><b>Interface:</b> Use when unrelated classes share a capability ("can-do").</li>
+    </ul>
+    </div>
+
+    <h2 id="abstract-classes">Abstract Classes</h2>
+    <p>An abstract class is a class that cannot be instantiated on its own; it serves as a base for subclasses. It can contain both <b>abstract methods</b> (which have no body and must be implemented by the child) and <b>concrete methods</b> (which have a body and are inherited as-is). This allows you to define a template where some behavior is fixed (like `eat()`) and some is left for the child to decide (like `makeSound()`). Abstract classes are perfect for capturing common characteristics in a hierarchy, like `Animal` or `Vehicle`.</p>
+    <div class="code">
+public abstract class Animal {
+    protected String name;
+    protected int age;
+
+    public Animal(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public abstract void makeSound();
+    public abstract String getType();
+
+    public void eat() { System.out.println(name + " is eating."); }
+
+    @Override
+    public String toString() {
+        return getType() + ": " + name + " (age " + age + ")";
+    }
+}
+
+public class Dog extends Animal {
+    public Dog(String name, int age) { super(name, age); }
+    @Override
+    public void makeSound() { System.out.println(name + " barks: Woof!"); }
+    @Override
+    public String getType() { return "Dog"; }
+}
+</div>
+
+    <h2 id="abstract-rules">Abstract Class Rules</h2>
+    <p>Working with abstract classes requires following specific rules enforced by the compiler. You cannot create an object directly from an abstract class using `new`. If a class has even one abstract method, the class itself must be declared abstract. Subclasses must either implement all inherited abstract methods or be declared abstract themselves. These rules ensure that you never have an incomplete object in your system.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <table>
+        <thead>
+            <tr>
+                <th>Rule</th>
+                <th>Detail</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Cannot instantiate</td>
+                <td>new AbstractClass() is not allowed</td>
+            </tr>
+            <tr>
+                <td>Can have constructor</td>
+                <td>Called via super() from child</td>
+            </tr>
+            <tr>
+                <td>Abstract methods</td>
+                <td>No body, ends with ;</td>
+            </tr>
+            <tr>
+                <td>Concrete methods</td>
+                <td>Fully implemented, inherited</td>
+            </tr>
+            <tr>
+                <td>Child must implement all</td>
+                <td>Or be abstract itself</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h2 id="when-abstract">When to Use Abstract Class</h2>
+    <p>Use an abstract class when you want to share code among several closely related classes. If you have fields (like `name` or `age`) that every child needs, an abstract class is the best place to define them. It is also useful when you want to define non-static or non-final fields, which interfaces cannot do. Essentially, use it when there is a strong "is-a" relationship, like "Dog is an Animal".</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <ul>
+        <li>Classes share common fields and behavior.</li>
+        <li>You want to declare non-static or non-final fields.</li>
+        <li>You require access modifiers other than public (like protected).</li>
+    </ul>
+    </div>
+
+    <h2 id="interfaces">What is an Interface?</h2>
+    <p>An interface is a pure contract that defines a set of methods a class must implement. Unlike abstract classes, interfaces cannot hold state (instance fields) or constructors. They are used to define capabilities that can be shared across completely different class hierarchies, like `Drawable` or `Serializable`. A class "implements" an interface, promising to provide the actual code for all the methods defined in that contract.</p>
+    <div class="code">
+public interface Drawable {
+    void draw();
+    void resize(int factor);
+}
+</div>
+
+    <h2 id="implements">implements — Using an Interface</h2>
+    <p>To use an interface, a class uses the `implements` keyword. This forces the class to provide a body for every method declared in the interface. In the example below, both `Circle` and `Square` implement `Drawable`, but they draw themselves in completely different ways. This loose coupling allows you to treat different objects uniformly based on what they can do, not just what they inherit from.</p>
+    <div class="code">
+public class Circle implements Drawable {
+    private int radius;
+    public Circle(int radius) { this.radius = radius; }
+
+    @Override
+    public void draw() { System.out.println("Drawing circle with radius " + radius); }
+
+    @Override
+    public void resize(int factor) {
+        radius *= factor;
+        System.out.println("Circle resized. New radius: " + radius);
+    }
+}
+</div>
+
+    <h2 id="multiple-interfaces">Multiple Interfaces</h2>
+    <p>One of Java's most powerful features is that a class can implement multiple interfaces, effectively supporting multiple inheritance of type. This allows a single class, like `Document`, to be both `Printable` and `Saveable` at the same time. This is not possible with classes, where you can only extend one parent. This flexibility is key to designing modular and decoupled systems.</p>
+    <div class="code">
+public interface Printable { void print(); }
+public interface Saveable { void save(); }
+
+public class Document implements Printable, Saveable {
+    private String content;
+    public Document(String content) { this.content = content; }
+    @Override
+    public void print() { System.out.println("Printing: " + content); }
+    @Override
+    public void save() { System.out.println("Saving: " + content); }
+}
+</div>
+
+    <h2 id="default-methods">default Methods (Java 8+)</h2>
+    <p>Before Java 8, adding a new method to an interface would break every class that implemented it. To solve this, <b>default methods</b> were introduced. They allow you to add a method with a body to an interface, so existing classes don't need to change. This feature provides backward compatibility while allowing interfaces to evolve over time.</p>
+    <div class="code">
+public interface Greeting {
+    void greet(String name);
+
+    default void greetAll(String[] names) {
+        for (String name : names) greet(name);
+    }
+}
+
+public class FormalGreeting implements Greeting {
+    @Override
+    public void greet(String name) { System.out.println("Good day, " + name + "."); }
+}
+</div>
+
+    <h2 id="interface-rules">Interface Rules</h2>
+    <p>Interfaces strictly separate definition from implementation. All variables declared in an interface are implicitly `public`, `static`, and `final` (constants). All methods are implicitly `public` and `abstract` (unless marked `default` or `static`). You cannot instantiate an interface directly because it has no constructor and is incomplete by definition.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <table>
+        <thead>
+            <tr>
+                <th>Rule</th>
+                <th>Detail</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Methods</td>
+                <td>Abstract by default</td>
+            </tr>
+            <tr>
+                <td>Fields</td>
+                <td>public static final only</td>
+            </tr>
+            <tr>
+                <td>Cannot instantiate</td>
+                <td>new Interface() not allowed</td>
+            </tr>
+            <tr>
+                <td>implements</td>
+                <td>One class can implement many</td>
+            </tr>
+            <tr>
+                <td>default</td>
+                <td>Concrete and can be overridden</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h2 id="abstract-vs-interface">Abstract Class vs Interface</h2>
+    <p>Choosing between an abstract class and an interface is a common design decision. Use an abstract class when you need to share code (fields and methods) among related classes. Use an interface when you need to define a role or capability that unrelated classes can implement. A class can extend only one abstract class but can implement multiple interfaces.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <table>
+        <thead>
+            <tr>
+                <th>Feature</th>
+                <th>Abstract Class</th>
+                <th>Interface</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Instantiate</td>
+                <td>❌ No</td>
+                <td>❌ No</td>
+            </tr>
+            <tr>
+                <td>Methods</td>
+                <td>Abstract + Concrete</td>
+                <td>Abstract + default</td>
+            </tr>
+            <tr>
+                <td>Fields</td>
+                <td>Any type</td>
+                <td>public static final only</td>
+            </tr>
+            <tr>
+                <td>Constructor</td>
+                <td>✅ Yes</td>
+                <td>❌ No</td>
+            </tr>
+            <tr>
+                <td>Extends/Implements</td>
+                <td>One class</td>
+                <td>Multiple interfaces</td>
+            </tr>
+            <tr>
+                <td>Use when</td>
+                <td>Shared code + is-a</td>
+                <td>Shared contract + can-do</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h2 id="full-example">Full Example: Notification System</h2>
+    <p>This example combines both concepts to build a flexible system. We use an abstract class `Notification` to handle the shared `recipient` and `message` fields. We use an interface `Schedulable` to add scheduling capability only to `EmailNotification`. This design allows `SMSNotification` to inherit the basics without being forced to implement scheduling logic it doesn't support.</p>
+    <div class="code">
+public abstract class Notification {
+    protected String recipient;
+    protected String message;
+
+    public Notification(String recipient, String message) {
+        this.recipient = recipient;
+        this.message = message;
+    }
+
+    public abstract void send();
+
+    public void log() { System.out.println("LOG: Notification to " + recipient); }
+}
+
+public interface Schedulable { void schedule(String dateTime); }
+
+public class EmailNotification extends Notification implements Schedulable {
+    public EmailNotification(String recipient, String message) { super(recipient, message); }
+
+    @Override
+    public void send() {
+        System.out.println("Email to " + recipient + ": " + message);
+        log();
+    }
+
+    @Override
+    public void schedule(String dateTime) {
+        System.out.println("Email scheduled for " + dateTime);
+    }
+}
+
+public class SMSNotification extends Notification {
+    public SMSNotification(String recipient, String message) { super(recipient, message); }
+
+    @Override
+    public void send() {
+        System.out.println("SMS to " + recipient + ": " + message);
+        log();
+    }
+}
+</div>
+
+    <h2 id="common-mistakes">Common Mistakes</h2>
+    <p>A frequent mistake is trying to instantiate an interface or abstract class using `new`, which causes a compile-time error. Another issue is forgetting to implement <i>all</i> methods of an interface in a concrete class. Also, beginners often mistakenly think interface fields are instance variables, but they are actually static constants. The examples below highlight these pitfalls.</p>
+    <div class="code">
+new Animal();
+new Drawable();
+
+class Circle implements Drawable {
+    public void draw() { }
+}
+
+interface Shape {
+    int width = 10;
+    int getWidth();
+}
+</div>
+
+    <h2 id="practice-exercises">Practice Exercises</h2>
+    <p>These exercises challenge you to apply abstraction to real-world scenarios. Start by building a simple hierarchy using an abstract class. Then, introduce interfaces to add capabilities like "Resizable" or "Taxable" to specific classes. This hands-on practice will help you understand when to use "extends" versus "implements" in your own projects.</p>
+    <ul>
+        <li>Create abstract Employee with calculateSalary() and children FullTime/PartTime.</li>
+        <li>Create Shape → Circle/Rectangle and a Resizable interface.</li>
+        <li>Use abstract class for common fields and interface for capabilities.</li>
+        <li>Create Notification with Email/Push and Schedulable interface.</li>
+        <li>Replace an abstract class with an interface and note changes.</li>
+    </ul>
+    <p>Next topic: Exception Handling — try, catch, finally, and custom exceptions.</p>
+</div>
+
+    </div>
+
+</body>
+</html>

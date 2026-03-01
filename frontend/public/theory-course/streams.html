@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streams - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link active">23. Streams</a>
+                <div class="page-subtopics">
+                    <a href="#what" class="subtopic-link">What is Stream</a>
+                    <a href="#create" class="subtopic-link">Create Streams</a>
+                    <a href="#filter" class="subtopic-link">filter</a>
+                    <a href="#map" class="subtopic-link">map</a>
+                    <a href="#chain" class="subtopic-link">Chaining</a>
+                    <a href="#collect" class="subtopic-link">collect</a>
+                    <a href="#sorted" class="subtopic-link">sorted</a>
+                    <a href="#distinct" class="subtopic-link">distinct</a>
+                    <a href="#limit-skip" class="subtopic-link">limit & skip</a>
+                    <a href="#count" class="subtopic-link">count</a>
+                    <a href="#foreach" class="subtopic-link">forEach</a>
+                    <a href="#intermediate" class="subtopic-link">Intermediate vs Terminal</a>
+                    <a href="#reduce" class="subtopic-link">reduce</a>
+                    <a href="#minmax" class="subtopic-link">min & max</a>
+                    <a href="#collect-map" class="subtopic-link">Collectors to Map</a>
+                    <a href="#grouping" class="subtopic-link">groupingBy</a>
+                    <a href="#full-example" class="subtopic-link">Full Example</a>
+                    <a href="#mistakes" class="subtopic-link">Common Mistakes</a>
+                    <a href="#quick-ref" class="subtopic-link">Quick Reference</a>
+                    <a href="#practice" class="subtopic-link">Practice</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Streams</h1>
+
+    <h2 id="what">What is the Stream API?</h2>
+    <p>A Stream is a pipeline for processing data with chained operations like <b>filter</b>, <b>map</b>, and <b>collect</b>. Streams do <b>not</b> modify the original collection.</p>
+    <p>Streams focus on <b>what</b> to do, not <b>how</b> to loop, which makes code shorter and more readable.</p>
+    <p>Streams are <b>lazy</b>: intermediate operations don’t run until a terminal operation is called.</p>
+    <p>A stream is single‑use, so you must create a new stream for each pipeline.</p>
+    <div class="code">
+List<String> result = names.stream()
+    .filter(name -> name.startsWith("A"))
+    .map(name -> name.toUpperCase())
+    .collect(Collectors.toList());
+    </div>
+
+    <h2 id="create">Creating a Stream</h2>
+    <p>You can create streams from collections, arrays, or explicit values.</p>
+    <p>Use <b>stream()</b> for sequential processing and <b>parallelStream()</b> for parallel execution.</p>
+    <p>Infinite streams can be created with Stream.generate or Stream.iterate when needed.</p>
+    <div class="code">
+List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
+Stream<String> s1 = names.stream();
+
+String[] arr = {"Alice", "Bob"};
+Stream<String> s2 = Arrays.stream(arr);
+
+Stream<Integer> s3 = Stream.of(1, 2, 3, 4, 5);
+Stream<String> empty = Stream.empty();
+    </div>
+
+    <h2 id="filter">filter()</h2>
+    <p><b>filter</b> keeps only elements that match a condition. The size can shrink, but the source stays unchanged.</p>
+    <p>It accepts a Predicate and removes items where the predicate returns false.</p>
+    <p>Filtering early in a pipeline improves performance by reducing later work.</p>
+    <div class="code">
+List<Integer> nums = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
+
+List<Integer> evens = nums.stream()
+    .filter(n -> n % 2 == 0)
+    .collect(Collectors.toList());
+
+List<String> names2 = Arrays.asList("Alice", "Bob", "Anna", "Charlie", "Amy");
+List<String> aNames = names2.stream()
+    .filter(name -> name.startsWith("A"))
+    .collect(Collectors.toList());
+    </div>
+
+    <h2 id="map">map()</h2>
+    <p><b>map</b> transforms each element into a new value. The number of elements stays the same.</p>
+    <p>Use it for converting types, extracting fields, or formatting values.</p>
+    <p>Each input produces exactly one output element.</p>
+    <div class="code">
+List<String> lower = Arrays.asList("alice", "bob", "charlie");
+List<String> upper = lower.stream()
+    .map(name -> name.toUpperCase())
+    .collect(Collectors.toList());
+
+List<Integer> lengths = lower.stream()
+    .map(name -> name.length())
+    .collect(Collectors.toList());
+
+List<String> strNums = Arrays.asList("1", "2", "3", "4", "5");
+List<Integer> intNums = strNums.stream()
+    .map(s -> Integer.parseInt(s))
+    .collect(Collectors.toList());
+    </div>
+
+    <h2 id="chain">Chaining filter and map</h2>
+    <p>Streams are designed to be chained into a readable pipeline.</p>
+    <p>Each step passes its result to the next step, which makes transformations clear.</p>
+    <p>Order matters: filter then map is not always the same as map then filter.</p>
+    <div class="code">
+List<String> names3 = Arrays.asList("Alice", "Bob", "Anna", "Charlie", "Amy", "Brian");
+List<String> result = names3.stream()
+    .filter(name -> name.startsWith("A"))
+    .map(String::toUpperCase)
+    .collect(Collectors.toList());
+
+List<Integer> nums2 = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
+List<Integer> doubledEvens = nums2.stream()
+    .filter(n -> n % 2 == 0)
+    .map(n -> n * 2)
+    .collect(Collectors.toList());
+    </div>
+
+    <h2 id="collect">collect()</h2>
+    <p><b>collect</b> is a terminal operation that gathers results into a list, set, map, or string.</p>
+    <p>Collectors define the final shape: list, set, map, joining, grouping, or summarizing.</p>
+    <p>collect ends the stream, so you cannot reuse the same stream afterward.</p>
+    <div class="code">
+List<String> list = names.stream().collect(Collectors.toList());
+Set<String> set = names.stream().collect(Collectors.toSet());
+
+String joined = names.stream()
+    .collect(Collectors.joining(", "));
+    </div>
+
+    <h2 id="sorted">sorted()</h2>
+    <p><b>sorted</b> orders elements naturally or with a custom comparator.</p>
+    <p>Sorting is an intermediate step and runs only when a terminal operation is executed.</p>
+    <p>Custom comparators let you sort by length, fields, or reverse order.</p>
+    <div class="code">
+List<Integer> nums3 = Arrays.asList(5,3,8,1,9,2);
+List<Integer> asc = nums3.stream().sorted().collect(Collectors.toList());
+List<Integer> desc = nums3.stream()
+    .sorted((a, b) -> b - a)
+    .collect(Collectors.toList());
+
+List<String> names4 = Arrays.asList("Charlie", "Al", "Bob", "Diana");
+List<String> byLength = names4.stream()
+    .sorted((a, b) -> a.length() - b.length())
+    .collect(Collectors.toList());
+    </div>
+
+    <h2 id="distinct">distinct()</h2>
+    <p><b>distinct</b> removes duplicates based on equals and hashCode.</p>
+    <p>For custom objects, correct equals and hashCode implementations are required.</p>
+    <p>distinct keeps the first occurrence and removes later duplicates.</p>
+    <div class="code">
+List<Integer> nums4 = Arrays.asList(1,2,2,3,3,3,4,5,5);
+List<Integer> unique = nums4.stream().distinct().collect(Collectors.toList());
+
+List<String> names5 = Arrays.asList("Alice", "Bob", "Alice", "Charlie", "Bob");
+List<String> uniqueSorted = names5.stream()
+    .distinct()
+    .sorted()
+    .collect(Collectors.toList());
+    </div>
+
+    <h2 id="limit-skip">limit() and skip()</h2>
+    <p><b>limit</b> takes the first n elements, <b>skip</b> ignores the first n elements. Useful for pagination.</p>
+    <p>Use skip + limit together to create pages, like skip(10).limit(10) for page 2.</p>
+    <p>These are intermediate operations, so they are lazy until a terminal runs.</p>
+    <div class="code">
+List<Integer> nums5 = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
+List<Integer> first5 = nums5.stream().limit(5).collect(Collectors.toList());
+List<Integer> last5 = nums5.stream().skip(5).collect(Collectors.toList());
+
+List<Integer> page2 = nums5.stream().skip(5).limit(5).collect(Collectors.toList());
+    </div>
+
+    <h2 id="count">count()</h2>
+    <p><b>count</b> is a terminal operation that returns the number of elements.</p>
+    <p>It is often combined with filter to count matching elements.</p>
+    <p>Because it is terminal, the stream cannot be reused after count.</p>
+    <div class="code">
+List<String> names6 = Arrays.asList("Alice", "Bob", "Anna", "Charlie", "Amy");
+long total = names6.stream().count();
+long aCount = names6.stream().filter(name -> name.startsWith("A")).count();
+    </div>
+
+    <h2 id="foreach">forEach()</h2>
+    <p><b>forEach</b> is a terminal operation used for side effects like printing.</p>
+    <p>Use it when you need to perform an action on each element rather than collect results.</p>
+    <p>Prefer to keep side effects small to preserve stream readability.</p>
+    <div class="code">
+List<String> names7 = Arrays.asList("Alice", "Bob", "Charlie");
+names7.stream().forEach(name -> System.out.println("Hello, " + name));
+    </div>
+
+    <h2 id="intermediate">Intermediate vs Terminal Operations</h2>
+    <p>Intermediate operations build the pipeline; terminal operations trigger execution.</p>
+    <p>Intermediate steps are <b>lazy</b>, and a stream is consumed after a terminal operation runs.</p>
+    <p>Intermediate operations return a new stream, while terminal operations return a result or side effect.</p>
+    <p>A stream can be used only once, so always create a new stream for another pipeline.</p>
+    <div class="code">
+Intermediate → filter, map, sorted, distinct, limit, skip (lazy)
+Terminal     → collect, forEach, count, min, max, reduce
+    </div>
+
+    <h2 id="reduce">reduce()</h2>
+    <p><b>reduce</b> combines all elements into a single result using an accumulator.</p>
+    <p>The identity value is the starting point, and the accumulator is applied for each element.</p>
+    <p>Common uses include sum, product, min/max via custom logic, or concatenation.</p>
+    <p>For numeric sums, prefer specialized methods like mapToInt().sum() for readability.</p>
+    <div class="code">
+List<Integer> nums6 = Arrays.asList(1,2,3,4,5);
+int sum = nums6.stream().reduce(0, (a, b) -> a + b);
+int product = nums6.stream().reduce(1, (a, b) -> a * b);
+
+List<String> words = Arrays.asList("Hello", " ", "World", "!");
+String sentence = words.stream().reduce("", (a, b) -> a + b);
+    </div>
+
+    <h2 id="minmax">min() and max()</h2>
+    <p><b>min</b> and <b>max</b> are terminal operations that return the smallest or largest element using a comparator.</p>
+    <p>They return an Optional, so handle empty streams before calling get().</p>
+    <p>Use Comparator.naturalOrder() for natural ordering or a custom comparator for fields.</p>
+    <div class="code">
+List<Integer> nums7 = Arrays.asList(5,3,8,1,9,2);
+int min = nums7.stream().min((a, b) -> a - b).get();
+int max = nums7.stream().max((a, b) -> a - b).get();
+
+int min2 = nums7.stream().min(Comparator.naturalOrder()).get();
+int max2 = nums7.stream().max(Comparator.naturalOrder()).get();
+    </div>
+
+    <h2 id="collect-map">Collecting to Map</h2>
+    <p><b>Collectors.toMap</b> creates a map from stream elements using key and value functions.</p>
+    <p>Keys must be unique; if duplicates are possible, provide a merge rule.</p>
+    <p>Use a merge function to decide which value to keep when keys repeat.</p>
+    <div class="code">
+List<String> names8 = Arrays.asList("Alice", "Bob", "Charlie");
+Map<String, Integer> nameLengths = names8.stream()
+    .collect(Collectors.toMap(
+        name -> name,
+        name -> name.length()
+    ));
+    </div>
+
+    <h2 id="grouping">groupingBy</h2>
+    <p><b>groupingBy</b> groups elements by a classifier function and can also compute counts or other reductions.</p>
+    <p>It returns a Map where each key maps to a list or a downstream result.</p>
+    <p>Combine it with counting, summing, or mapping for grouped statistics.</p>
+    <div class="code">
+List<String> names9 = Arrays.asList("Alice", "Bob", "Anna", "Charlie", "Amy", "Brian");
+Map<Character, List<String>> grouped = names9.stream()
+    .collect(Collectors.groupingBy(name -> name.charAt(0)));
+
+Map<Character, Long> countByLetter = names9.stream()
+    .collect(Collectors.groupingBy(
+        name -> name.charAt(0),
+        Collectors.counting()
+    ));
+    </div>
+
+    <h2 id="full-example">Full Example: Student Report</h2>
+    <p>This example combines filtering, sorting, reduction, and collecting in a single workflow.</p>
+    <div class="code">
+public class StudentReport {
+    public static void main(String[] args) {
+
+        List<String> students = Arrays.asList(
+            "Alice", "Bob", "Charlie", "Anna", "David", "Amy", "Brian"
+        );
+
+        List<Integer> scores = Arrays.asList(88, 42, 95, 76, 55, 91, 63);
+
+        System.out.println("=== Student Report ===");
+        System.out.println("Total: " + students.stream().count());
+
+        List<String> aStudents = students.stream()
+            .filter(s -> s.startsWith("A"))
+            .sorted()
+            .collect(Collectors.toList());
+        System.out.println("A students: " + aStudents);
+
+        List<Integer> passing = scores.stream()
+            .filter(s -> s >= 60)
+            .sorted()
+            .collect(Collectors.toList());
+        System.out.println("Passing scores: " + passing);
+
+        double avg = scores.stream()
+            .reduce(0, Integer::sum) / (double) scores.size();
+        System.out.printf("Average: %.1f%n", avg);
+
+        System.out.println("Highest: " + scores.stream().max(Comparator.naturalOrder()).get());
+        System.out.println("Lowest:  " + scores.stream().min(Comparator.naturalOrder()).get());
+
+        String allNames = students.stream()
+            .map(String::toUpperCase)
+            .collect(Collectors.joining(", "));
+        System.out.println("Names: " + allNames);
+    }
+}
+    </div>
+
+    <h2 id="mistakes">Common Mistakes</h2>
+    <p>A stream can be consumed only once, and intermediate operations do nothing until a terminal operation is called.</p>
+    <p>Forgetting to add a terminal operation leads to no output or side effects.</p>
+    <p>Reusing a consumed stream throws an IllegalStateException.</p>
+    <div class="code">
+Stream<String> s = names.stream();
+s.filter(...).collect(...);
+// s.map(...).collect(...); // stream already consumed
+
+names.stream().filter(n -> n.startsWith("A"));
+// names.stream().filter(n -> n.startsWith("A")).collect(Collectors.toList());
+    </div>
+
+    <h2 id="quick-ref">Quick Reference</h2>
+    <p>Use this as a compact reminder of common intermediate and terminal operations.</p>
+    <div class="code">
+.filter(predicate)
+.map(function)
+.sorted()
+.sorted(comparator)
+.distinct()
+.limit(n)
+.skip(n)
+.count()
+.forEach(consumer)
+.reduce(identity, fn)
+.min(comparator)
+.max(comparator)
+.collect(Collectors.toList())
+.collect(Collectors.toSet())
+.collect(Collectors.joining())
+.collect(Collectors.toMap())
+.collect(Collectors.groupingBy())
+    </div>
+
+    <h2 id="practice">Practice Exercises</h2>
+    <p>Practice these to build confidence with pipelines and collectors.</p>
+    <ul>
+        <li>Filter a list to keep only odd numbers.</li>
+        <li>Map names to their lengths.</li>
+        <li>Filter strings longer than 4, then lowercase.</li>
+        <li>Convert ["10","20","30"] to integers with map.</li>
+        <li>Join city names with Collectors.joining(", ").</li>
+        <li>Top 3 largest values using sorted + limit.</li>
+        <li>Remove duplicates, sort, print with forEach.</li>
+        <li>Count strings with length &gt; 4.</li>
+        <li>Skip first 10 from a list of 20.</li>
+        <li>Pipeline: filter even → double → sort desc → take 3 → print.</li>
+        <li>Sum and product using reduce.</li>
+        <li>Group words by length with groupingBy.</li>
+        <li>Count passing (>=50) and failing.</li>
+    </ul>
+</div>
+
+    </div>
+
+</body>
+</html>

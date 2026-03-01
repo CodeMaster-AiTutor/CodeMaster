@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collections - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link active">20. Collections</a>
+                <div class="page-subtopics">
+                    <a href="#framework" class="subtopic-link">What is Collections</a>
+                    <a href="#list" class="subtopic-link">List</a>
+                    <a href="#arraylist" class="subtopic-link">ArrayList</a>
+                    <a href="#linkedlist" class="subtopic-link">LinkedList</a>
+                    <a href="#list-compare" class="subtopic-link">List Comparison</a>
+                    <a href="#set" class="subtopic-link">Set</a>
+                    <a href="#hashset" class="subtopic-link">HashSet</a>
+                    <a href="#treeset" class="subtopic-link">TreeSet</a>
+                    <a href="#linkedhashset" class="subtopic-link">LinkedHashSet</a>
+                    <a href="#set-compare" class="subtopic-link">Set Comparison</a>
+                    <a href="#map" class="subtopic-link">Map</a>
+                    <a href="#hashmap" class="subtopic-link">HashMap</a>
+                    <a href="#map-iteration" class="subtopic-link">Map Iteration</a>
+                    <a href="#treemap" class="subtopic-link">TreeMap</a>
+                    <a href="#linkedhashmap" class="subtopic-link">LinkedHashMap</a>
+                    <a href="#map-compare" class="subtopic-link">Map Comparison</a>
+                    <a href="#collections-utility" class="subtopic-link">Collections Utility</a>
+                    <a href="#stack" class="subtopic-link">Stack</a>
+                    <a href="#queue" class="subtopic-link">Queue</a>
+                    <a href="#priorityqueue" class="subtopic-link">PriorityQueue</a>
+                    <a href="#conversions" class="subtopic-link">Conversions</a>
+                    <a href="#hashmap-internals" class="subtopic-link">HashMap Internals</a>
+                    <a href="#advanced-hashmap" class="subtopic-link">Advanced HashMap</a>
+                    <a href="#nested" class="subtopic-link">Nested Collections</a>
+                    <a href="#unmodifiable" class="subtopic-link">Unmodifiable</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Collections</h1>
+
+    <h2 id="framework">What is the Collections Framework?</h2>
+    <p>Arrays are fixed-size. Real programs need dynamic structures: unique sets, key-value maps, sorted data, fast lookups. Java’s <b>Collections Framework</b> provides these as ready-made structures.</p>
+    <p>It is a unified set of interfaces and classes that standardize how collections are stored, accessed, and iterated.</p>
+    <p>This makes code consistent and lets you swap implementations without changing the logic.</p>
+    <div class="code">
+Main interfaces → List, Set, Map
+List: ordered, duplicates allowed
+Set: unique elements only
+Map: key-value pairs
+    </div>
+
+    <h2 id="list">List</h2>
+    <p>A <b>List</b> is ordered, index-based, and allows duplicates.</p>
+    <p>Elements maintain insertion order, and you can access or update by index.</p>
+    <p>Lists are ideal when sequence matters, such as playlists, to‑do items, or maintaining a ranked order.</p>
+    <p>Common operations include get(index), set(index, value), and inserting at a specific position.</p>
+
+    <h2 id="arraylist">ArrayList (most commonly used)</h2>
+    <p>Backed by a resizable array. Fast random access, slower insertions in the middle.</p>
+    <p>Random access is O(1) because elements are stored contiguously in memory.</p>
+    <p>Insertions or deletions in the middle require shifting elements, which is O(n).</p>
+    <p>Appends are fast, but resizing occasionally costs time due to copying.</p>
+    <div class="code">
+import java.util.ArrayList;
+import java.util.List;
+
+List<String> students = new ArrayList<>();
+students.add("Alice");
+students.add("Bob");
+students.add("Charlie");
+students.add("Alice");
+
+System.out.println(students);         // [Alice, Bob, Charlie, Alice]
+System.out.println(students.get(1));  // Bob
+System.out.println(students.size());  // 4
+
+students.set(1, "Bobby");
+students.remove("Charlie");
+students.remove(0);
+System.out.println(students.contains("Alice"));
+
+for (String s : students) {
+    System.out.println(s);
+}
+    </div>
+
+    <h2 id="linkedlist">LinkedList (fast insert/remove at ends)</h2>
+    <p>Doubly linked list. Fast insert/remove at beginning or end, slower index access.</p>
+    <p>Each node stores data plus references to previous and next nodes.</p>
+    <p>Accessing by index requires traversal from the head or tail, so it is O(n).</p>
+    <p>Best for queue/deque style usage and frequent end insertions/removals.</p>
+    <div class="code">
+import java.util.LinkedList;
+
+LinkedList<String> tasks = new LinkedList<>();
+tasks.add("Task A");
+tasks.add("Task B");
+tasks.addFirst("Urgent Task");
+tasks.addLast("Low Priority");
+
+System.out.println(tasks.getFirst());
+System.out.println(tasks.getLast());
+tasks.removeFirst();
+System.out.println(tasks);
+    </div>
+
+    <h2 id="list-compare">ArrayList vs LinkedList</h2>
+    <p>Choose based on access pattern: frequent indexing vs frequent insert/delete.</p>
+    <p>If you need fast reads by index, choose ArrayList. If you need many inserts/removes near the ends, choose LinkedList.</p>
+    <p>In practice, ArrayList is preferred for most read-heavy workloads.</p>
+    <div class="code">
+Get by index → ArrayList O(1), LinkedList O(n)
+Add at end   → ArrayList O(1), LinkedList O(1)
+Add at start → ArrayList O(n), LinkedList O(1)
+Memory use   → ArrayList less, LinkedList more
+Best for     → ArrayList index access, LinkedList frequent inserts/deletes
+    </div>
+
+    <h2 id="set">Set</h2>
+    <p>A <b>Set</b> stores unique elements only. Duplicates are ignored.</p>
+    <p>Sets are useful for membership checks, de-duplication, and maintaining uniqueness.</p>
+    <p>The definition of “duplicate” depends on equals() and hashCode() for that type.</p>
+    <p>Use Set when you care about uniqueness rather than order or position.</p>
+
+    <h2 id="hashset">HashSet (fastest, no order)</h2>
+    <p>Uses hashing for O(1) average insert and lookup. Does not guarantee order.</p>
+    <p>Ideal for fast membership checks like “has this ID been seen before?”.</p>
+    <p>Iteration order can change if the table resizes or the hash distribution changes.</p>
+    <div class="code">
+import java.util.HashSet;
+
+HashSet<String> cities = new HashSet<>();
+cities.add("Delhi");
+cities.add("Mumbai");
+cities.add("Bangalore");
+cities.add("Delhi");
+
+System.out.println(cities);
+System.out.println(cities.size());
+System.out.println(cities.contains("Mumbai"));
+cities.remove("Mumbai");
+    </div>
+
+    <h2 id="treeset">TreeSet (sorted)</h2>
+    <p>Keeps elements sorted using a balanced tree. Slower than HashSet but ordered.</p>
+    <p>Insert and lookup are O(log n), but you get sorted iteration and range queries.</p>
+    <p>Elements must be comparable or you must provide a comparator.</p>
+    <div class="code">
+import java.util.TreeSet;
+
+TreeSet<Integer> scores = new TreeSet<>();
+scores.add(75); scores.add(90); scores.add(60);
+scores.add(90);
+scores.add(85);
+
+System.out.println(scores);
+System.out.println(scores.first());
+System.out.println(scores.last());
+
+TreeSet<String> names = new TreeSet<>();
+names.add("Mango"); names.add("Apple"); names.add("Banana");
+System.out.println(names);
+    </div>
+
+    <h2 id="linkedhashset">LinkedHashSet (insertion order)</h2>
+    <p>Maintains insertion order while keeping uniqueness. Slightly slower than HashSet.</p>
+    <p>Great when you need uniqueness plus predictable iteration order, such as removing duplicates while preserving input order.</p>
+    <div class="code">
+import java.util.LinkedHashSet;
+
+LinkedHashSet<String> languages = new LinkedHashSet<>();
+languages.add("Java");
+languages.add("Python");
+languages.add("C++");
+languages.add("Java");
+
+System.out.println(languages);
+    </div>
+
+    <h2 id="set-compare">Set Comparison</h2>
+    <p>Choose a Set based on ordering and performance needs. HashSet is fastest, TreeSet keeps data sorted, and LinkedHashSet preserves insertion order.</p>
+    <p>Use HashSet for speed, TreeSet for sorted views and ranges, LinkedHashSet for consistent iteration order.</p>
+    <div class="code">
+Order       → HashSet none, TreeSet sorted, LinkedHashSet insertion
+Performance → HashSet fastest, TreeSet slower, LinkedHashSet slightly slower
+Nulls       → HashSet one, TreeSet no, LinkedHashSet one
+Best for    → HashSet fast unique, TreeSet sorted unique, LinkedHashSet ordered unique
+    </div>
+
+    <h2 id="map">Map</h2>
+    <p>A <b>Map</b> stores key-value pairs. Keys are unique; values can repeat.</p>
+    <p>Maps are optimized for fast key-based lookup rather than sequential access.</p>
+    <p>Use a Map when you need to associate each key with one value, like id → student or country → capital.</p>
+    <p>Maps do not implement Collection, so they have their own APIs for keys, values, and entries.</p>
+
+    <h2 id="hashmap">HashMap (most used)</h2>
+    <p>Provides fast average O(1) put/get using hashing. Order is not guaranteed and one null key is allowed.</p>
+    <p>When keys are well-distributed, HashMap gives near-constant time performance.</p>
+    <p>Prefer it for large datasets where ordering is not required.</p>
+    <div class="code">
+import java.util.HashMap;
+
+HashMap<String, Integer> grades = new HashMap<>();
+grades.put("Alice", 92);
+grades.put("Bob", 85);
+grades.put("Charlie", 78);
+grades.put("Diana", 95);
+
+System.out.println(grades.get("Alice"));
+System.out.println(grades.get("Eve"));
+System.out.println(grades.getOrDefault("Eve", 0));
+System.out.println(grades.containsKey("Bob"));
+System.out.println(grades.containsValue(78));
+
+grades.put("Bob", 90);
+grades.remove("Charlie");
+System.out.println(grades.size());
+    </div>
+
+    <h2 id="map-iteration">Iterating a HashMap</h2>
+    <p>Use keySet for keys, values for values, and entrySet when you need both key and value together.</p>
+    <p>entrySet avoids repeated lookups and is best for performance when reading both.</p>
+    <p>forEach is concise for printing or simple processing.</p>
+    <div class="code">
+for (String name : grades.keySet()) {
+    System.out.println(name);
+}
+
+for (int grade : grades.values()) {
+    System.out.println(grade);
+}
+
+for (Map.Entry<String, Integer> entry : grades.entrySet()) {
+    System.out.println(entry.getKey() + " → " + entry.getValue());
+}
+
+grades.forEach((name, grade) -> System.out.println(name + ": " + grade));
+    </div>
+
+    <h2 id="treemap">TreeMap (sorted keys)</h2>
+    <p>Maintains keys in sorted order using a balanced tree. Slower than HashMap but great for range queries.</p>
+    <p>Useful when you need sorted iteration, smallest/largest keys, or subMap ranges.</p>
+    <p>Keys must be comparable or you must supply a comparator.</p>
+    <div class="code">
+import java.util.TreeMap;
+
+TreeMap<String, Integer> prices = new TreeMap<>();
+prices.put("Mango", 80);
+prices.put("Apple", 120);
+prices.put("Banana", 40);
+prices.put("Grapes", 150);
+
+System.out.println(prices);
+System.out.println(prices.firstKey());
+System.out.println(prices.lastKey());
+    </div>
+
+    <h2 id="linkedhashmap">LinkedHashMap (insertion order)</h2>
+    <p>Preserves insertion order and offers predictable iteration while keeping hashing performance.</p>
+    <p>Iteration order matches insertion order, which is useful for display or deterministic output.</p>
+    <p>Often used as a foundation for LRU cache logic.</p>
+    <div class="code">
+import java.util.LinkedHashMap;
+
+LinkedHashMap<String, String> capitals = new LinkedHashMap<>();
+capitals.put("India", "New Delhi");
+capitals.put("France", "Paris");
+capitals.put("Japan", "Tokyo");
+
+capitals.forEach((country, capital) ->
+    System.out.println(country + " → " + capital));
+    </div>
+
+    <h2 id="map-compare">Map Comparison</h2>
+    <p>Pick based on ordering: HashMap for speed, TreeMap for sorted keys, LinkedHashMap for insertion order.</p>
+    <p>HashMap is usually fastest, TreeMap provides sorted access, LinkedHashMap gives stable iteration.</p>
+    <div class="code">
+Key order   → HashMap none, TreeMap sorted, LinkedHashMap insertion
+Performance→ HashMap fastest, TreeMap slower, LinkedHashMap slightly slower
+Null keys  → HashMap one, TreeMap no, LinkedHashMap one
+Best for   → HashMap fast lookup, TreeMap sorted keys, LinkedHashMap ordered keys
+    </div>
+
+    <h2 id="collections-utility">Collections Utility Class</h2>
+    <p>Contains static helper methods for sorting, searching, reversing, and working with collections.</p>
+    <p>These algorithms operate on existing lists and can save you from writing common logic.</p>
+    <p>Binary search requires a sorted list, and reverseOrder helps in descending sorts.</p>
+    <div class="code">
+import java.util.Collections;
+import java.util.ArrayList;
+
+ArrayList<Integer> nums = new ArrayList<>();
+nums.add(40); nums.add(10); nums.add(70); nums.add(25); nums.add(55);
+
+Collections.sort(nums);
+Collections.sort(nums, Collections.reverseOrder());
+System.out.println(Collections.min(nums));
+System.out.println(Collections.max(nums));
+Collections.reverse(nums);
+Collections.shuffle(nums);
+
+ArrayList<String> words = new ArrayList<>();
+words.add("apple"); words.add("banana"); words.add("apple");
+System.out.println(Collections.frequency(words, "apple"));
+
+ArrayList<Integer> sorted = new ArrayList<>();
+sorted.add(10); sorted.add(30); sorted.add(50); sorted.add(70);
+System.out.println(Collections.binarySearch(sorted, 50));
+    </div>
+
+    <h2 id="stack">Stack (LIFO)</h2>
+    <p>LIFO means last-in element is removed first. Common for undo history and backtracking.</p>
+    <p>Think of a stack of plates: you remove the top plate first.</p>
+    <p>push adds, pop removes, and peek reads the top without removing.</p>
+    <div class="code">
+import java.util.LinkedList;
+
+LinkedList<String> stack = new LinkedList<>();
+stack.push("Page 1");
+stack.push("Page 2");
+stack.push("Page 3");
+
+System.out.println("Stack: " + stack);
+System.out.println("Top: " + stack.peek());
+System.out.println("Popped: " + stack.pop());
+System.out.println("Stack: " + stack);
+    </div>
+
+    <h2 id="queue">Queue (FIFO)</h2>
+    <p>FIFO means first-in element is removed first. Used in scheduling, buffering, and messaging.</p>
+    <p>Queues model real-world lines where the earliest entry is served first.</p>
+    <p>offer adds to the tail, poll removes from the head, and peek inspects the head.</p>
+    <div class="code">
+import java.util.LinkedList;
+import java.util.Queue;
+
+Queue<String> queue = new LinkedList<>();
+queue.offer("Customer 1");
+queue.offer("Customer 2");
+queue.offer("Customer 3");
+
+System.out.println("Queue: " + queue);
+System.out.println("Next: " + queue.peek());
+System.out.println("Served: " + queue.poll());
+System.out.println("Queue: " + queue);
+    </div>
+
+    <h2 id="priorityqueue">PriorityQueue (smallest first)</h2>
+    <p>Always removes the highest-priority element (smallest by default). Useful for scheduling and shortest-path algorithms.</p>
+    <p>Unlike normal queues, order is based on priority, not insertion time.</p>
+    <p>Use a custom comparator for max-heap behavior.</p>
+    <div class="code">
+import java.util.PriorityQueue;
+import java.util.Collections;
+
+PriorityQueue<Integer> pq = new PriorityQueue<>();
+pq.offer(50); pq.offer(10); pq.offer(30); pq.offer(5); pq.offer(20);
+
+while (!pq.isEmpty()) {
+    System.out.print(pq.poll() + " ");
+}
+
+PriorityQueue<Integer> maxPQ = new PriorityQueue<>(Collections.reverseOrder());
+maxPQ.offer(50); maxPQ.offer(10); maxPQ.offer(30);
+System.out.println(maxPQ.poll());
+    </div>
+
+    <h2 id="conversions">Converting Between Collection Types</h2>
+    <p>Conversions help when you need ordering, uniqueness, or a different API. For example, convert a List to a Set to remove duplicates, or a Set to a List for sorting.</p>
+    <p>Converting between types is common when a task needs a different collection behavior.</p>
+    <p>Remember that converting a List to a Set drops duplicates and may change order.</p>
+    <div class="code">
+import java.util.*;
+
+String[] arr = {"Alice", "Bob", "Charlie"};
+ArrayList<String> list = new ArrayList<>(Arrays.asList(arr));
+String[] backToArr = list.toArray(new String[0]);
+
+ArrayList<Integer> withDups = new ArrayList<>(Arrays.asList(1, 2, 2, 3, 3, 3));
+HashSet<Integer> unique = new HashSet<>(withDups);
+
+ArrayList<Integer> sortedList = new ArrayList<>(unique);
+Collections.sort(sortedList);
+
+ArrayList<String> names = new ArrayList<>(Arrays.asList("Bob", "Alice", "Bob", "Charlie"));
+LinkedHashSet<String> orderedUnique = new LinkedHashSet<>(names);
+
+HashMap<String, Integer> scores = new HashMap<>();
+scores.put("Charlie", 88); scores.put("Alice", 92); scores.put("Bob", 80);
+ArrayList<String> keyList = new ArrayList<>(scores.keySet());
+Collections.sort(keyList);
+    </div>
+
+    <h2 id="hashmap-internals">How HashMap Works Internally</h2>
+    <p>HashMap uses <b>hashCode()</b> to place keys into buckets for O(1) average access.</p>
+    <p>When collisions happen, multiple keys share a bucket, so equals is used to find the correct one.</p>
+    <p>When the load factor threshold is reached, the map resizes and rehashes entries.</p>
+    <p>Good hashCode implementations distribute keys evenly to keep buckets small and fast.</p>
+    <p>Poor hashing causes long chains and slower access time.</p>
+    <div class="code">
+When you put("Alice", 92):
+1) hashCode() → number
+2) bucket index computed
+3) key-value stored in bucket
+
+Collisions → multiple keys in same bucket
+Load factor → 0.75 triggers resize (rehashing)
+Pre-size: new HashMap<>(1024)
+
+HashSet uses HashMap internally:
+set.add("Apple") → map.put("Apple", DUMMY_VALUE)
+    </div>
+
+    <h2 id="advanced-hashmap">Advanced HashMap Methods</h2>
+    <p>These methods reduce boilerplate by handling missing keys and updates in one step.</p>
+    <p>They are safer and more concise for counters, groupings, and default values.</p>
+    <p>computeIfAbsent is especially useful for building lists or sets of values per key.</p>
+    <div class="code">
+HashMap<String, Integer> votes = new HashMap<>();
+votes.put("Alice", 5);
+int aliceVotes = votes.getOrDefault("Alice", 0);
+int bobVotes   = votes.getOrDefault("Bob", 0);
+
+HashMap<String, Integer> scores = new HashMap<>();
+scores.put("Alice", 90);
+scores.putIfAbsent("Alice", 100);
+scores.putIfAbsent("Bob", 85);
+
+HashMap<String, ArrayList<String>> groups = new HashMap<>();
+groups.computeIfAbsent("Team B", k -> new ArrayList<>()).add("Bob");
+groups.computeIfAbsent("Team B", k -> new ArrayList<>()).add("Charlie");
+
+HashMap<String, Integer> wordCount = new HashMap<>();
+String[] words = {"apple", "banana", "apple", "cherry", "apple", "banana"};
+for (String word : words) {
+    wordCount.merge(word, 1, Integer::sum);
+}
+    </div>
+
+    <h2 id="nested">Nested Collections</h2>
+    <p>Nested collections model grouped or hierarchical data, such as a student mapped to a list of marks.</p>
+    <p>They are common in real applications but require careful iteration and null checks.</p>
+    <p>Think of it as a table: each key points to a collection of related values.</p>
+    <p>They are powerful for representing grouped data but can become complex, so keep structures consistent.</p>
+    <div class="code">
+import java.util.*;
+
+HashMap<String, ArrayList<Integer>> studentMarks = new HashMap<>();
+studentMarks.put("Alice", new ArrayList<>(Arrays.asList(88, 92, 79)));
+studentMarks.put("Bob",   new ArrayList<>(Arrays.asList(70, 65, 80)));
+studentMarks.get("Alice").add(95);
+
+for (Map.Entry<String, ArrayList<Integer>> entry : studentMarks.entrySet()) {
+    ArrayList<Integer> marks = entry.getValue();
+    int sum = 0;
+    for (int m : marks) sum += m;
+    double avg = (double) sum / marks.size();
+    System.out.printf("%-8s | Marks: %-20s | Avg: %.1f%n",
+        entry.getKey(), marks.toString(), avg);
+}
+
+HashMap<String, HashMap<String, Integer>> records = new HashMap<>();
+HashMap<String, Integer> aliceMarks = new HashMap<>();
+aliceMarks.put("Math", 92); aliceMarks.put("Science", 88); aliceMarks.put("English", 79);
+records.put("Alice", aliceMarks);
+
+HashMap<String, Integer> bobMarks = new HashMap<>();
+bobMarks.put("Math", 75); bobMarks.put("Science", 80); bobMarks.put("English", 85);
+records.put("Bob", bobMarks);
+
+for (Map.Entry<String, HashMap<String, Integer>> student : records.entrySet()) {
+    System.out.println("Student: " + student.getKey());
+    student.getValue().forEach((subject, mark) ->
+        System.out.println("  " + subject + ": " + mark));
+}
+    </div>
+
+    <h2 id="unmodifiable">Unmodifiable Collections</h2>
+    <p>Unmodifiable collections prevent changes through the returned view. Useful for read-only data and API safety.</p>
+    <p>List.of, Set.of, and Map.of create fixed collections that cannot be changed at all.</p>
+    <p>Unmodifiable views reflect changes in the original collection, but you cannot edit through the view.</p>
+    <p>Use them to protect internal data from accidental modification.</p>
+    <div class="code">
+import java.util.Collections;
+
+ArrayList<String> students = new ArrayList<>();
+students.add("Alice"); students.add("Bob");
+
+List<String> readOnly = Collections.unmodifiableList(students);
+System.out.println(readOnly.get(0));
+
+List<String> fixed = List.of("Alice", "Bob", "Charlie");
+Set<String> fixedSet = Set.of("A", "B", "C");
+Map<String, Integer> fixedMap = Map.of("Alice", 90, "Bob", 85);
+    </div>
+</div>
+
+    </div>
+
+</body>
+</html>

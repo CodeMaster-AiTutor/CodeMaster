@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lambda - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link active">22. Lambda</a>
+                <div class="page-subtopics">
+                    <a href="#what" class="subtopic-link">What is Lambda</a>
+                    <a href="#syntax" class="subtopic-link">Lambda Syntax</a>
+                    <a href="#functional" class="subtopic-link">Functional Interfaces</a>
+                    <a href="#built-in" class="subtopic-link">Built‑in Interfaces</a>
+                    <a href="#comparison" class="subtopic-link">Quick Table</a>
+                    <a href="#foreach" class="subtopic-link">forEach</a>
+                    <a href="#sorting" class="subtopic-link">Sorting</a>
+                    <a href="#method-ref" class="subtopic-link">Method References</a>
+                    <a href="#chaining" class="subtopic-link">Chaining</a>
+                    <a href="#removeif" class="subtopic-link">removeIf</a>
+                    <a href="#replaceall" class="subtopic-link">replaceAll</a>
+                    <a href="#custom" class="subtopic-link">Custom Interfaces</a>
+                    <a href="#full-example" class="subtopic-link">Full Example</a>
+                    <a href="#mistakes" class="subtopic-link">Common Mistakes</a>
+                    <a href="#best-practices" class="subtopic-link">Best Practices</a>
+                    <a href="#practice" class="subtopic-link">Practice</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Lambda</h1>
+
+    <h2 id="what">What is a Lambda Expression?</h2>
+    <p>A Lambda is a <b>short, anonymous function</b> written inline. It reduces boilerplate when passing behavior as an argument.</p>
+    <p>Lambdas treat behavior as data, so you can pass logic to methods just like values.</p>
+    <p>They are the foundation for the Streams API and functional programming style in Java.</p>
+    <div class="code">
+// Old way
+Runnable r1 = new Runnable() {
+    @Override
+    public void run() {
+        System.out.println("Hello!");
+    }
+};
+r1.run();
+
+// Lambda way
+Runnable r2 = () -> System.out.println("Hello!");
+r2.run();
+    </div>
+
+    <h2 id="syntax">Lambda Syntax</h2>
+    <p>The left side is the parameter list, the arrow <b>-></b> separates parameters from the body, and the right side is the expression or block.</p>
+    <p>Type inference often lets you omit parameter types when the compiler can determine them.</p>
+    <div class="code">
+(parameters) -> expression
+(parameters) -> { statements; }
+
+() -> System.out.println("Hello!")
+name -> System.out.println("Hi " + name)
+(a, b) -> a + b
+(a, b) -> { int sum = a + b; return sum; }
+    </div>
+
+    <h2 id="functional">Functional Interfaces</h2>
+    <p>A functional interface has exactly <b>one abstract method</b>. Lambdas work only with these.</p>
+    <p>Default and static methods do not count toward the single abstract method rule.</p>
+    <p>@FunctionalInterface helps the compiler enforce the rule and documents your intent.</p>
+    <div class="code">
+@FunctionalInterface
+public interface Greeting {
+    void sayHello(String name);
+}
+
+Greeting g = name -> System.out.println("Hello, " + name + "!");
+g.sayHello("Alice");
+    </div>
+
+    <h2 id="built-in">Built‑in Functional Interfaces</h2>
+    <p>Java provides common functional interfaces in <b>java.util.function</b> to avoid custom interfaces.</p>
+    <p>Use them for callbacks, transformations, filtering, and supplier logic.</p>
+    <div class="code">
+Runnable task = () -> System.out.println("Task running!");
+
+Consumer<String> printer = name -> System.out.println("Name: " + name);
+Supplier<String> greeting = () -> "Hello, World!";
+Function<String, Integer> lengthFn = str -> str.length();
+Predicate<Integer> isEven = n -> n % 2 == 0;
+    </div>
+
+    <h2 id="comparison">Quick Comparison Table</h2>
+    <p>This table helps you match a lambda to the right interface based on input and output.</p>
+    <div class="code">
+Runnable      → no input, no output, run()
+Consumer<T>   → input, no output, accept(T)
+Supplier<T>   → no input, output, get()
+Function<T,R> → input, output, apply(T)
+Predicate<T>  → input, boolean, test(T)
+    </div>
+
+    <h2 id="foreach">Lambdas with forEach</h2>
+    <p>forEach accepts a Consumer, so it is perfect for printing or applying a side-effect to each element.</p>
+    <p>It makes iteration concise while keeping the intent clear.</p>
+    <div class="code">
+ArrayList<String> names = new ArrayList<>();
+names.add("Alice");
+names.add("Bob");
+
+for (String name : names) {
+    System.out.println(name);
+}
+
+names.forEach(name -> System.out.println(name));
+
+HashMap<String, Integer> scores = new HashMap<>();
+scores.put("Alice", 92);
+scores.put("Bob", 85);
+
+scores.forEach((name, score) ->
+    System.out.println(name + " scored " + score));
+    </div>
+
+    <h2 id="sorting">Sorting with Lambda</h2>
+    <p>Lambdas simplify Comparator logic and allow custom ordering without separate classes.</p>
+    <p>Comparators return negative, zero, or positive values to indicate order.</p>
+    <div class="code">
+ArrayList<String> names2 = new ArrayList<>();
+names2.add("Charlie"); names2.add("Al"); names2.add("Bob");
+
+names2.sort((a, b) -> a.length() - b.length());
+
+ArrayList<Integer> nums = new ArrayList<>();
+nums.add(50); nums.add(10); nums.add(80); nums.add(30);
+nums.sort((a, b) -> b - a);
+
+ArrayList<String> cities = new ArrayList<>();
+cities.add("Mumbai"); cities.add("Delhi"); cities.add("Agra");
+cities.sort((a, b) -> a.compareTo(b));
+    </div>
+
+    <h2 id="method-ref">Method References</h2>
+    <p>Method references are shorthand for lambdas that call existing methods.</p>
+    <p>Use <b>Class::staticMethod</b>, <b>Class::instanceMethod</b>, or <b>object::instanceMethod</b>.</p>
+    <div class="code">
+names.forEach(System.out::println);
+
+Function<String, String> upper = String::toUpperCase;
+System.out.println(upper.apply("hello"));
+
+Supplier<ArrayList> listMaker = ArrayList::new;
+ArrayList list = listMaker.get();
+    </div>
+
+    <h2 id="chaining">Chaining with andThen</h2>
+    <p>Functions and predicates can be combined to build pipelines of logic.</p>
+    <p>andThen runs after the first function, while compose runs before it.</p>
+    <div class="code">
+Function<String, String> trim  = str -> str.trim();
+Function<String, String> upper2 = str -> str.toUpperCase();
+Function<String, String> process = trim.andThen(upper2);
+System.out.println(process.apply("  hello world  "));
+
+Predicate<Integer> isPositive = n -> n > 0;
+Predicate<Integer> isEven2     = n -> n % 2 == 0;
+Predicate<Integer> isPositiveEven = isPositive.and(isEven2);
+Predicate<Integer> either = isPositive.or(isEven2);
+Predicate<Integer> isOdd = isEven2.negate();
+    </div>
+
+    <h2 id="removeif">removeIf with Lambda</h2>
+    <p>removeIf takes a Predicate and removes elements that match the condition.</p>
+    <p>This is a concise way to filter collections without manual loops.</p>
+    <div class="code">
+ArrayList<Integer> nums2 = new ArrayList<>(
+    Arrays.asList(1,2,3,4,5,6,7,8,9,10)
+);
+nums2.removeIf(n -> n % 2 == 0);
+
+ArrayList<String> names3 = new ArrayList<>(
+    Arrays.asList("Alice", "Bob", "Anna", "Charlie", "Amy")
+);
+names3.removeIf(name -> name.startsWith("A"));
+    </div>
+
+    <h2 id="replaceall">replaceAll with Lambda</h2>
+    <p>replaceAll applies a Function to every element and replaces each element with the result.</p>
+    <p>It is useful for bulk transformations like formatting or applying discounts.</p>
+    <div class="code">
+ArrayList<String> words = new ArrayList<>(
+    Arrays.asList("hello", "world", "java")
+);
+words.replaceAll(w -> w.toUpperCase());
+
+ArrayList<Integer> prices = new ArrayList<>(
+    Arrays.asList(100, 200, 300)
+);
+prices.replaceAll(p -> p + (p / 10));
+    </div>
+
+    <h2 id="custom">Custom Functional Interfaces</h2>
+    <p>Create custom interfaces only when built-in ones do not match your method signature.</p>
+    <p>Keep them small and focused, and annotate with @FunctionalInterface.</p>
+    <div class="code">
+@FunctionalInterface
+interface MathOperation {
+    int operate(int a, int b);
+}
+
+@FunctionalInterface
+interface Validator<T> {
+    boolean validate(T value);
+}
+
+MathOperation add = (a, b) -> a + b;
+Validator<String> notEmpty = s -> !s.isEmpty();
+    </div>
+
+    <h2 id="full-example">Full Example: Student Filter System</h2>
+    <div class="code">
+public class StudentFilter {
+
+    static ArrayList<String> filter(ArrayList<String> list, Predicate<String> condition) {
+        ArrayList<String> result = new ArrayList<>();
+        list.forEach(item -> { if (condition.test(item)) result.add(item); });
+        return result;
+    }
+
+    static void printAll(ArrayList<String> list, Consumer<String> printer) {
+        list.forEach(printer);
+    }
+
+    static ArrayList<String> transform(ArrayList<String> list, Function<String, String> fn) {
+        ArrayList<String> result = new ArrayList<>();
+        list.forEach(item -> result.add(fn.apply(item)));
+        return result;
+    }
+
+    public static void main(String[] args) {
+        ArrayList<String> students = new ArrayList<>(
+            Arrays.asList("Alice", "Bob", "Charlie", "Anna", "David", "Amy")
+        );
+
+        ArrayList<String> longNames = filter(students, name -> name.length() > 3);
+        System.out.println("Long names: " + longNames);
+
+        ArrayList<String> aNames = filter(students, name -> name.startsWith("A"));
+        System.out.println("Starts with A: " + aNames);
+
+        System.out.println("All students:");
+        printAll(students, name -> System.out.println("  -> " + name));
+
+        ArrayList<String> upper = transform(students, String::toUpperCase);
+        System.out.println("Uppercase: " + upper);
+    }
+}
+    </div>
+
+    <h2 id="mistakes">Common Mistakes</h2>
+    <p>These mistakes usually involve functional interface rules or variable capture.</p>
+    <p>Captured variables must be effectively final, so you cannot change them inside the lambda.</p>
+    <div class="code">
+interface Wrong {
+    void doA();
+    void doB();
+}
+
+int count = 0;
+// names.forEach(name -> count++); // must be effectively final
+    </div>
+
+    <h2 id="best-practices">Best Practices</h2>
+    <ul>
+        <li>Keep lambdas short; extract to named methods if long.</li>
+        <li>Use method references when calling existing methods.</li>
+        <li>Prefer built‑in interfaces over custom ones.</li>
+        <li>Use @FunctionalInterface on your custom interfaces.</li>
+    </ul>
+
+    <h2 id="practice">Practice Exercises</h2>
+    <ul>
+        <li>Use removeIf to delete strings shorter than 4.</li>
+        <li>Use replaceAll to add "Dr. " prefix to names.</li>
+        <li>Create StringFormatter with 3 formats: uppercase, reverse, brackets.</li>
+        <li>Write applyTwice(Function&lt;Integer, Integer&gt; fn, int value).</li>
+        <li>Pipeline: keep positives, double, print with forEach.</li>
+    </ul>
+</div>
+
+    </div>
+
+</body>
+</html>

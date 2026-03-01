@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serialization - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link active">26. Serialization</a>
+                <div class="page-subtopics">
+                    <a href="#what" class="subtopic-link">What is Serialization</a>
+                    <a href="#serializable" class="subtopic-link">Serializable</a>
+                    <a href="#write" class="subtopic-link">Writing Objects</a>
+                    <a href="#multiple" class="subtopic-link">Multiple Objects</a>
+                    <a href="#what-gets" class="subtopic-link">What Gets Serialized</a>
+                    <a href="#extensions" class="subtopic-link">File Extensions</a>
+                    <a href="#read" class="subtopic-link">Reading Objects</a>
+                    <a href="#transient" class="subtopic-link">transient</a>
+                    <a href="#versioning" class="subtopic-link">Versioning</a>
+                    <a href="#exceptions" class="subtopic-link">Exceptions</a>
+                    <a href="#full-example" class="subtopic-link">Full Example</a>
+                    <a href="#custom" class="subtopic-link">Custom Serialization</a>
+                    <a href="#mistakes" class="subtopic-link">Common Mistakes</a>
+                    <a href="#quick-ref" class="subtopic-link">Quick Reference</a>
+                    <a href="#practice" class="subtopic-link">Practice</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Serialization</h1>
+
+    <h2 id="what">What is Serialization?</h2>
+    <p><b>Serialization</b> converts a Java object into a <b>byte stream</b> so it can be saved, sent over a network, or stored in a database.</p>
+    <p><b>Deserialization</b> rebuilds the original object from the byte stream.</p>
+    <p>This allows objects to be persisted or transferred while preserving their state.</p>
+    <p>Only the object’s data is stored, not its behavior or methods.</p>
+    <div class="code">
+Object → (Serialization) → Byte Stream → File / Network
+File   → (Deserialization) → Byte Stream → Object
+    </div>
+
+    <h2 id="serializable">Making a Class Serializable</h2>
+    <p>A class must implement <b>Serializable</b> (marker interface) to be serialized.</p>
+    <p>Serializable has no methods; it simply tells the JVM the class can be serialized.</p>
+    <p>All non-transient fields must also be serializable, or you will get errors.</p>
+    <div class="code">
+import java.io.Serializable;
+
+public class Student implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private String name;
+    private int    age;
+    private String grade;
+
+    public Student(String name, int age, String grade) {
+        this.name = name;
+        this.age = age;
+        this.grade = grade;
+    }
+
+    public String getName() { return name; }
+    public int getAge() { return age; }
+    public String getGrade() { return grade; }
+
+    @Override
+    public String toString() {
+        return "Student{name='" + name + "', age=" + age + ", grade='" + grade + "'}";
+    }
+}
+    </div>
+    <p><b>serialVersionUID</b> is the class version. If it changes, old files fail with InvalidClassException.</p>
+    <p>Define it explicitly to keep backward compatibility across code changes.</p>
+
+    <h2 id="write">Writing an Object to a File</h2>
+    <p>ObjectOutputStream converts the object graph into bytes and writes them to a file.</p>
+    <p>The whole object graph is serialized, including referenced objects, if they are serializable.</p>
+    <div class="code">
+import java.io.*;
+
+public class WriteObject {
+    public static void main(String[] args) {
+        Student student = new Student("Alice", 20, "A");
+
+        try (FileOutputStream fos = new FileOutputStream("student.ser");
+             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+
+            oos.writeObject(student);
+            System.out.println("Object saved: " + student);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+    </div>
+
+    <h2 id="multiple">Writing Multiple Objects</h2>
+    <p>The easiest way is to serialize a collection like ArrayList, which preserves order.</p>
+    <p>When reading, you cast back to the same collection type.</p>
+    <div class="code">
+import java.io.*;
+import java.util.ArrayList;
+
+public class WriteMultiple {
+    public static void main(String[] args) {
+        ArrayList<Student> students = new ArrayList<>();
+        students.add(new Student("Alice", 20, "A"));
+        students.add(new Student("Bob", 22, "B"));
+        students.add(new Student("Charlie", 21, "A"));
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(
+                new FileOutputStream("students.ser"))) {
+
+            oos.writeObject(students);
+            System.out.println("Saved " + students.size() + " students.");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+    </div>
+
+    <h2 id="what-gets">What Gets Serialized?</h2>
+    <p>Instance fields are serialized by default. static fields belong to the class, not the object, so they are not saved.</p>
+    <p>transient fields are skipped, which is useful for sensitive or derived data.</p>
+    <div class="code">
+public class Example implements Serializable {
+    private String name;           // serialized
+    private int age;               // serialized
+    static int count = 0;          // not serialized
+    transient String password;     // not serialized
+}
+    </div>
+
+    <h2 id="extensions">Common File Extensions</h2>
+    <div class="code">
+.ser  .dat  .obj
+    </div>
+
+    <h2 id="read">Reading an Object from a File</h2>
+    <p>ObjectInputStream reconstructs the object graph from the byte stream.</p>
+    <p>readObject returns Object, so you must cast it to the correct type.</p>
+    <div class="code">
+import java.io.*;
+
+public class ReadObject {
+    public static void main(String[] args) {
+        try (FileInputStream fis = new FileInputStream("student.ser");
+             ObjectInputStream ois = new ObjectInputStream(fis)) {
+
+            Student student = (Student) ois.readObject();
+            System.out.println("Loaded: " + student);
+
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+}
+    </div>
+
+    <h2 id="transient">The transient Keyword</h2>
+    <p>Use <b>transient</b> for sensitive or derived fields so they are skipped during serialization.</p>
+    <p>After deserialization, transient fields get default values like null or 0.</p>
+    <p>This is useful for passwords, computed fields, or resources that cannot be serialized.</p>
+    <div class="code">
+import java.io.Serializable;
+
+public class User implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private String username;
+    private String email;
+    private transient String password;
+
+    public User(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+    }
+
+    @Override
+    public String toString() {
+        return "User{username='" + username + "', email='" + email
+                + "', password='" + password + "'}";
+    }
+}
+    </div>
+
+    <h2 id="versioning">Serialization Versioning</h2>
+    <p>Versioning controls whether old serialized data can be read by a newer class definition.</p>
+    <p>If serialVersionUID stays the same, new fields will get default values on load.</p>
+    <div class="code">
+public class Student implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private String name;
+    private int age;
+}
+
+public class Student implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private String name;
+    private int age;
+    private String grade;
+}
+    </div>
+    <p>Keep serialVersionUID the same to allow old files to load. New fields get default values.</p>
+    <p>Changing the UID signals a breaking change and will invalidate old files.</p>
+
+    <h2 id="exceptions">Exceptions in Serialization</h2>
+    <p>Most errors come from missing Serializable, version mismatches, or missing classes.</p>
+    <div class="code">
+NotSerializableException
+InvalidClassException
+ClassNotFoundException
+FileNotFoundException
+    </div>
+    <div class="code">
+try (ObjectInputStream ois = ...) {
+    Object obj = ois.readObject();
+} catch (IOException e) {
+    System.out.println("File error: " + e.getMessage());
+} catch (ClassNotFoundException e) {
+    System.out.println("Class not found: " + e.getMessage());
+}
+    </div>
+
+    <h2 id="full-example">Full Example: Student Record System</h2>
+    <div class="code">
+import java.io.*;
+import java.util.*;
+
+public class StudentRecord {
+
+    private static final String FILE = "records.ser";
+
+    public static void saveAll(ArrayList<Student> list) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(
+                new FileOutputStream(FILE))) {
+            oos.writeObject(list);
+            System.out.println("Saved " + list.size() + " records.");
+        } catch (IOException e) {
+            System.out.println("Save failed: " + e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Student> loadAll() {
+        File f = new File(FILE);
+        if (!f.exists()) return new ArrayList<>();
+
+        try (ObjectInputStream ois = new ObjectInputStream(
+                new FileInputStream(FILE))) {
+            return (ArrayList<Student>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Load failed: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public static void main(String[] args) {
+        ArrayList<Student> students = loadAll();
+        students.add(new Student("Alice", 20, "A"));
+        students.add(new Student("Bob", 22, "B"));
+        students.add(new Student("Charlie", 21, "A"));
+
+        saveAll(students);
+
+        ArrayList<Student> loaded = loadAll();
+        System.out.println("\n=== All Students ===");
+        loaded.forEach(System.out::println);
+    }
+}
+    </div>
+
+    <h2 id="custom">Custom Serialization — writeObject/readObject</h2>
+    <p>Custom serialization lets you control what gets written and read for sensitive or computed data.</p>
+    <p>Use defaultWriteObject and defaultReadObject to keep standard behavior intact.</p>
+    <div class="code">
+import java.io.*;
+
+public class SecureUser implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private String username;
+    private transient String password;
+
+    public SecureUser(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.defaultWriteObject();
+        String encrypted = "ENC:" + password;
+        oos.writeObject(encrypted);
+    }
+
+    private void readObject(ObjectInputStream ois)
+            throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
+        String encrypted = (String) ois.readObject();
+        this.password = encrypted.replace("ENC:", "");
+    }
+
+    @Override
+    public String toString() {
+        return "SecureUser{username='" + username + "', password='" + password + "'}";
+    }
+}
+    </div>
+    <div class="code">
+SecureUser user = new SecureUser("alice", "secret123");
+
+try (ObjectOutputStream oos = new ObjectOutputStream(
+        new FileOutputStream("secure.ser"))) {
+    oos.writeObject(user);
+    System.out.println("Saved: " + user);
+}
+
+try (ObjectInputStream ois = new ObjectInputStream(
+        new FileInputStream("secure.ser"))) {
+    SecureUser loaded = (SecureUser) ois.readObject();
+    System.out.println("Loaded: " + loaded);
+}
+    </div>
+
+    <h2 id="mistakes">Common Mistakes</h2>
+    <p>These errors usually come from not implementing Serializable or storing non-serializable fields.</p>
+    <div class="code">
+public class Car { }
+
+private static final long serialVersionUID = 1L;
+
+private Connection dbConn;
+private transient Connection dbConn;
+
+Object obj = ois.readObject();
+    </div>
+
+    <h2 id="quick-ref">Quick Reference</h2>
+    <div class="code">
+implements Serializable
+private static final long serialVersionUID = 1L;
+ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("file.ser"));
+oos.writeObject(object);
+ObjectInputStream ois = new ObjectInputStream(new FileInputStream("file.ser"));
+MyClass obj = (MyClass) ois.readObject();
+transient String password;
+try (ObjectOutputStream oos = new ObjectOutputStream(...)) { }
+oos.writeObject(arrayList);
+ArrayList<T> list = (ArrayList<T>) ois.readObject();
+    </div>
+
+    <h2 id="practice">Practice Exercises</h2>
+    <ul>
+        <li>Create a Product class, make it Serializable, and save one product to product.ser.</li>
+        <li>Serialize an ArrayList&lt;Product&gt; with 4 products.</li>
+        <li>Serialize a class without Serializable and read the error.</li>
+        <li>Add static count to Student and verify it is not serialized.</li>
+        <li>Explain why serialVersionUID is important and what exception occurs if it changes.</li>
+        <li>Serialize a User with transient password and verify it becomes null.</li>
+        <li>Serialize a BankAccount with transient pin and verify pin is lost.</li>
+        <li>Add field email to Student and deserialize with same serialVersionUID.</li>
+        <li>Change serialVersionUID and observe InvalidClassException.</li>
+        <li>Write and read a HashMap&lt;String, Student&gt;.</li>
+    </ul>
+</div>
+
+    </div>
+
+</body>
+</html>

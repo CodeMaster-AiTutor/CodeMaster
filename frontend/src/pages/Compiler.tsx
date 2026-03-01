@@ -649,7 +649,12 @@ const getStoredEditorThemeSupport = () => {
   }
 };
 
-const Compiler = () => {
+type CompilerProps = {
+  withLayout?: boolean;
+  onExecutionSuccess?: () => void;
+};
+
+const Compiler = ({ withLayout = true, onExecutionSuccess }: CompilerProps) => {
   const navigate = useNavigate();
   const initialCode = getFallbackCode() ?? '';
 
@@ -1272,6 +1277,7 @@ const Compiler = () => {
         setTerminalSessionId(result.session_id);
         setTerminalWsUrl(result.ws_url || '');
         setExecutionStatus('success');
+        onExecutionSuccess?.();
         toast({
           title: "Session started!",
           description: "Interactive terminal is ready."
@@ -1378,12 +1384,11 @@ const Compiler = () => {
     });
   };
 
-  return (
-    <AppLayout>
-      <div ref={compilerRef}>
-        <div className={`${isFullscreen ? 'h-screen bg-black overflow-y-auto' : 'min-h-screen'} bg-gradient-to-br from-background via-background to-background/95`}> 
-          <div className={`${isFullscreen ? 'p-4' : 'pt-1 px-1 pb-1 sm:pt-1 sm:px-1 sm:pb-1 md:pt-1 md:px-2 md:pb-2 lg:pt-1 lg:px-2 lg:pb-2'}`}> 
-            <div className={`${isFullscreen ? 'max-w-full' : 'max-w-7xl'} mx-auto space-y-1`}> 
+  const compilerContent = (
+    <div ref={compilerRef}>
+      <div className={`${isFullscreen ? 'h-screen bg-black overflow-y-auto' : 'min-h-screen'} bg-gradient-to-br from-background via-background to-background/95`}> 
+        <div className={`${isFullscreen ? 'p-4' : 'pt-1 px-1 pb-1 sm:pt-1 sm:px-1 sm:pb-1 md:pt-1 md:px-2 md:pb-2 lg:pt-1 lg:px-2 lg:pb-2'}`}> 
+          <div className={`${isFullscreen ? 'max-w-full' : 'max-w-7xl'} mx-auto space-y-1`}> 
               
               {/* Main IDE Layout */} 
               <div className={`${isFullscreen ? 'space-y-6' : 'space-y-6'}`}> 
@@ -1547,8 +1552,11 @@ const Compiler = () => {
           </div> 
         </div> 
       </div>
-    </AppLayout>
   );
+  if (withLayout) {
+    return <AppLayout>{compilerContent}</AppLayout>;
+  }
+  return compilerContent;
 };
 
 export default Compiler;

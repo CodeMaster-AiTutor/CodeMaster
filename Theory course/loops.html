@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loops - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link active">6. Loops</a>
+                <div class="page-subtopics">
+                    <a href="#while-loop" class="subtopic-link">while loop</a>
+                    <a href="#do-while-loop" class="subtopic-link">do-while loop</a>
+                    <a href="#for-loop" class="subtopic-link">for loop</a>
+                    <a href="#nested-loops" class="subtopic-link">nested loops</a>
+                    <a href="#break-continue" class="subtopic-link">break & continue</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Loops</h1>
+
+    <h2 id="why-loops-exist">Why Loops Exist</h2>
+    <p>Programs often need to repeat work: print numbers, read multiple inputs, count totals. Writing the same statement 100 times is not practical. <b>Loops</b> repeat a block until a condition changes.</p>
+    <ul>
+        <li>ATM tries up to 3 PIN attempts</li>
+        <li>Sum marks of N subjects</li>
+        <li>Process each element in a list</li>
+    </ul>
+
+    <h2 id="loop-anatomy">Loop Anatomy</h2>
+    <p>Every loop depends on three parts: <b>initialization</b>, <b>condition</b>, <b>update</b>. Missing update often causes infinite loops.</p>
+    <div class="code">
+int i = 1;              // initialization
+while (i <= 3) {        // condition
+    System.out.println(i);
+    i++;                // update
+}
+    </div>
+
+    <h2 id="while-loop">while loop</h2>
+    <h3>Concept</h3>
+    <p>Checks the condition before each iteration. Runs zero or more times.</p>
+    <h3>Syntax</h3>
+    <div class="code">
+while (condition) {
+    // statements
+}
+    </div>
+    <h3>Examples</h3>
+    <div class="code">
+// Print 1..5
+int i = 1;
+while (i <= 5) {
+    System.out.println(i);
+    i++;
+}
+
+// Sum of first N numbers
+int n = 5, sum = 0, k = 1;
+while (k <= n) {
+    sum += k;
+    k++;
+}
+System.out.println(sum);
+    </div>
+    <div class="try">Exam Point: Forgetting the update creates an infinite loop.</div>
+
+    <h2 id="do-while-loop">do-while loop</h2>
+    <p>Executes the body at least once; condition is checked <b>after</b> the body.</p>
+    <div class="code">
+int choice;
+do {
+    // show menu
+    System.out.println("1.Play 2.Exit");
+    choice = 2; // imagine user input
+} while (choice != 2);
+    </div>
+    <div class="try">Exam Point: do-while guarantees one execution.</div>
+
+    <h2 id="for-loop">for loop</h2>
+    <p>Best when you know how many times to repeat. Three parts: <b>init; condition; update</b>.</p>
+    <div class="code">
+for (int i = 1; i <= 5; i++) {
+    System.out.println(i);
+}
+
+// Multiple variables
+for (int a = 1, b = 5; a <= b; a++, b--) {
+    System.out.println(a + "," + b);
+}
+
+// Empty parts are allowed
+int x = 1;
+for (; x <= 3; ) { // behaves like while
+    System.out.println(x);
+    x++;
+}
+    </div>
+    <div class="try">Exam Point: for(;;) is an infinite loop.</div>
+
+    <h2 id="for-each">Enhanced for-each</h2>
+    <p>Reads elements of arrays/collections without using indexes. Use when you only need to access, not modify the index.</p>
+    <div class="code">
+int[] arr = {2, 4, 6};
+for (int val : arr) {
+    System.out.println(val);
+}
+    </div>
+
+    <h2 id="nested-loops">Nested loops</h2>
+    <p>Loop inside another loop, often used for tables and patterns. Total iterations = outer × inner counts.</p>
+    <div class="code">
+// 3x3 multiplication table
+for (int i = 1; i <= 3; i++) {
+    for (int j = 1; j <= 3; j++) {
+        System.out.print((i*j) + " ");
+    }
+    System.out.println();
+}
+    </div>
+    <div class="try">Exam Point: If outer runs 3 times and inner 4 times → 12 total iterations.</div>
+
+    <h2 id="break-continue">break & continue</h2>
+    <p><b>break</b> exits the loop immediately. <b>continue</b> skips the current iteration and jumps to the next check.</p>
+    <div class="code">
+// Print 1..5 except 3; stop at 4
+for (int i = 1; i <= 5; i++) {
+    if (i == 3) continue;
+    if (i == 5) break;
+    System.out.println(i);
+}
+    </div>
+    <div class="try">Exam Point: Order of checks matters for break/continue.</div>
+
+    <h2 id="choose-loop">Choosing the right loop</h2>
+    <ul>
+        <li>Unknown count → <b>while</b></li>
+        <li>At least once → <b>do-while</b></li>
+        <li>Known count or index → <b>for</b></li>
+        <li>Read-only over arrays/collections → <b>for-each</b></li>
+    </ul>
+
+    <h2 id="common-mistakes">Common mistakes</h2>
+    <ul>
+        <li>Off-by-one errors (use <= vs < carefully)</li>
+        <li>Changing the loop variable inside nested blocks</li>
+        <li>Missing braces causing only the next statement to loop</li>
+    </ul>
+</div>
+
+    </div>
+
+</body>
+</html>

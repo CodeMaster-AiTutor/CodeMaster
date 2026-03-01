@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArrayList - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link active">16. ArrayList</a>
+                <div class="page-subtopics">
+                    <a href="#what" class="subtopic-link">What is ArrayList</a>
+                <a href="#size-capacity" class="subtopic-link">Size vs Capacity</a>
+                <a href="#add-get-set-remove" class="subtopic-link">Core operations</a>
+                <a href="#iteration" class="subtopic-link">Iteration patterns</a>
+                <a href="#bulk-ops" class="subtopic-link">Bulk and predicate ops</a>
+                <a href="#sorting" class="subtopic-link">Sorting</a>
+                <a href="#conversion" class="subtopic-link">Conversion</a>
+                <a href="#performance" class="subtopic-link">Performance</a>
+                <a href="#streams" class="subtopic-link">Streams & filtering</a>
+                <a href="#thread-safety" class="subtopic-link">Thread‑safety</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>ArrayList</h1>
+
+    <h2 id="what">What is ArrayList?</h2>
+    <p>ArrayList is a resizable array implementation of the List interface. Unlike standard arrays, which have a fixed length, ArrayList grows automatically when you add more elements. It allows you to store duplicates and maintains the insertion order of elements. Under the hood, it uses a standard array that gets replaced by a larger one when it fills up. This makes it the go-to choice for lists where you don't know the exact number of elements in advance.</p>
+    <div class="code">
+import java.util.*;
+ArrayList<String> names = new ArrayList<>();          // default capacity
+ArrayList<Integer> nums = new ArrayList<>(16);        // with initial capacity
+</div>
+    <div class="try">Exam Point: ArrayList maintains insertion order and allows duplicates.</div>
+
+    <h2 id="size-capacity">Size vs Capacity</h2>
+    <p>The size() method tells you how many elements are currently in the list, while capacity is the length of the internal backing array. When the size reaches the capacity, ArrayList creates a new, larger array and copies everything over. This resizing operation is costly, so it's good practice to set an initial capacity if you know the approximate size. You can also use trimToSize() to free up unused memory after filling the list.</p>
+    <div class="code">
+System.out.println(names.size());
+names.ensureCapacity(100);   // reduce future resizes
+names.trimToSize();          // shrink to current size
+    </div>
+
+    <h2 id="add-get-set-remove">Core Operations</h2>
+    <p>ArrayList provides simple methods to manipulate data. add() appends elements to the end, while get() gives you instant access to any element by its index. set() updates an element at a specific position, and remove() deletes elements by index or value. Be careful when removing by value with integers, as the compiler might confuse the number for an index. These operations cover 90% of what you do with lists.</p>
+    <div class="code">
+ArrayList<Integer> list = new ArrayList<>();
+list.add(10);                 // append
+list.add(0, 5);               // insert at index
+int first = list.get(0);      // read
+list.set(0, 7);               // replace at index
+list.remove(1);               // remove by index
+list.remove(Integer.valueOf(7)); // remove by value
+boolean has10 = list.contains(10);
+int pos = list.indexOf(10);
+list.clear();                 // remove all
+    </div>
+    <div class="try">Exam Point: remove(int) removes by index; remove(Object) removes by value.</div>
+
+    <h2 id="iteration">Iteration Patterns</h2>
+    <p>You can loop through an ArrayList in several ways depending on your needs. The enhanced for-loop is the cleanest for reading elements. A standard for-loop gives you access to the index, which is useful if you need to know the position. Iterators are the safest way to remove elements while looping, as they prevent ConcurrentModificationException. ListIterator even allows you to traverse backwards.</p>
+    <div class="code">
+// for-each
+for (String n : names) {
+    System.out.println(n);
+}
+
+// index-based
+for (int i = 0; i < names.size(); i++) {
+    System.out.println(i + ": " + names.get(i));
+}
+
+// Iterator (supports safe removal during traversal)
+Iterator<String> it = names.iterator();
+while (it.hasNext()) {
+    String v = it.next();
+    if (v.startsWith("A")) it.remove();
+}
+
+// ListIterator (bidirectional)
+ListIterator<String> li = names.listIterator(names.size());
+while (li.hasPrevious()) {
+    System.out.println(li.previous());
+}
+    </div>
+    <div class="try">Exam Point: Iterators are fail‑fast if list is structurally modified outside the iterator.</div>
+
+    <h2 id="bulk-ops">Bulk and Predicate Operations</h2>
+    <p>Java provides powerful methods to handle multiple elements at once. addAll() merges another collection into your list, which is faster than adding items one by one. removeIf() accepts a lambda condition to delete all matching elements in a single pass. These methods are optimized and result in cleaner, more readable code. They are essential for filtering data efficiently.</p>
+    <div class="code">
+names.addAll(Arrays.asList("Asha", "Riya", "Karan"));
+names.removeIf(s -> s.length() < 4);   // Java 8+
+    </div>
+
+    <h2 id="sorting">Sorting</h2>
+    <p>Sorting organizes your list in a specific order, such as alphabetical or numerical. Collections.sort() uses the natural order of elements (like A to Z). For custom sorting, you can pass a Comparator to define your own rules, such as sorting by string length. The sort algorithm is stable and efficient (O(n log n)). Always sort before searching if you plan to use binary search.</p>
+    <div class="code">
+Collections.sort(names);                      // natural order
+names.sort(Comparator.comparingInt(String::length)); // by length
+    </div>
+    <div class="try">Exam Point: Collections.sort(list) uses natural ordering; provide Comparator for custom order.</div>
+
+    <h2 id="conversion">Conversion</h2>
+    <p>Sometimes you need to convert between an ArrayList and a standard array. toArray() returns a static array containing all list elements. Conversely, Arrays.asList() wraps an array into a fixed-size list. To get a fully modifiable ArrayList from an array, pass the wrapper to the ArrayList constructor. This is a common pattern when bridging legacy APIs with modern collections.</p>
+    <div class="code">
+// to array
+String[] arr = names.toArray(new String[0]);
+
+// from array (fixed-size list!)
+List<String> l = Arrays.asList("a", "b", "c");
+ArrayList<String> copy = new ArrayList<>(l); // real, resizable copy
+    </div>
+
+    <h2 id="performance">Performance (Big-O)</h2>
+    <p>Understanding performance helps you choose the right collection. ArrayList is excellent for reading data but slower for inserting in the middle.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <table>
+        <thead>
+            <tr>
+                <th>Operation</th>
+                <th>Time Complexity</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>get(i)</td>
+                <td>O(1)</td>
+                <td>Instant access by index</td>
+            </tr>
+            <tr>
+                <td>add(e)</td>
+                <td>O(1) amortized</td>
+                <td>Fast append (occasional resize)</td>
+            </tr>
+            <tr>
+                <td>add(i, e)</td>
+                <td>O(n)</td>
+                <td>Slow insert (shifts elements)</td>
+            </tr>
+            <tr>
+                <td>remove(i)</td>
+                <td>O(n)</td>
+                <td>Slow remove (shifts elements)</td>
+            </tr>
+            <tr>
+                <td>contains(e)</td>
+                <td>O(n)</td>
+                <td>Linear search</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+    <div class="try">Exam Point: Prefer ArrayList for reads and appends; prefer LinkedList for frequent middle inserts/removes.</div>
+
+    <h2 id="streams">Streams & Filtering</h2>
+    <p>The Stream API allows you to process lists functionally. You can filter, map, and sort elements without modifying the original list. This approach is declarative, meaning you describe <em>what</em> you want rather than <em>how</em> to loop. It is very powerful for data transformation pipelines. The result can be collected back into a new List.</p>
+    <div class="code">
+List<String> result = names.stream()
+    .filter(s -> s.startsWith("R"))
+    .sorted()
+    .toList(); // Java 16+
+    </div>
+
+    <h2 id="thread-safety">Thread-Safety</h2>
+    <p>By default, ArrayList is not thread-safe, meaning it can break if modified by multiple threads simultaneously. If you need concurrent access, wrap it with Collections.synchronizedList(). Alternatively, use CopyOnWriteArrayList for thread-safe iteration. Ignoring thread safety in multi-threaded apps is a common source of bugs. Always synchronize access when sharing lists.</p>
+    <div class="code">
+List<String> sync = Collections.synchronizedList(new ArrayList<>());
+    </div>
+
+</div>
+
+    </div>
+
+</body>
+</html>

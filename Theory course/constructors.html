@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constructors - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link active">11. Constructors</a>
+                <div class="page-subtopics">
+                    <a href="#what-is-constructor" class="subtopic-link">What is a constructor</a>
+                    <a href="#constructor-rules" class="subtopic-link">Constructor rules</a>
+                    <a href="#default-constructor" class="subtopic-link">Default constructor</a>
+                    <a href="#parameterized-constructor" class="subtopic-link">Parameterized constructor</a>
+                    <a href="#this-keyword" class="subtopic-link">this keyword</a>
+                    <a href="#constructor-overloading" class="subtopic-link">Overloading</a>
+                    <a href="#constructor-chaining" class="subtopic-link">this() chaining</a>
+                    <a href="#copy-constructor" class="subtopic-link">Copy constructor</a>
+                    <a href="#constructor-vs-method" class="subtopic-link">Constructor vs method</a>
+                    <a href="#no-constructor" class="subtopic-link">No constructor case</a>
+                    <a href="#full-example" class="subtopic-link">Full example</a>
+                    <a href="#common-mistakes" class="subtopic-link">Common mistakes</a>
+                    <a href="#practice-exercises" class="subtopic-link">Practice</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Constructors</h1>
+
+    <h2 id="what-is-constructor">What is a Constructor?</h2>
+    <p>A constructor is a special block of code that initializes a newly created object. It runs automatically when you use the <b>new</b> keyword. Its primary purpose is to set initial values for object attributes so the object is ready to use immediately. Think of it as a setup routine that prepares the object's internal state before you call any methods.</p>
+    <div class="code">
+Student s = new Student();
+</div>
+    <p>At the moment you use <b>new</b>, the constructor runs and sets up the object.</p>
+
+    <h2 id="constructor-rules">Constructor Rules</h2>
+    <p>Constructors follow strict rules that distinguish them from regular methods. They must have the exact same name as the class and cannot have a return type, not even void. If you violate these rules, the compiler treats them as normal methods, which can lead to confusing bugs.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <ul>
+        <li>Same name as the class</li>
+        <li>No return type (not even void)</li>
+        <li>Called automatically when you use <b>new</b></li>
+    </ul>
+    </div>
+
+    <h2 id="default-constructor">Default constructor</h2>
+    <p>If you do not write any constructor in your class, Java creates one for you automatically. This "default constructor" takes no arguments and initializes all fields to their default values (null, 0, false). It ensures that you can always create an object even if you haven't defined how initialization should happen. However, once you add your own constructor, this automatic one disappears.</p>
+    <div class="code">
+public class Student {
+    String name;
+    int age;
+
+    // Java adds this invisibly:
+    // public Student() { }
+}
+</div>
+    <p>Default values are: null for objects, 0 for numbers, and false for booleans.</p>
+    <div class="try">Exam Point: When does Java generate a default constructor?</div>
+
+    <h2 id="parameterized-constructor">Parameterized constructor</h2>
+    <p>A parameterized constructor allows you to pass specific values when creating an object. This is essential for setting unique properties for each instance, like a student's name or ID. By enforcing these parameters, you ensure that no object is created in an invalid or empty state. It replaces the need to call multiple setter methods right after creation.</p>
+    <div class="code">
+public class Student {
+    String name;
+    int age;
+    double marks;
+
+    public Student(String name, int age, double marks) {
+        this.name = name;
+        this.age = age;
+        this.marks = marks;
+    }
+
+    @Override
+    public String toString() {
+        return name + " | Age: " + age + " | Marks: " + marks;
+    }
+}
+
+Student s1 = new Student("Alice", 20, 92.5);
+Student s2 = new Student("Bob", 22, 78.0);
+System.out.println(s1);
+System.out.println(s2);
+</div>
+    <p>All fields are set in one clean line without extra assignments later.</p>
+    <div class="try">Exam Point: How is a parameterized constructor called?</div>
+
+    <h2 id="this-keyword">this keyword</h2>
+    <p>The <b>this</b> keyword is a reference to the current object inside a method or constructor. It is commonly used to distinguish between class fields and parameters with the same name. Without <b>this</b>, the parameter shadows the field, meaning the assignment would have no effect on the object's state. Using <b>this</b> makes your code clear and prevents variable shadowing errors.</p>
+    <div class="code">
+public Student(String name, int age) {
+    this.name = name;
+    this.age = age;
+}
+</div>
+    <p>If you skip <b>this</b> when names match, you only assign the parameter to itself.</p>
+    <div class="code">
+public Student(String name, int age) {
+    name = name;
+    age = age;
+}
+</div>
+    <div class="try">Exam Point: What is the meaning of this.name?</div>
+
+    <h2 id="constructor-overloading">Constructor Overloading</h2>
+    <p>Constructor overloading allows a class to have multiple constructors with different parameter lists. This gives flexibility to the user of your class, letting them create objects in different ways depending on the data available. For example, one constructor might take all details, while another sets default values for missing information. Java selects the correct constructor based on the number and type of arguments passed.</p>
+    <div class="code">
+public class Student {
+    String name;
+    int age;
+    double marks;
+    String grade;
+
+    public Student(String name, int age, double marks) {
+        this.name = name;
+        this.age = age;
+        this.marks = marks;
+        this.grade = marks >= 60 ? "Pass" : "Fail";
+    }
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+        this.marks = 0;
+        this.grade = "Not Graded";
+    }
+
+    public Student(String name) {
+        this.name = name;
+        this.age = 0;
+        this.marks = 0;
+        this.grade = "Not Graded";
+    }
+}
+</div>
+    <div class="try">Exam Point: What is constructor overloading?</div>
+
+    <h2 id="constructor-chaining">this() — Constructor Chaining</h2>
+    <p>Constructor chaining allows one constructor to call another within the same class using <b>this()</b>. This reuses code and avoids duplication when you have multiple overloaded constructors. The call to <b>this()</b> must be the very first statement in the constructor body. By centralizing initialization logic in one main constructor, you make your class easier to maintain.</p>
+    <div class="code">
+public class Student {
+    String name;
+    int age;
+    double marks;
+
+    public Student(String name, int age, double marks) {
+        this.name = name;
+        this.age = age;
+        this.marks = marks;
+    }
+
+    public Student(String name, int age) {
+        this(name, age, 0.0);
+    }
+
+    public Student(String name) {
+        this(name, 18, 0.0);
+    }
+}
+</div>
+    <div class="try">Exam Point: Why must this() be the first line?</div>
+
+    <h2 id="copy-constructor">Copy Constructor</h2>
+    <p>A copy constructor creates a new object by copying the attributes of an existing object. This is useful when you need a duplicate that is independent of the original. Unlike a simple reference assignment, which points two variables to the same object, a copy constructor ensures deep or shallow copying of values. It is often used to pass objects safely without modifying the original.</p>
+    <div class="code">
+public class Student {
+    String name;
+    int age;
+    double marks;
+
+    public Student(String name, int age, double marks) {
+        this.name = name;
+        this.age = age;
+        this.marks = marks;
+    }
+
+    public Student(Student other) {
+        this.name = other.name;
+        this.age = other.age;
+        this.marks = other.marks;
+    }
+}
+</div>
+    <div class="try">Exam Point: What is the purpose of a copy constructor?</div>
+
+    <h2 id="constructor-vs-method">Constructor vs Method</h2>
+    <p>While both contain code blocks, constructors and methods serve different purposes. Constructors initialize objects and have no return type, whereas methods define object behavior and must declare a return type. Understanding this distinction is key to mastering Java's object-oriented structure.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <table>
+        <thead>
+            <tr>
+                <th>Feature</th>
+                <th>Constructor</th>
+                <th>Method</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Name</td>
+                <td>Same as class</td>
+                <td>Any name</td>
+            </tr>
+            <tr>
+                <td>Return type</td>
+                <td>None</td>
+                <td>Must have one</td>
+            </tr>
+            <tr>
+                <td>Called</td>
+                <td>Automatically with new</td>
+                <td>Manually</td>
+            </tr>
+            <tr>
+                <td>Purpose</td>
+                <td>Initialize object</td>
+                <td>Perform operations</td>
+            </tr>
+            <tr>
+                <td>this()</td>
+                <td>Can call another constructor</td>
+                <td>Cannot</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h2 id="no-constructor">What Happens When No Constructor is Written?</h2>
+    <p>If you don't write any constructor, Java inserts a default no-argument constructor for you. However, as soon as you define even one parameterized constructor, this automatic default constructor is removed. This means you cannot create an empty object unless you explicitly define a no-argument constructor yourself. This rule enforces strict initialization if that's what your design requires.</p>
+    <div class="code">
+public class Car {
+    String brand;
+
+    public Car(String brand) {
+        this.brand = brand;
+    }
+}
+
+Car c = new Car();
+Car d = new Car("Toyota");
+</div>
+    <p>If you still want a no‑arg constructor, you must write it yourself.</p>
+
+    <h2 id="full-example">Full Example: Product Class</h2>
+    <p>This comprehensive example demonstrates overloading, chaining, and encapsulation in a single class. It shows how to handle optional parameters by providing multiple constructors that delegate to a main one. The toString method allows easy verification of the object's state. This pattern is very common in real-world Java applications.</p>
+    <div class="code">
+public class Product {
+    private int id;
+    private String name;
+    private double price;
+    private int stock;
+
+    public Product(int id, String name, double price, int stock) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.stock = stock;
+    }
+
+    public Product(int id, String name) {
+        this(id, name, 0.0, 0);
+    }
+
+    public Product(Product other) {
+        this(other.id, other.name, other.price, other.stock);
+    }
+
+    public void restock(int qty) { stock += qty; }
+
+    public boolean sell(int qty) {
+        if (stock < qty) { System.out.println("Not enough stock."); return false; }
+        stock -= qty;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%-5d %-15s $%-8.2f Stock: %d", id, name, price, stock);
+    }
+}
+</div>
+
+    <h2 id="common-mistakes">Common Mistakes</h2>
+    <p>Beginners often accidental declare a return type for a constructor, turning it into a method. Another common issue is calling <b>this()</b> later in the body instead of the first line. Forgetting to define a no-arg constructor when one is needed by frameworks is also a frequent trap. The examples below highlight these errors so you can avoid them.</p>
+    <div class="code">
+public void Student(String name) { }
+public Student(String name) { }
+
+public Student(String name) {
+    System.out.println("hello");
+    this(name, 18);
+}
+
+public Student(String name, int age) { }
+Student s = new Student();
+</div>
+    <div class="try">Exam Point: Identify the mistake in each example.</div>
+
+    <h2 id="practice-exercises">Practice Exercises</h2>
+    <p>Practice is the best way to solidify your understanding of object initialization. These exercises cover creating simple objects, using overloading, and implementing copy logic. Try to write the code from scratch without looking at the examples first. Verify your results by printing the object details to the console.</p>
+    <ul>
+        <li>Create a Car class with brand, model, year and a parameterized constructor. Create 3 cars.</li>
+        <li>Create a Book class with title, author, price and print details using toString().</li>
+        <li>Create a Rectangle class with width and height, and an area() method set by constructor.</li>
+        <li>Create a Person with name and email. Use this properly in the constructor.</li>
+        <li>Create a Product class with overloaded constructors and refactor using this() chaining.</li>
+        <li>Create a BankAccount class with a copy constructor and verify copy independence.</li>
+        <li>Create a Movie class with full, partial, and copy constructors.</li>
+        <li>Write a Circle class with radius default 1 and methods area() and perimeter().</li>
+        <li>Create a Laptop class with only a parameterized constructor, then fix the no‑arg error.</li>
+        <li>Use this() chaining in a Hotel class for full and walk‑in bookings.</li>
+    </ul>
+    <p>Next topic: Encapsulation — using private fields and public getters/setters to protect data.</p>
+</div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polymorphism - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link active">14. Polymorphism</a>
+                <div class="page-subtopics">
+                    <a href="#what-is-polymorphism" class="subtopic-link">What is polymorphism</a>
+                    <a href="#compile-time" class="subtopic-link">Compile-time</a>
+                    <a href="#overloading-rules" class="subtopic-link">Overloading rules</a>
+                    <a href="#overloading-example" class="subtopic-link">Overloading example</a>
+                    <a href="#overloading-vs-overriding" class="subtopic-link">Overloading vs overriding</a>
+                    <a href="#runtime-polymorphism" class="subtopic-link">Runtime polymorphism</a>
+                    <a href="#dynamic-dispatch" class="subtopic-link">Dynamic dispatch</a>
+                    <a href="#upcasting-downcasting" class="subtopic-link">Upcasting/downcasting</a>
+                    <a href="#method-hiding" class="subtopic-link">Method hiding</a>
+                    <a href="#full-example" class="subtopic-link">Full example</a>
+                    <a href="#benefits" class="subtopic-link">Benefits</a>
+                    <a href="#common-mistakes" class="subtopic-link">Common mistakes</a>
+                    <a href="#quick-reference" class="subtopic-link">Quick reference</a>
+                    <a href="#practice-exercises" class="subtopic-link">Practice</a>
+                </div>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Polymorphism</h1>
+
+    <h2 id="what-is-polymorphism">What is Polymorphism?</h2>
+    <p>Polymorphism is the ability of an object to take on many forms. In Java, this means that a single method name or object reference can behave differently depending on the context in which it is used. It allows you to write flexible code that can work with objects of different types as if they were the same type. The two main types of polymorphism in Java are compile-time (handled by method overloading) and runtime (handled by method overriding).</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <ul>
+        <li><b>Compile-time:</b> Decisions are made by the compiler (e.g., Overloading).</li>
+        <li><b>Runtime:</b> Decisions are made while the program is running (e.g., Overriding).</li>
+    </ul>
+    </div>
+
+    <h2 id="compile-time">Compile-time Polymorphism — Method Overloading</h2>
+    <p>Compile-time polymorphism, or method overloading, occurs when multiple methods in the same class share the same name but have different parameter lists. The compiler determines which method to call by matching the argument types and count to the method signatures. This allows you to perform similar operations (like adding numbers) on different data types without creating unique method names for each one. It improves code readability and reduces complexity.</p>
+    <div class="code">
+public class Calculator {
+    public int add(int a, int b) { return a + b; }
+    public int add(int a, int b, int c) { return a + b + c; }
+    public double add(double a, double b) { return a + b; }
+    public String add(String a, String b) { return a + b; }
+}
+</div>
+
+    <h2 id="overloading-rules">Rules of Overloading</h2>
+    <p>To successfully overload a method, you must change the parameter list. You can change the number of parameters, the types of parameters, or their order. However, changing only the return type or the access modifier is not sufficient to distinguish overloaded methods. If the compiler cannot find a unique match for a method call, it will report an ambiguity error.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <table>
+        <thead>
+            <tr>
+                <th>What can differ</th>
+                <th>What cannot differ</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Number of parameters</td>
+                <td>Return type alone</td>
+            </tr>
+            <tr>
+                <td>Type of parameters</td>
+                <td>Parameter names only</td>
+            </tr>
+            <tr>
+                <td>Order of parameters</td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h2 id="overloading-example">Practical Overloading Example</h2>
+    <p>In this example, the `print` method is overloaded to handle different types of input: a string, a number, or an array of strings. The user of the class doesn't need to remember different method names like `printString` or `printInt`. They simply call `print`, and Java automatically routes the call to the correct implementation. This pattern is very common in standard Java libraries, such as `System.out.println()`.</p>
+    <div class="code">
+public class Printer {
+    public void print(String message) { System.out.println(message); }
+    public void print(String message, int times) {
+        for (int i = 0; i < times; i++) System.out.println(message);
+    }
+    public void print(int number) { System.out.println("Number: " + number); }
+    public void print(String[] items) {
+        for (String item : items) System.out.println("- " + item);
+    }
+}
+</div>
+
+    <h2 id="overloading-vs-overriding">Overloading vs Overriding</h2>
+    <p>It is crucial to understand the difference between these two concepts. Overloading happens within the same class and is resolved at compile time based on method signatures. Overriding happens in a subclass and is resolved at runtime based on the actual object type. Overloading increases the readability of methods, while overriding allows for specific implementations of inherited behavior.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <table>
+        <thead>
+            <tr>
+                <th>Feature</th>
+                <th>Overloading</th>
+                <th>Overriding</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Where</td>
+                <td>Same class</td>
+                <td>Child class</td>
+            </tr>
+            <tr>
+                <td>Parameters</td>
+                <td>Must differ</td>
+                <td>Must be same</td>
+            </tr>
+            <tr>
+                <td>Decided at</td>
+                <td>Compile time</td>
+                <td>Runtime</td>
+            </tr>
+            <tr>
+                <td>Keyword</td>
+                <td>None</td>
+                <td>@Override</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h2 id="runtime-polymorphism">Runtime Polymorphism</h2>
+    <p>Runtime polymorphism allows a reference variable of a parent class to hold an object of a child class. When a method is called on this reference, Java looks at the actual object in memory to decide which method to execute. This is also known as dynamic method dispatch. It is the mechanism that allows generic code (like a list of `Animal`s) to behave specifically for each object (like `Dog`s barking and `Cat`s meowing).</p>
+    <div class="code">
+public class Animal {
+    String name;
+    public Animal(String name) { this.name = name; }
+    public void makeSound() { System.out.println(name + " makes a sound."); }
+}
+
+public class Dog extends Animal {
+    public Dog(String name) { super(name); }
+    @Override
+    public void makeSound() { System.out.println(name + " barks: Woof!"); }
+}
+</div>
+
+    <h2 id="dynamic-dispatch">Dynamic Method Dispatch</h2>
+    <p>This example demonstrates how the same reference variable `a` can point to different objects at different times. First, it points to a `Dog`, so calling `makeSound()` prints "Woof". Later, it points to a `Cat`, and the same line of code prints "Meow". The decision of which method to run is deferred until the program is actually running, hence the name "dynamic dispatch".</p>
+    <div class="code">
+Animal a;
+
+a = new Dog("Rex");
+a.makeSound();
+
+a = new Cat("Whiskers");
+a.makeSound();
+</div>
+    <p>The variable type is Animal, but Java calls the child method based on the real object.</p>
+
+    <h2 id="upcasting-downcasting">Upcasting and Downcasting</h2>
+    <p>Upcasting is treating a child object as a parent object, which is always safe and happens automatically. Downcasting is converting a parent reference back to a child reference, which requires an explicit cast. Downcasting can be dangerous if the object is not actually of that child type, leading to a `ClassCastException`. You should always use the `instanceof` operator to check the type before downcasting.</p>
+    <div class="code">
+Dog dog = new Dog("Rex");
+Animal a = dog;
+
+Animal a2 = new Cat("Whiskers");
+Dog d2 = (Dog) a2;
+</div>
+    <p>Upcasting is automatic and safe. Downcasting must be checked with instanceof.</p>
+
+    <h2 id="method-hiding">Method Hiding vs Overriding</h2>
+    <p>Static methods cannot be overridden; they can only be hidden. If a child class defines a static method with the same signature as one in the parent, the child's method hides the parent's. Unlike instance methods, the version of the static method that gets called is determined by the class of the reference variable, not the actual object. This is a common source of confusion, so it's best to access static methods via the class name directly.</p>
+    <div class="code">
+public class Animal {
+    public static void info() { System.out.println("I am Animal"); }
+    public void speak() { System.out.println("..."); }
+}
+
+public class Dog extends Animal {
+    public static void info() { System.out.println("I am Dog"); }
+    @Override
+    public void speak() { System.out.println("Woof"); }
+}
+
+Animal a = new Dog("Rex");
+a.info();
+a.speak();
+</div>
+
+    <h2 id="full-example">Full Example: Payment System</h2>
+    <p>This comprehensive example shows polymorphism in a real-world scenario. We define a base `Payment` class and several subclasses like `CreditCard`, `UPI`, and `Cash`. We can then create a single array of `Payment` objects that contains a mix of these different types. The `process()` loop treats them all as `Payment`s, but each one executes its own specific processing logic.</p>
+    <div class="code">
+public class Payment {
+    protected String sender;
+    protected double amount;
+
+    public Payment(String sender, double amount) {
+        this.sender = sender;
+        this.amount = amount;
+    }
+
+    public void process() { System.out.println(sender + " pays $" + amount); }
+    public String getType() { return "Unknown"; }
+
+    @Override
+    public String toString() { return getType() + " | " + sender + " | $" + amount; }
+}
+
+public class CreditCard extends Payment {
+    private String cardNumber;
+
+    public CreditCard(String sender, double amount, String cardNumber) {
+        super(sender, amount);
+        this.cardNumber = cardNumber;
+    }
+
+    @Override
+    public void process() {
+        System.out.println("Credit card charged: " + cardNumber + " for $" + amount);
+    }
+
+    @Override
+    public String getType() { return "CreditCard"; }
+}
+
+public class UPI extends Payment {
+    private String upiId;
+
+    public UPI(String sender, double amount, String upiId) {
+        super(sender, amount);
+        this.upiId = upiId;
+    }
+
+    @Override
+    public void process() {
+        System.out.println("UPI transfer via " + upiId + " for $" + amount);
+    }
+
+    @Override
+    public String getType() { return "UPI"; }
+}
+
+public class Cash extends Payment {
+    public Cash(String sender, double amount) { super(sender, amount); }
+    @Override
+    public void process() { System.out.println("Cash payment of $" + amount + " received."); }
+    @Override
+    public String getType() { return "Cash"; }
+}
+
+Payment[] payments = {
+    new CreditCard("Alice", 250.00, "****-1234"),
+    new UPI("Bob", 150.00, "bob@upi"),
+    new Cash("Charlie", 50.00),
+    new UPI("Diana", 300.00, "diana@upi")
+};
+
+double total = 0;
+for (Payment p : payments) {
+    p.process();
+    total += p.amount;
+}
+System.out.println("\nTotal collected: $" + total);
+</div>
+
+    <h2 id="benefits">Benefits of Polymorphism</h2>
+    <p>Polymorphism makes your code more modular and easier to extend. You can add new classes (like a `Bitcoin` payment method) without changing the existing code that processes payments. It simplifies code by allowing you to treat related objects uniformly. This reduces code duplication and separates the "what" (the interface) from the "how" (the implementation).</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <table>
+        <thead>
+            <tr>
+                <th>Benefit</th>
+                <th>Explanation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Extensibility</td>
+                <td>Add new types without changing existing code</td>
+            </tr>
+            <tr>
+                <td>Simplicity</td>
+                <td>One loop handles all types</td>
+            </tr>
+            <tr>
+                <td>Flexibility</td>
+                <td>Swap objects at runtime</td>
+            </tr>
+            <tr>
+                <td>Maintainability</td>
+                <td>Logic stays in each class</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h2 id="common-mistakes">Common Mistakes</h2>
+    <p>One common mistake is trying to call a child-specific method on a parent reference without downcasting. Another is assuming that static methods work like instance methods (they don't override). Confusing overloading (same class) with overriding (subclass) is also frequent. The snippets below illustrate these traps so you can avoid them.</p>
+    <div class="code">
+Animal a = new Dog("Rex");
+a.bark();
+((Dog) a).bark();
+
+Animal a2 = new Cat("Whiskers");
+Dog d2 = (Dog) a2;
+if (a2 instanceof Dog) { Dog d = (Dog) a2; }
+
+public void show(int n) { }
+public void show(String s) { }
+@Override
+public void show(int n) { }
+</div>
+
+    <h2 id="quick-reference">Quick Reference</h2>
+    <p>This section provides a quick look at the syntax for overloading, overriding, and casting. Use it to refresh your memory on the keywords and structures. Remember that `@Override` is optional but recommended, and `instanceof` is your safety net for casting. Keep these patterns in mind when designing your class hierarchies.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <div class="code">
+void add(int a, int b) { }
+void add(double a, double b) { }
+
+class Dog extends Animal {
+    @Override
+    public void makeSound() { }
+}
+
+Animal a = new Dog("Rex");
+if (a instanceof Dog) { Dog d = (Dog) a; }
+
+Animal[] arr = { new Dog(), new Cat(), new Bird() };
+for (Animal x : arr) { x.makeSound(); }
+</div>
+    </div>
+
+    <h2 id="practice-exercises">Practice Exercises</h2>
+    <p>Practice is essential to mastering polymorphism. Start by creating simple overloaded methods to see how the compiler selects them. Then, build a hierarchy of classes and override methods to observe runtime behavior. Finally, try mixing different subclasses in an array and processing them in a loop. These exercises cover the most common use cases you'll encounter.</p>
+    <ul>
+        <li>Create MathUtils with overloaded multiply().</li>
+        <li>Create Display with overloaded show() methods.</li>
+        <li>Create Convert with overloaded toText() methods.</li>
+        <li>Create Shape → Circle/Rectangle/Triangle and print areas using Shape[].</li>
+        <li>Create Payment → CreditCard/UPI/Cash and process with a loop.</li>
+        <li>Upcast and downcast safely using instanceof.</li>
+        <li>Show static method hiding vs overriding.</li>
+        <li>Create Employee → Manager/Developer/Designer and print roles.</li>
+        <li>Add NetBanking to the payment example with no loop changes.</li>
+    </ul>
+    <p>Next topic: Abstraction — using abstract classes and interfaces.</p>
+</div>
+
+    </div>
+
+</body>
+</html>

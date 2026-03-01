@@ -1,0 +1,683 @@
+Intermediate
+
+
+Arrays
+
+01  Find Largest in Array   --> Easy
+
+Problem Statement
+Accept N integers into an array and find the maximum value by scanning through every element. Keep track of the largest value seen so far as you loop.	
+
+Concepts Covered
+▸  Arrays
+▸  Loop Traversal
+▸  Comparison Logic
+
+Example Input
+5 elements: 3 7 1 9 4	
+Expected Output
+Largest: 9
+
+Hint:  Start by assuming the first element is the largest. Update it whenever you find something bigger.
+
+Test Cases
+#	Input	                Expected Output
+1	[10, 20, 5, 30, 15]	30
+2	[-3, -7, -1, -9]	-1
+3	[42]	                42
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+02  Reverse an Array	--> Easy
+
+Problem Statement
+Reverse the elements of an array in-place using a two-pointer approach. Swap the element at the start with the element at the end, then move both pointers inward until they meet.	
+
+Concepts Covered
+▸  Arrays
+▸  Two-Pointer Technique
+▸  In-Place Swapping
+
+Example Input
+[1, 2, 3, 4, 5]	
+Expected Output
+[5, 4, 3, 2, 1]
+
+Hint:  Use a left index starting at 0 and a right index starting at length-1. Swap and move them toward each other.
+
+Test Cases
+#	Input	        Expected Output
+1	[10, 20, 30]	[30, 20, 10]
+2	[7]	        [7]
+3	[4, 8, 15, 16]	[16, 15, 8, 4]
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+03  Linear Search     -->  Easy
+
+Problem Statement
+Search for a target value in an unsorted array by checking each element one at a time from the beginning. Return the index if found, or -1 if the element is not in the array.	
+
+Concepts Covered
+▸  Array Traversal
+▸  Loop
+▸  Comparison
+▸  Return Values
+
+Example Input
+Array: [2,4,6,8,10]  Target: 6	
+Expected Output
+Found at index: 2
+
+Hint:  Loop from index 0 to length-1. The moment you find a match, return that index immediately.
+
+Test Cases
+#	Input	                Expected Output
+1	[5,3,9,1] target=9	Index: 2
+2	[1,2,3,4] target=7	Not found (-1)
+3	[10]      target=10	Index: 0
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+04  Sum of Array Elements   -->  Easy
+
+Problem Statement
+Write a method that accepts an integer array and returns the sum of all its elements. Use the method from your main code and display the result.	
+
+Concepts Covered
+▸  Methods / Functions
+▸  Array Traversal
+▸  Accumulator
+
+Example Input
+[10, 20, 30, 40]	
+Expected Output
+Sum: 100
+
+Hint:  Create a method sumArray(int[] arr) with its own running total. Keep main() clean.
+
+Test Cases
+#	Input	        Expected Output
+1	[1,2,3,4,5]	15
+2	[-5, 5, 10]	10
+3	[0,0,0]	        0
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+05  Count Even and Odd	 --> Easy
+
+Problem Statement
+Traverse an array and separately count how many elements are even and how many are odd. Display both counts. Use the modulus operator to check divisibility by 2.	
+
+Concepts Covered
+▸  Array Traversal
+▸  Modulus Operator
+▸  Multiple Counters
+
+Example Input
+[1,2,3,4,5,6]	
+Expected Output
+Even: 3  |  Odd: 3
+
+Hint:  Maintain two counters: evenCount and oddCount. Increment the right one inside a single loop.
+
+Test Cases
+#	Input	        Expected Output
+1	[2,4,6,8]	Even: 4  Odd: 0
+2	[1,3,5,7]	Even: 0  Odd: 4
+3	[0,7,14,21]	Even: 2  Odd: 2
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+06  Find Second Largest    -->  Medium
+
+Problem Statement
+Find the second largest element in an array without sorting it. You need to track both the largest and second-largest values in a single pass through the array.	
+
+Concepts Covered
+▸  Arrays
+▸  Two-Variable Tracking
+▸  Edge Cases
+
+Example Input
+[12, 35, 1, 10, 34, 1]	
+Expected Output
+Second Largest: 34
+
+Hint:  Use two variables: max1 and max2. When you find a new maximum, old max1 becomes max2.
+
+Test Cases
+#	Input	              Expected Output
+1	[5, 5, 5]	      5 (or 'No distinct second')
+2	[100, 90, 80, 70]     90
+3	[3, 1]	              1
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+07  Bubble Sort	    -->  Medium
+
+Problem Statement
+Sort an array in ascending order using the Bubble Sort algorithm. Repeatedly compare adjacent pairs and swap them if they are out of order. Each full pass bubbles the next largest element to its correct position.	
+
+Concepts Covered
+▸  Nested Loops
+▸  Adjacent Swapping
+▸  Sorting Algorithms
+
+Example Input
+[64, 34, 25, 12, 22]	
+Expected Output
+[12, 22, 25, 34, 64]
+
+Hint:  Add an early-exit flag: if no swap happened in a full pass, the array is already sorted.
+
+Test Cases
+#	Input	            Expected Output
+1	[5, 1, 4, 2, 8]	    [1, 2, 4, 5, 8]
+2	[3, 3, 2, 1]	    [1, 2, 3, 3]
+3	[1]	            [1]
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+08  Binary Search	--> Medium
+
+Problem Statement
+Search for a target in a sorted array using Binary Search. Repeatedly halve the search space by comparing the target to the middle element. Much faster than linear search for large arrays.	
+
+Concepts Covered
+▸  Sorted Arrays
+▸  Divide and Conquer
+▸  Low/Mid/High Pointers
+
+Example Input
+Sorted: [1,3,5,7,9,11]  Target: 7	
+Expected Output
+Found at index: 3
+
+Hint:  If target < mid, search the left half; if target > mid, search the right half; if equal, you've found it.
+
+Test Cases
+#	Input	                      Expected Output
+1	[2,4,6,8,10]   target=4	      Index: 1
+2	[1,2,3,4,5]    target=6	      Not found
+3	[10,20,30,40]  target=10      Index: 0
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+09  Remove Duplicates	 --> Medium
+
+Problem Statement
+Print only the unique elements from an array, removing any that appear more than once. You may not use a Set — implement the check manually by comparing each element against all previous ones.	
+
+Concepts Covered
+▸  Nested Loop Comparison
+▸  Uniqueness Check
+▸  Array Logic
+
+Example Input
+[1, 2, 3, 2, 4, 3, 5]	
+Expected Output
+Unique: [1, 2, 3, 4, 5]
+
+Hint:  For each element, scan all elements before it. Only print it if no match was found in earlier positions.
+
+Test Cases
+#	Input	        Expected Output
+1	[5,5,5,5]	[5]
+2	[1,2,3,4,5]	[1,2,3,4,5]
+3	[4,1,4,2,1,3]	[4,1,2,3]
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+10  Array Rotation (Left by K)	  -->  Medium
+
+Problem Statement
+Rotate an array to the left by K positions. Each left rotation moves the first element to the end. For efficiency, handle K > N using modulo so you don't rotate more than necessary.	
+
+Concepts Covered
+▸  Array Manipulation
+▸  Modulo Arithmetic
+▸  Index Shifting
+
+Example Input
+[1,2,3,4,5]  K=2	
+Expected Output
+[3,4,5,1,2]
+
+Hint:  Store the first element, shift all others left by one, then place the saved element at the end. Repeat K times.
+
+Test Cases
+#	Input	                Expected Output
+1	[10,20,30,40]  K=1	[20,30,40,10]
+2	[1,2,3]        K=3	[1,2,3]
+3	[5,10,15]      K=5	[15,5,10]
+
+===========================================================================================================================================================================================
+
+Strings
+
+
+11  Reverse a String	--> Easy
+
+Problem Statement
+Reverse a string without using any built-in reverse() method. Iterate through the characters from the last index to the first and build up the reversed string manually.	
+
+Concepts Covered
+▸  String Traversal
+▸  Character Access
+▸  String Concatenation
+
+Example Input
+"hello"	
+Expected Output
+"olleh"
+
+Hint:  Use a loop from str.length()-1 down to 0, appending each character to a new string.
+
+Test Cases
+#	Input	           Expected Output
+1	"Java"	           "avaJ"
+2	"racecar"	   "racecar"
+3	"a"	           "a"
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+12  Palindrome String	    -->  Easy
+
+Problem Statement
+Check whether a string reads the same forwards and backwards. Ignore character case for a robust solution. Compare the original string with its reverse.	
+
+Concepts Covered
+▸  String Reversal
+▸  Case Insensitivity
+▸  Comparison
+
+Example Input
+"Madam"	
+Expected Output
+Palindrome
+
+Hint:  Convert to lowercase first. Then reverse the string and check if it equals the original.
+
+Test Cases
+#	Input	        Expected Output
+1	"racecar"	Palindrome
+2	"hello"	        Not Palindrome
+3	"Level"	        Palindrome
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+13  Count Words in a Sentence	  --> Easy
+
+Problem Statement
+Count the number of words in a sentence without using split() or any regex. Manually scan characters and detect transitions from whitespace to non-whitespace to identify word boundaries.	
+
+Concepts Covered
+▸  Character Scanning
+▸  State Tracking
+▸  Manual Parsing
+
+Example Input
+"  Hello World  Java  "	
+Expected Output
+Word Count: 3
+
+Hint:  Use a boolean 'inWord' flag. Flip it when you cross a space boundary. Each true→false transition counts as one word.
+
+Test Cases
+#	Input	              Expected Output
+1	"one"	                1
+2	"the quick brown"	3
+3	"   spaces   "	        1
+ 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+14  Remove Spaces	--> Easy
+
+Problem Statement
+
+Remove all space characters from a string without using replace(). Loop through each character and build a new string that skips any spaces.	
+
+Concepts Covered
+▸  String Traversal
+▸  Character Filtering
+▸  String Building
+
+Example Input
+"hello world java"	
+Expected Output
+"helloworldjava"
+
+Hint:  Check if each character equals ' ' (space). Only append it to your result string if it is not a space.
+
+Test Cases
+#	Input	        Expected Output
+1	"a b c"	        "abc"
+2	"no spaces"	"nospaces"
+3	"  hi  "	"hi"
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+15  Anagram Checker	--> Medium
+
+Problem Statement
+Two strings are anagrams if they contain exactly the same characters in any order (e.g. 'listen' and 'silent'). Check this without sorting — use a frequency count array of size 26 for each string.	
+
+Concepts Covered
+▸  Character Frequency
+▸  Array Counting
+▸  String Comparison
+
+Example Input
+"listen"  "silent"	
+Expected Output
+Anagram
+
+Hint:  Increment a count for each char in string A; decrement for each char in string B. If all counts are zero at the end, they are anagrams.
+
+Test Cases
+#	Input	                 Expected Output
+1	"hello"  "world"	 Not Anagram
+2	"triangle"  "integral"	 Anagram
+3	"abc"  "cab"	         Anagram
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+16  String Compression	  --> Hard
+
+Problem Statement
+Compress a string by replacing consecutive repeated characters with the character followed by its count. If the compressed result would be longer than the original, return the original.	
+
+Concepts Covered
+▸  String Traversal
+▸  Run-Length Encoding
+▸  StringBuilder
+
+Example Input
+"aaabb"	
+Expected Output
+"a3b2"
+
+Hint:  Compare each character with the next one. While they match, increment a counter. When they differ, append char + count to your result.
+
+Test Cases
+#	Input	            Expected Output
+1	"aabcccdddd"	    "a2b1c3d4"
+2	"abc"	"abc"       (no benefit)
+3	"zzzzz"	            "z5"
+
+============================================================================================================================================================================================
+
+Matrices
+
+
+17  Matrix Addition	-->  Easy
+
+Problem Statement
+Add two 2D integer matrices of the same dimensions. The result matrix's element at position (i,j) is the sum of the corresponding elements from both input matrices.	
+
+Concepts Covered
+▸  2D Arrays
+▸  Nested Loops
+▸  Element-wise Operations
+
+Example Input
+A=[[1,2],[3,4]]  B=[[5,6],[7,8]]	
+Expected Output
+[[6,8],[10,12]]
+
+Hint:  Use two nested loops — one for rows, one for columns. result[i][j] = A[i][j] + B[i][j].
+
+Test Cases
+#	Input	                                Expected Output
+1	[[0,0],[0,0]] + [[1,1],[1,1]]	        [[1,1],[1,1]]
+2	[[1,2,3],[4,5,6]] + [[1,2,3],[4,5,6]]	[[2,4,6],[8,10,12]]
+3	[[9]] + [[1]]	                        [[10]]
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+18  Transpose a Matrix	 --> Medium
+
+Problem Statement
+Compute the transpose of a matrix by swapping rows and columns. Element at position (i,j) in the original becomes element at (j,i) in the transposed matrix.	
+
+Concepts Covered
+▸  2D Arrays
+▸  Nested Loops
+▸  Index Swapping
+
+Example Input
+[[1,2,3],[4,5,6]]	
+Expected Output
+[[1,4],[2,5],[3,6]]
+
+Hint:  Create a new matrix with swapped dimensions. Set transposed[j][i] = original[i][j].
+
+Test Cases
+#	Input	             Expected Output
+1	[[1,2],[3,4]]	     [[1,3],[2,4]]
+2	[[5]]	             [[5]]
+3	[[1,0,0],[0,1,0]]    3×2 matrix
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+19  Matrix Multiplication	--> Hard
+
+Problem Statement
+Multiply two matrices A (m×n) and B (n×p) to produce result C (m×p). Each element C[i][j] is the dot product of row i from A and column j from B. Requires three nested loops.	
+
+Concepts Covered
+▸  2D Arrays
+▸  Triple Nested Loops
+▸  Dot Product
+▸  Dimension Rules
+
+Example Input
+A=[[1,2],[3,4]]  B=[[5,6],[7,8]]	
+Expected Output
+[[19,22],[43,50]]
+
+Hint:  The inner dimension must match: columns of A must equal rows of B. C[i][j] += A[i][k] * B[k][j].
+
+Test Cases
+#	Input	                        Expected Output
+1	[[1,0],[0,1]] × [[3,4],[5,6]]	[[3,4],[5,6]] (identity)
+2	[[2,3]] × [[1],[4]]	        [[14]]
+3	[[1,2,3]] × [[1],[2],[3]]	[[14]]
+
+============================================================================================================================================================================================
+
+Methods & OOP
+
+
+20  Method Overloading Demo	--> Medium
+
+Problem Statement
+Demonstrate method overloading by creating multiple versions of an add() method that each accept different parameter types or different counts: add(int,int), add(int,int,int), and add(double,double).	
+
+Concepts Covered
+▸  Method Overloading
+▸  Polymorphism
+▸  Return Types
+▸  Type Casting
+
+Example Input
+add(2,3)  /  add(1,2,3)  /  add(1.5,2.5)	
+Expected Output
+5  /  6  /  4.0
+
+Hint:  Keep the method name identical — only change the parameter list. Java resolves which version to call based on argument types.
+
+Test Cases
+#	Input	        Expected Output
+1	add(10, 20)	30
+2	add(5, 10, 15)	30
+3	add(2.2, 3.3)	5.5
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+21  Student Result System	--> Medium
+
+Problem Statement
+Build a system using methods that computes a student's total marks, average percentage, and final grade. Use separate methods for each calculation to keep the code modular.	
+
+Concepts Covered
+▸  Multiple Methods
+▸  Return Values
+▸  Grade Logic
+▸  Modular Design
+
+Example Input
+Marks: [78, 85, 90, 72, 88]	
+Expected Output
+Total: 413  Avg: 82.6  Grade: A
+
+Hint:  Create: calcTotal(), calcAverage(), assignGrade(). Call them from main() and display a formatted result.
+
+Test Cases
+#	Input	                Expected Output
+1	[50,50,50,50,50]	Total:250  Avg:50  Grade:C
+2	[95,98,92,99,97]	Total:481  Avg:96.2  Grade:A+
+3	[30,40,35,28,42]	Total:175  Avg:35  Grade:Fail
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+22  Employee Salary System	--> Medium
+
+Problem Statement
+Calculate an employee's gross salary from their basic pay using standard allowances: HRA = 20% of Basic, DA = 10% of Basic. Display each component and the total gross salary.	
+
+Concepts Covered
+▸  Methods
+▸  Percentage Calculations
+▸  Formatted Output
+
+Example Input
+Basic Salary: 30,000	
+Expected Output
+HRA: 6000  DA: 3000  Gross: 39,000
+
+Hint:  Basic + HRA + DA = Gross. Create a method for each component and one final method to print the breakdown.
+Test Cases
+#	Input	        Expected Output
+1	Basic: 50,000	HRA:10000  DA:5000  Gross:65,000
+2	Basic: 20,000	HRA:4000   DA:2000  Gross:26,000
+3	Basic: 100,000	HRA:20000  DA:10000 Gross:130,000
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+23  Menu-Driven Program      -->  Medium
+
+Problem Statement
+Build a loop-based menu system that displays options to the user, reads their choice, executes the corresponding action, and loops back until they choose to exit. Use a switch-case inside a do-while loop.
+	
+Concepts Covered
+▸  do-while Loop
+▸  Switch-Case
+▸  User Input
+▸  Program Flow
+
+Example Input
+Menu choice: 2 (then) 4 to exit	
+Expected Output
+[Action for choice 2 executed, then exits]
+
+Hint:  Use a do-while so the menu is shown at least once. The loop condition should check whether the user chose 'Exit'.
+
+Test Cases
+#	Input	                Expected Output
+1	Choice: 1	        Option 1 executed
+2	Choice: 99 (invalid)	Invalid option message
+3	Choice: exit option	Goodbye / program ends
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+24  Custom Exception Demo	--> Hard
+
+Problem Statement
+Create a custom exception class (e.g. InvalidAgeException) and throw it when a user enters an age below 18. Demonstrate both throwing and catching the exception with a meaningful message.	
+
+Concepts Covered
+▸  Custom Exceptions
+▸  throw / throws
+▸  try-catch
+▸  OOP Inheritance
+
+Example Input
+Age: 15	
+Expected Output
+Exception: Age must be 18 or above
+
+Hint:  Extend the Exception class. In your method, use: if (age < 18) throw new InvalidAgeException("Age must be 18+").
+
+Test Cases
+#	Input	   Expected Output
+1	Age: 17	   Age must be 18 or above
+2	Age: 18    Access granted
+3	Age: -1	   Age must be 18 or above
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+25  Number Guessing Game	-->  Hard
+
+Problem Statement
+Generate a random number between 1 and 100. Ask the user to guess it. After each guess, tell them if they guessed too high, too low, or correctly. Count the number of attempts and display it when they win.	
+
+Concepts Covered
+▸  Random Number Generation
+▸  Loops
+▸  User Input
+▸  Attempt Counting
+
+Example Input
+Guess: 50  →  Guess: 75  →  Guess: 63	
+Expected Output
+Correct! You got it in 3 attempts.
+
+Hint:  Use Math.random() or Random class. Wrap the guessing logic in a while loop that exits on a correct guess.
+
+Test Cases
+#	Input	                        Expected Output
+1	Correct on first try	        Got it in 1 attempt!
+2	Guess too high repeatedly	Too High! feedback each time
+3	Guess too low then correct	Too Low! → Correct!
+
+
+
+============================================================================================================================================================================================
+
+
+Arrays
+
+01. Find Largest in Array — Easy
+02. Reverse an Array — Easy
+03. Linear Search — Easy
+04. Sum of Array Elements — Easy
+05. Count Even and Odd — Easy
+06. Find Second Largest — Medium
+07. Bubble Sort — Medium
+08. Binary Search — Medium
+09. Remove Duplicates — Medium
+10. Array Rotation (Left by K) — Hard
+
+Strings
+11. Reverse a String — Easy
+12. Palindrome String — Easy
+13. Count Words in a Sentence — Easy
+14. Remove Spaces — Easy
+15. Anagram Checker — Medium
+16. String Compression — Hard
+
+Matrices
+17. Matrix Addition — Easy
+18. Transpose a Matrix — Medium
+19. Matrix Multiplication — Hard
+
+Methods & OOP
+20. Method Overloading Demo — Medium
+21. Student Result System — Medium
+22. Employee Salary System — Medium
+23. Menu-Driven Program — Medium
+24. Custom Exception Demo — Hard
+25. Number Guessing Game — Hard
+

@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Handling - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link active">18. File Handling</a>
+                <div class="page-subtopics">
+                    <a href="#what-is-file-handling" class="subtopic-link">What is file handling</a>
+                    <a href="#key-classes" class="subtopic-link">Key classes</a>
+                    <a href="#filewriter" class="subtopic-link">FileWriter</a>
+                    <a href="#bufferedwriter" class="subtopic-link">BufferedWriter</a>
+                    <a href="#printwriter" class="subtopic-link">PrintWriter</a>
+                    <a href="#check-exists" class="subtopic-link">Check exists</a>
+                    <a href="#bufferedreader" class="subtopic-link">BufferedReader</a>
+                    <a href="#read-csv" class="subtopic-link">Read CSV</a>
+                    <a href="#file-class" class="subtopic-link">File class</a>
+                    <a href="#create-delete" class="subtopic-link">Create/Delete</a>
+                    <a href="#directories" class="subtopic-link">Directories</a>
+                    <a href="#read-all" class="subtopic-link">Read all</a>
+                    <a href="#full-example" class="subtopic-link">Full example</a>
+                    <a href="#copy-file" class="subtopic-link">Copy file</a>
+                    <a href="#common-mistakes" class="subtopic-link">Common mistakes</a>
+                    <a href="#quick-reference" class="subtopic-link">Quick reference</a>
+                    <a href="#practice-exercises" class="subtopic-link">Practice</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link ">27. Mini Projects</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>File Handling</h1>
+
+    <h2 id="what-is-file-handling">What is File Handling?</h2>
+    <p>File handling lets your Java program read from and write to files on disk.</p>
+    <p>Data saved in files persists even after the program closes.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <table>
+        <thead>
+            <tr>
+                <th>Use Case</th>
+                <th>Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Save user data</td>
+                <td>Profiles, settings, logs</td>
+            </tr>
+            <tr>
+                <td>Read configurations</td>
+                <td>App config files</td>
+            </tr>
+            <tr>
+                <td>Export reports</td>
+                <td>.txt or .csv outputs</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h2 id="key-classes">Key Classes</h2>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <table>
+        <thead>
+            <tr>
+                <th>Class</th>
+                <th>Purpose</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>FileWriter</td>
+                <td>Write characters to a file</td>
+            </tr>
+            <tr>
+                <td>BufferedWriter</td>
+                <td>Efficient writing (buffered)</td>
+            </tr>
+            <tr>
+                <td>FileReader</td>
+                <td>Read characters from a file</td>
+            </tr>
+            <tr>
+                <td>BufferedReader</td>
+                <td>Efficient reading line by line</td>
+            </tr>
+            <tr>
+                <td>File</td>
+                <td>Represents a file or directory</td>
+            </tr>
+            <tr>
+                <td>PrintWriter</td>
+                <td>Write formatted text</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h2 id="filewriter">Writing to a File — FileWriter</h2>
+    <div class="code">
+import java.io.*;
+
+public class WriteFile {
+    public static void main(String[] args) {
+        try (FileWriter fw = new FileWriter("output.txt")) {
+            fw.write("Hello, World!\n");
+            fw.write("This is line 2.\n");
+            fw.write("Java File Handling.\n");
+            System.out.println("File written successfully.");
+        } catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+}
+</div>
+    <p>By default FileWriter overwrites the file. To append, pass true as the second argument.</p>
+    <div class="code">
+new FileWriter("output.txt", true)
+</div>
+
+    <h2 id="bufferedwriter">Writing with BufferedWriter — Faster</h2>
+    <div class="code">
+try (BufferedWriter bw = new BufferedWriter(
+        new FileWriter("students.txt"))) {
+
+    bw.write("ID,Name,Age,Marks");
+    bw.newLine();
+
+    bw.write("1,Alice,20,92.5");
+    bw.newLine();
+
+    bw.write("2,Bob,22,78.0");
+    bw.newLine();
+
+    bw.write("3,Charlie,21,65.5");
+    bw.newLine();
+
+    System.out.println("Written successfully.");
+
+} catch (IOException e) {
+    e.printStackTrace();
+}
+</div>
+    <p>bw.newLine() uses the correct line break for the platform.</p>
+
+    <h2 id="printwriter">Writing with PrintWriter — Formatted Output</h2>
+    <div class="code">
+try (PrintWriter pw = new PrintWriter(
+        new FileWriter("report.txt"))) {
+
+    pw.println("=== Student Report ===");
+    pw.printf("%-5s %-15s %-6s%n", "ID", "Name", "Marks");
+    pw.println("-".repeat(30));
+    pw.printf("%-5d %-15s %-6.1f%n", 1, "Alice", 92.5);
+    pw.printf("%-5d %-15s %-6.1f%n", 2, "Bob", 78.0);
+    pw.printf("%-5d %-15s %-6.1f%n", 3, "Charlie", 65.5);
+
+    System.out.println("Report saved.");
+
+} catch (IOException e) {
+    e.printStackTrace();
+}
+</div>
+
+    <h2 id="check-exists">Checking if File Exists</h2>
+    <div class="code">
+File file = new File("output.txt");
+
+if (file.exists()) {
+    System.out.println("File found: " + file.getName());
+    System.out.println("Size: " + file.length() + " bytes");
+} else {
+    System.out.println("File does not exist.");
+}
+</div>
+
+    <h2 id="bufferedreader">Reading a File — BufferedReader</h2>
+    <div class="code">
+import java.io.*;
+
+public class ReadFile {
+    public static void main(String[] args) {
+        try (BufferedReader br = new BufferedReader(
+                new FileReader("students.txt"))) {
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                System.out.println(line);
+            }
+
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("Read error: " + e.getMessage());
+        }
+    }
+}
+</div>
+
+    <h2 id="read-csv">Reading CSV Data into Objects</h2>
+    <div class="code">
+import java.io.*;
+import java.util.*;
+
+public class ReadCSV {
+    public static void main(String[] args) {
+        ArrayList<String[]> records = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(
+                new FileReader("students.txt"))) {
+
+            String line = br.readLine();
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                records.add(parts);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.printf("%-5s %-15s %-5s %-6s%n",
+            "ID", "Name", "Age", "Marks");
+        System.out.println("-".repeat(35));
+
+        for (String[] r : records) {
+            System.out.printf("%-5s %-15s %-5s %-6s%n",
+                r[0], r[1], r[2], r[3]);
+        }
+    }
+}
+</div>
+
+    <h2 id="file-class">File Class — File Information</h2>
+    <div class="code">
+import java.io.*;
+
+File file = new File("students.txt");
+
+System.out.println("Name:     " + file.getName());
+System.out.println("Path:     " + file.getAbsolutePath());
+System.out.println("Exists:   " + file.exists());
+System.out.println("Size:     " + file.length() + " bytes");
+System.out.println("Readable: " + file.canRead());
+System.out.println("Writable: " + file.canWrite());
+</div>
+    <p>The File class represents a path and lets you inspect properties without opening the file. It can tell you the file’s name, absolute path, size, and whether it is readable or writable. This is useful for validating user input before you attempt actual I/O. File does not read the contents, so it is fast and safe to call. Use these checks to avoid exceptions and to show helpful messages.</p>
+
+    <h2 id="create-delete">Creating and Deleting Files</h2>
+    <div class="code">
+File file = new File("temp.txt");
+
+if (file.createNewFile()) {
+    System.out.println("File created.");
+} else {
+    System.out.println("File already exists.");
+}
+
+if (file.delete()) {
+    System.out.println("File deleted.");
+}
+</div>
+    <p>createNewFile() creates an empty file only if it does not already exist. This allows you to avoid overwriting existing data unintentionally. delete() removes the file, so you should confirm the return value to know if it succeeded. On some systems, deletion can fail if the file is open or permissions are missing. Always handle these cases to prevent silent errors.</p>
+
+    <h2 id="directories">Working with Directories</h2>
+    <div class="code">
+File dir = new File("reports");
+
+dir.mkdir();
+dir.mkdirs();
+
+File folder = new File(".");
+String[] files = folder.list();
+if (files != null) {
+    for (String f : files) {
+        System.out.println(f);
+    }
+}
+</div>
+    <p>Directories are handled by the same File class and are created with mkdir or mkdirs. mkdir creates a single directory, while mkdirs creates any missing parent folders. Listing a directory with list() gives you the file names, which you can loop through. If list() returns null, the path may not exist or may not be a directory. This is a common starting point for building file explorers or batch processors.</p>
+
+    <h2 id="read-all">Reading Entire File at Once (Java 11+)</h2>
+    <div class="code">
+import java.nio.file.*;
+
+String content = Files.readString(Path.of("output.txt"));
+System.out.println(content);
+
+String data = "Line 1\nLine 2\nLine 3";
+Files.writeString(Path.of("quick.txt"), data);
+</div>
+    <p>Files.readString and Files.writeString provide a concise way to read or write an entire file in one call. They are perfect for small files like configuration or template files. Because they load the whole file into memory, they are not suitable for very large files. Using Path.of keeps paths clear and avoids manual stream handling. Always wrap these calls in try-catch to handle IOExceptions.</p>
+
+    <h2 id="full-example">Full Example: Student File Manager</h2>
+    <div class="code">
+import java.io.*;
+import java.util.*;
+
+public class StudentFileManager {
+    private static final String FILE = "students.csv";
+
+    public static void saveAll(ArrayList<String[]> students) {
+        try (BufferedWriter bw = new BufferedWriter(
+                new FileWriter(FILE))) {
+
+            bw.write("id,name,age,marks");
+            bw.newLine();
+
+            for (String[] s : students) {
+                bw.write(String.join(",", s));
+                bw.newLine();
+            }
+            System.out.println("Saved " + students.size() + " records.");
+
+        } catch (IOException e) {
+            System.out.println("Save error: " + e.getMessage());
+        }
+    }
+
+    public static ArrayList<String[]> loadAll() {
+        ArrayList<String[]> list = new ArrayList<>();
+        File f = new File(FILE);
+        if (!f.exists()) return list;
+
+        try (BufferedReader br = new BufferedReader(
+                new FileReader(FILE))) {
+
+            br.readLine();
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (!line.trim().isEmpty())
+                    list.add(line.split(","));
+            }
+
+        } catch (IOException e) {
+            System.out.println("Load error: " + e.getMessage());
+        }
+        return list;
+    }
+
+    public static void printAll(ArrayList<String[]> students) {
+        System.out.printf("%-5s %-15s %-5s %-6s%n",
+            "ID", "Name", "Age", "Marks");
+        System.out.println("-".repeat(35));
+        for (String[] s : students) {
+            System.out.printf("%-5s %-15s %-5s %-6s%n",
+                s[0], s[1], s[2], s[3]);
+        }
+    }
+
+    public static void main(String[] args) {
+        ArrayList<String[]> students = new ArrayList<>();
+        students.add(new String[]{"1", "Alice", "20", "92.5"});
+        students.add(new String[]{"2", "Bob", "22", "78.0"});
+        students.add(new String[]{"3", "Charlie", "21", "65.5"});
+
+        saveAll(students);
+
+        ArrayList<String[]> loaded = loadAll();
+        printAll(loaded);
+    }
+}
+</div>
+    <p>This full example combines writing, reading, and printing so you can see a complete workflow. It writes a CSV header, saves each student row, and then reloads the data from disk. The loadAll method checks for missing files to avoid errors on the first run. The printAll method formats output so you can verify the data easily. This structure is a good template for many small data storage tasks.</p>
+
+    <h2 id="copy-file">Copying a File</h2>
+    <div class="code">
+import java.io.*;
+
+public class CopyFile {
+    public static void copy(String source, String dest) {
+        try (BufferedReader br = new BufferedReader(new FileReader(source));
+             BufferedWriter bw = new BufferedWriter(new FileWriter(dest))) {
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                bw.write(line);
+                bw.newLine();
+            }
+            System.out.println("Copied to: " + dest);
+
+        } catch (IOException e) {
+            System.out.println("Copy error: " + e.getMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+        copy("students.csv", "students_backup.csv");
+    }
+}
+</div>
+    <p>Copying a file line by line is a safe way to duplicate text files. The code reads each line from the source and writes it to the destination, preserving order. BufferedReader and BufferedWriter keep the operation fast for larger files. If the destination file already exists, it will be overwritten unless you open it in append mode. Always handle IOExceptions so you can report which file failed.</p>
+
+    <h2 id="common-mistakes">Common Mistakes</h2>
+    <div class="code">
+FileWriter fw = new FileWriter("file.txt");
+fw.write("data");
+
+catch (IOException e) { }
+catch (FileNotFoundException e) { System.out.println("File missing."); }
+
+bw.write("line\n");
+bw.write("line");
+bw.newLine();
+
+String line = br.readLine();
+System.out.println(line.length());
+while ((line = br.readLine()) != null) { }
+</div>
+    <p>Common mistakes usually happen when resources are not closed or when errors are swallowed. An empty catch block hides real problems and makes debugging very hard. Using \n instead of newLine can produce files that look wrong on different operating systems. Reading a line without checking for null leads to NullPointerException at end of file. The list below highlights the fixes you should practice.</p>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <table>
+        <thead>
+            <tr>
+                <th>Mistake</th>
+                <th>Why it breaks</th>
+                <th>Correct Fix</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Forgot close()</td>
+                <td>Data stays in buffer, file empty</td>
+                <td>Use try-with-resources</td>
+            </tr>
+            <tr>
+                <td>Catching IOException only</td>
+                <td>Misses "File Not Found" specifics</td>
+                <td>Catch FileNotFoundException too</td>
+            </tr>
+            <tr>
+                <td>Using \n</td>
+                <td>Fails on some OS (Notepad)</td>
+                <td>Use bw.newLine()</td>
+            </tr>
+            <tr>
+                <td>No null check</td>
+                <td>Crash at end of file</td>
+                <td>Check line != null</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h2 id="quick-reference">Quick Reference</h2>
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+    <div class="code">
+new FileWriter("file.txt")
+new FileWriter("file.txt", true)
+new BufferedWriter(new FileWriter("file.txt"))
+new PrintWriter(new FileWriter("file.txt"))
+
+new BufferedReader(new FileReader("file.txt"))
+
+File file = new File("path");
+file.exists();
+file.length();
+file.getName();
+file.createNewFile();
+file.delete();
+file.mkdir();
+file.list();
+
+Files.readString(Path.of("file.txt"));
+Files.writeString(Path.of("file.txt"), content);
+</div>
+    </div>
+    <p>This section is a quick syntax reminder, not a replacement for the full explanations above. Use it when you remember the idea but need the exact method name or constructor. The examples are intentionally short so you can scan them quickly. If something fails, return to the earlier sections for context and error handling. Treat this as a checklist for common file operations.</p>
+
+    <h2 id="practice-exercises">Practice Exercises</h2>
+    <p>These exercises are designed to reinforce each file handling concept step by step. Focus on one task at a time and verify the output by opening the file. When you make a mistake, read the exception message and adjust your code. Try using both absolute and relative paths to understand how Java resolves file locations. Completing these tasks will make file I/O feel routine instead of risky.</p>
+    <ul>
+        <li>Save your name, age, and city to profile.txt — practice basic writing.</li>
+        <li>Write 5 student records to students.txt using BufferedWriter — practice buffered output.</li>
+        <li>Append 3 more lines to an existing file using FileWriter append mode — practice safe appending.</li>
+        <li>Use PrintWriter to write a formatted table of 4 products — practice formatting.</li>
+        <li>Check if a file exists before writing and print its size — practice file metadata.</li>
+        <li>Read and print 5 names using BufferedReader — practice line-by-line reading.</li>
+        <li>Read CSV into Student objects and print them — practice parsing and display.</li>
+        <li>Create output directory and write 3 files inside it — practice directory operations.</li>
+        <li>Use Files.readString() and print character count — practice full-file reads.</li>
+        <li>Build a CSV save/load system for Product list — practice full workflow.</li>
+        <li>Copy a file using BufferedReader and BufferedWriter — practice file copying.</li>
+        <li>Count total words, lines, and characters in a text file — practice text analysis.</li>
+        <li>Find highest and lowest scorer from CSV — practice aggregation logic.</li>
+        <li>Append a log entry with timestamp to log.txt each run — practice logging.</li>
+    </ul>
+    <p>Next is ArrayList — dynamic lists and how they compare to arrays.</p>
+</div>
+
+    </div>
+
+</body>
+</html>

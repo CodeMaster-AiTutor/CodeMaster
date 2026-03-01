@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Projects - Java Course</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="menu-btn">☰</div>
+        <div class="logo">Java Course</div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟢 BEGINNER</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="hello-world.html" class="topic-link ">1. Hello World</a>
+            </div>
+            <div class="topic">
+                <a href="variable.html" class="topic-link ">2. Variables</a>
+            </div>
+            <div class="topic">
+                <a href="input-output.html" class="topic-link ">3. Input Output</a>
+            </div>
+            <div class="topic">
+                <a href="operators.html" class="topic-link ">4. Operators</a>
+            </div>
+            <div class="topic">
+                <a href="conditionals.html" class="topic-link ">5. Conditionals</a>
+            </div>
+            <div class="topic">
+                <a href="loops.html" class="topic-link ">6. Loops</a>
+            </div>
+            <div class="topic">
+                <a href="methods.html" class="topic-link ">7. Methods</a>
+            </div>
+            <div class="topic">
+                <a href="arrays.html" class="topic-link ">8. Arrays</a>
+            </div>
+            <div class="topic">
+                <a href="strings.html" class="topic-link ">9. Strings</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🟡 INTERMEDIATE</div>
+        <div class="level-topics" style="display: none">
+            <div class="topic">
+                <a href="oop-intro.html" class="topic-link ">10. OOP Intro</a>
+            </div>
+            <div class="topic">
+                <a href="constructors.html" class="topic-link ">11. Constructors</a>
+            </div>
+            <div class="topic">
+                <a href="encapsulation.html" class="topic-link ">12. Encapsulation</a>
+            </div>
+            <div class="topic">
+                <a href="inheritance.html" class="topic-link ">13. Inheritance</a>
+            </div>
+            <div class="topic">
+                <a href="polymorphism.html" class="topic-link ">14. Polymorphism</a>
+            </div>
+            <div class="topic">
+                <a href="abstraction.html" class="topic-link ">15. Abstraction</a>
+            </div>
+            <div class="topic">
+                <a href="arraylist.html" class="topic-link ">16. ArrayList</a>
+            </div>
+            <div class="topic">
+                <a href="exception-handling.html" class="topic-link ">17. Exception Handling</a>
+            </div>
+            <div class="topic">
+                <a href="file-handling.html" class="topic-link ">18. File Handling</a>
+            </div>
+        </div>
+    </div>
+    <div class="level">
+        <div class="level-title" onclick="toggleLevel(this)">🔴 ADVANCED</div>
+        <div class="level-topics" style="display: block">
+            <div class="topic">
+                <a href="packages.html" class="topic-link ">19. Packages</a>
+            </div>
+            <div class="topic">
+                <a href="collections.html" class="topic-link ">20. Collections</a>
+            </div>
+            <div class="topic">
+                <a href="generics.html" class="topic-link ">21. Generics</a>
+            </div>
+            <div class="topic">
+                <a href="lambda.html" class="topic-link ">22. Lambda</a>
+            </div>
+            <div class="topic">
+                <a href="streams.html" class="topic-link ">23. Streams</a>
+            </div>
+            <div class="topic">
+                <a href="multithreading.html" class="topic-link ">24. Multithreading</a>
+            </div>
+            <div class="topic">
+                <a href="jdbc.html" class="topic-link ">25. JDBC</a>
+            </div>
+            <div class="topic">
+                <a href="serialization.html" class="topic-link ">26. Serialization</a>
+            </div>
+            <div class="topic">
+                <a href="mini-projects.html" class="topic-link active">27. Mini Projects</a>
+                <div class="page-subtopics">
+                    <a href="#overview" class="subtopic-link">Project Overview</a>
+                    <a href="#student-model" class="subtopic-link">Student Model</a>
+                    <a href="#student-manager" class="subtopic-link">StudentManager</a>
+                    <a href="#student-menu" class="subtopic-link">Student Menu</a>
+                    <a href="#bank-model" class="subtopic-link">Bank Model</a>
+                    <a href="#bank-class" class="subtopic-link">Bank Class</a>
+                    <a href="#bank-menu" class="subtopic-link">Bank Menu</a>
+                    <a href="#inventory-model" class="subtopic-link">Inventory Model</a>
+                    <a href="#inventory-class" class="subtopic-link">Inventory Class</a>
+                    <a href="#tips" class="subtopic-link">Final Tips</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="content">
+    <h1>Mini Projects</h1>
+
+    <h2 id="overview">Project Overview</h2>
+    <p>Build complete, menu-driven console apps with proper models, managers, and file storage.</p>
+    <p>Files needed (example): Student.java, StudentManager.java, Main.java.</p>
+
+    <h2 id="student-model">Student Management System — Student Model</h2>
+    <div class="code">
+import java.io.Serializable;
+
+public class Student implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private int    id;
+    private String name;
+    private int    age;
+    private double marks;
+
+    public Student(int id, String name, int age, double marks) {
+        this.id    = id;
+        this.name  = name;
+        this.age   = age;
+        this.marks = marks;
+    }
+
+    public int    getId()    { return id; }
+    public String getName()  { return name; }
+    public int    getAge()   { return age; }
+    public double getMarks() { return marks; }
+    public void   setMarks(double m) { this.marks = m; }
+
+    public String getGrade() {
+        if (marks >= 90) return "A";
+        else if (marks >= 75) return "B";
+        else if (marks >= 60) return "C";
+        else if (marks >= 50) return "D";
+        else return "F";
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%-5d %-15s %-5d %-8.1f %s",
+            id, name, age, marks, getGrade());
+    }
+}
+    </div>
+
+    <h2 id="student-manager">StudentManager — Logic and File Storage</h2>
+    <div class="code">
+import java.io.*;
+import java.util.*;
+
+public class StudentManager {
+    private ArrayList<Student> students = new ArrayList<>();
+    private static final String FILE = "students.ser";
+    private int nextId = 1;
+
+    public StudentManager() { load(); }
+
+    public void add(String name, int age, double marks) {
+        students.add(new Student(nextId++, name, age, marks));
+        save();
+        System.out.println("Student added.");
+    }
+
+    public void viewAll() {
+        if (students.isEmpty()) { System.out.println("No students found."); return; }
+        System.out.printf("%-5s %-15s %-5s %-8s %s%n",
+            "ID", "Name", "Age", "Marks", "Grade");
+        System.out.println("-".repeat(42));
+        students.forEach(System.out::println);
+    }
+
+    public void search(String name) {
+        students.stream()
+            .filter(s -> s.getName().equalsIgnoreCase(name))
+            .forEach(System.out::println);
+    }
+
+    public void updateMarks(int id, double marks) {
+        students.stream()
+            .filter(s -> s.getId() == id)
+            .findFirst()
+            .ifPresentOrElse(s -> {
+                s.setMarks(marks);
+                save();
+                System.out.println("Marks updated.");
+            }, () -> System.out.println("Student not found."));
+    }
+
+    public void delete(int id) {
+        boolean removed = students.removeIf(s -> s.getId() == id);
+        if (removed) { save(); System.out.println("Deleted."); }
+        else System.out.println("Student not found.");
+    }
+
+    public void topStudents() {
+        System.out.println("=== Grade A Students ===");
+        students.stream()
+            .filter(s -> s.getGrade().equals("A"))
+            .sorted((a, b) -> Double.compare(b.getMarks(), a.getMarks()))
+            .forEach(System.out::println);
+    }
+
+    private void save() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(
+                new FileOutputStream(FILE))) {
+            oos.writeObject(students);
+            oos.writeInt(nextId);
+        } catch (IOException e) { e.printStackTrace(); }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void load() {
+        File f = new File(FILE);
+        if (!f.exists()) return;
+        try (ObjectInputStream ois = new ObjectInputStream(
+                new FileInputStream(FILE))) {
+            students = (ArrayList<Student>) ois.readObject();
+            nextId   = ois.readInt();
+        } catch (IOException | ClassNotFoundException e) { e.printStackTrace(); }
+    }
+}
+    </div>
+
+    <h2 id="student-menu">Student System — Main Menu</h2>
+    <div class="code">
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        StudentManager manager = new StudentManager();
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("\n=== Student Management System ===");
+            System.out.println("1. Add Student");
+            System.out.println("2. View All");
+            System.out.println("3. Search by Name");
+            System.out.println("4. Update Marks");
+            System.out.println("5. Delete Student");
+            System.out.println("6. Top Students");
+            System.out.println("7. Exit");
+            System.out.print("Choice: ");
+
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1 -> {
+                    System.out.print("Name: ");
+                    String name = sc.nextLine();
+                    System.out.print("Age: ");
+                    int age = sc.nextInt();
+                    System.out.print("Marks: ");
+                    double marks = sc.nextDouble();
+                    manager.add(name, age, marks);
+                }
+                case 2 -> manager.viewAll();
+                case 3 -> {
+                    System.out.print("Name: ");
+                    manager.search(sc.nextLine());
+                }
+                case 4 -> {
+                    System.out.print("ID: ");
+                    int id = sc.nextInt();
+                    System.out.print("New Marks: ");
+                    double marks = sc.nextDouble();
+                    manager.updateMarks(id, marks);
+                }
+                case 5 -> {
+                    System.out.print("ID: ");
+                    manager.delete(sc.nextInt());
+                }
+                case 6 -> manager.topStudents();
+                case 7 -> { System.out.println("Goodbye!"); return; }
+                default -> System.out.println("Invalid choice.");
+            }
+        }
+    }
+}
+    </div>
+
+    <h2 id="bank-model">Bank Management System — Model</h2>
+    <div class="code">
+import java.io.Serializable;
+import java.util.ArrayList;
+
+public class BankAccount implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private int               accountNo;
+    private String            owner;
+    private double            balance;
+    private ArrayList<String> history = new ArrayList<>();
+
+    public BankAccount(int accountNo, String owner, double deposit) {
+        this.accountNo = accountNo;
+        this.owner     = owner;
+        this.balance   = deposit;
+        log("Account opened. Balance: " + deposit);
+    }
+
+    public int    getAccountNo() { return accountNo; }
+    public String getOwner()     { return owner; }
+    public double getBalance()   { return balance; }
+
+    public void deposit(double amount) {
+        if (amount <= 0) { System.out.println("Invalid amount."); return; }
+        balance += amount;
+        log("Deposited: " + amount + " | Balance: " + balance);
+        System.out.printf("Deposited %.2f | New Balance: %.2f%n", amount, balance);
+    }
+
+    public boolean withdraw(double amount) {
+        if (amount <= 0) { System.out.println("Invalid amount."); return false; }
+        if (balance < amount) { System.out.println("Insufficient funds."); return false; }
+        balance -= amount;
+        log("Withdrew: " + amount + " | Balance: " + balance);
+        System.out.printf("Withdrew %.2f | New Balance: %.2f%n", amount, balance);
+        return true;
+    }
+
+    public void printHistory() {
+        System.out.println("=== History: " + owner + " ===");
+        history.forEach(h -> System.out.println("  " + h));
+    }
+
+    private void log(String entry) { history.add(entry); }
+
+    @Override
+    public String toString() {
+        return String.format("Acc#%-6d %-15s Balance: $%.2f",
+            accountNo, owner, balance);
+    }
+}
+    </div>
+
+    <h2 id="bank-class">Bank Class</h2>
+    <div class="code">
+import java.io.*;
+import java.util.*;
+
+public class Bank {
+    private HashMap<Integer, BankAccount> accounts = new HashMap<>();
+    private static final String FILE = "bank.ser";
+    private int nextNo = 1001;
+
+    public Bank() { load(); }
+
+    public void createAccount(String owner, double deposit) {
+        BankAccount acc = new BankAccount(nextNo++, owner, deposit);
+        accounts.put(acc.getAccountNo(), acc);
+        save();
+        System.out.println("Account created: #" + acc.getAccountNo());
+    }
+
+    public BankAccount get(int no) { return accounts.getOrDefault(no, null); }
+
+    public void transfer(int from, int to, double amount) {
+        BankAccount a = get(from), b = get(to);
+        if (a == null || b == null) { System.out.println("Account not found."); return; }
+        if (a.withdraw(amount)) { b.deposit(amount); save(); }
+    }
+
+    public void viewAll() {
+        if (accounts.isEmpty()) { System.out.println("No accounts."); return; }
+        accounts.values().forEach(System.out::println);
+    }
+
+    private void save() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(
+                new FileOutputStream(FILE))) {
+            oos.writeObject(accounts);
+            oos.writeInt(nextNo);
+        } catch (IOException e) { e.printStackTrace(); }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void load() {
+        File f = new File(FILE);
+        if (!f.exists()) return;
+        try (ObjectInputStream ois = new ObjectInputStream(
+                new FileInputStream(FILE))) {
+            accounts = (HashMap<Integer, BankAccount>) ois.readObject();
+            nextNo   = ois.readInt();
+        } catch (IOException | ClassNotFoundException e) { e.printStackTrace(); }
+    }
+}
+    </div>
+
+    <h2 id="bank-menu">Bank System — Main Menu</h2>
+    <div class="code">
+import java.util.Scanner;
+
+public class BankApp {
+    public static void main(String[] args) {
+        Bank    bank = new Bank();
+        Scanner sc   = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("\n=== Bank System ===");
+            System.out.println("1. Create Account");
+            System.out.println("2. Deposit");
+            System.out.println("3. Withdraw");
+            System.out.println("4. Transfer");
+            System.out.println("5. View All Accounts");
+            System.out.println("6. Transaction History");
+            System.out.println("7. Exit");
+            System.out.print("Choice: ");
+
+            switch (sc.nextInt()) {
+                case 1 -> {
+                    sc.nextLine();
+                    System.out.print("Owner Name: ");
+                    String name = sc.nextLine();
+                    System.out.print("Initial Deposit: ");
+                    double dep = sc.nextDouble();
+                    bank.createAccount(name, dep);
+                }
+                case 2 -> {
+                    System.out.print("Account#: ");
+                    int no = sc.nextInt();
+                    System.out.print("Amount: ");
+                    double amt = sc.nextDouble();
+                    BankAccount acc = bank.get(no);
+                    if (acc != null) acc.deposit(amt);
+                    else System.out.println("Account not found.");
+                }
+                case 3 -> {
+                    System.out.print("Account#: ");
+                    int no = sc.nextInt();
+                    System.out.print("Amount: ");
+                    double amt = sc.nextDouble();
+                    BankAccount acc = bank.get(no);
+                    if (acc != null) acc.withdraw(amt);
+                    else System.out.println("Account not found.");
+                }
+                case 4 -> {
+                    System.out.print("From Account#: ");
+                    int from = sc.nextInt();
+                    System.out.print("To Account#: ");
+                    int to = sc.nextInt();
+                    System.out.print("Amount: ");
+                    double amt = sc.nextDouble();
+                    bank.transfer(from, to, amt);
+                }
+                case 5 -> bank.viewAll();
+                case 6 -> {
+                    System.out.print("Account#: ");
+                    BankAccount acc = bank.get(sc.nextInt());
+                    if (acc != null) acc.printHistory();
+                    else System.out.println("Account not found.");
+                }
+                case 7 -> { System.out.println("Goodbye!"); return; }
+                default -> System.out.println("Invalid choice.");
+            }
+        }
+    }
+}
+    </div>
+
+    <h2 id="inventory-model">Inventory System — Product Model</h2>
+    <div class="code">
+public class Product {
+    private int    id;
+    private String name;
+    private double price;
+    private int    qty;
+
+    public Product(int id, String name, double price, int qty) {
+        this.id    = id;
+        this.name  = name;
+        this.price = price;
+        this.qty   = qty;
+    }
+
+    public int    getId()   { return id; }
+    public String getName() { return name; }
+    public int    getQty()  { return qty; }
+    public void   setQty(int q) { this.qty = q; }
+
+    public String toCSV() { return id + "," + name + "," + price + "," + qty; }
+
+    public static Product fromCSV(String line) {
+        String[] p = line.split(",");
+        return new Product(Integer.parseInt(p[0]), p[1],
+            Double.parseDouble(p[2]), Integer.parseInt(p[3]));
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%-5d %-15s $%-8.2f Qty: %d", id, name, price, qty);
+    }
+}
+    </div>
+
+    <h2 id="inventory-class">Inventory — CSV Save/Load</h2>
+    <div class="code">
+import java.io.*;
+import java.util.*;
+
+public class Inventory {
+    private ArrayList<Product> products = new ArrayList<>();
+    private static final String FILE = "inventory.csv";
+    private int nextId = 1;
+
+    public Inventory() { load(); }
+
+    public void add(String name, double price, int qty) {
+        products.add(new Product(nextId++, name, price, qty));
+        save();
+        System.out.println("Added: " + name);
+    }
+
+    public void viewAll() {
+        if (products.isEmpty()) { System.out.println("No products."); return; }
+        products.forEach(System.out::println);
+    }
+
+    public void sell(int id, int qty) {
+        products.stream().filter(p -> p.getId() == id).findFirst()
+            .ifPresentOrElse(p -> {
+                if (p.getQty() < qty) System.out.println("Not enough stock.");
+                else { p.setQty(p.getQty() - qty); save();
+                    System.out.println("Sold. Remaining: " + p.getQty()); }
+            }, () -> System.out.println("Product not found."));
+    }
+
+    public void lowStock(int limit) {
+        products.stream().filter(p -> p.getQty() < limit)
+            .forEach(p -> System.out.println("LOW: " + p));
+    }
+
+    private void save() {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE))) {
+            bw.write(nextId + "\n");
+            for (Product p : products) bw.write(p.toCSV() + "\n");
+        } catch (IOException e) { e.printStackTrace(); }
+    }
+
+    private void load() {
+        File f = new File(FILE);
+        if (!f.exists()) return;
+        try (BufferedReader br = new BufferedReader(new FileReader(FILE))) {
+            nextId = Integer.parseInt(br.readLine().trim());
+            String line;
+            while ((line = br.readLine()) != null)
+                if (!line.trim().isEmpty()) products.add(Product.fromCSV(line));
+        } catch (IOException e) { e.printStackTrace(); }
+    }
+}
+    </div>
+
+    <h2 id="tips">Final Tips</h2>
+    <div class="code">
+Model class   → Student, Product, BankAccount
+Manager class → StudentManager, Bank, Inventory
+Main class    → menu + Scanner
+    </div>
+    <ul>
+        <li>Validate input (no negative marks, no empty names)</li>
+        <li>Handle file not found gracefully</li>
+        <li>Use streams for filtering and sorting</li>
+        <li>Use try-with-resources for all file operations</li>
+    </ul>
+
+    <p><b>Course complete!</b> Keep building projects and concepts will become second nature.</p>
+</div>
+
+    </div>
+
+</body>
+</html>

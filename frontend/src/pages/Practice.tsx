@@ -7,7 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Trophy, Circle, AlertCircle, BookOpen, Search, CheckCircle2, Target, Play, ArrowRight, Lock, ExternalLink } from 'lucide-react';
+import { Trophy, Circle, AlertCircle, BookOpen, Search, CheckCircle2, Target, Play, ArrowRight, Lock, ExternalLink, CheckCheck } from 'lucide-react';
 import AppLayout from '@/components/layout/AppLayout';
 import { practiceAPI } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
@@ -41,6 +41,22 @@ interface LearningConcept {
   level: 'basic' | 'intermediate' | 'advanced';
   tutorialUrl?: string;
 }
+
+type PracticeDifficulty = 'Easy' | 'Medium' | 'Hard';
+
+type PracticeProblem = {
+  title: string;
+  difficulty: PracticeDifficulty;
+};
+
+type PracticeSection = {
+  title: string;
+  problems: PracticeProblem[];
+};
+
+type PracticeProblemSet =
+  | { type: 'flat'; problems: PracticeProblem[] }
+  | { type: 'sectioned'; sections: PracticeSection[] };
 
 const learningPathConcepts: LearningConcept[] = [
   {
@@ -480,88 +496,137 @@ const learningPathConcepts: LearningConcept[] = [
   },
 ];
 
-const practiceProblemSets: Record<LearningConcept['level'], string[]> = {
-  basic: [
-    'Basic Calculator',
-    'Even Odd Checker',
-    'Largest of Three Numbers',
-    'Leap Year Checker',
-    'Factorial Calculator',
-    'Prime Number Checker',
-    'Fibonacci Series',
-    'Reverse a Number',
-    'Palindrome Number',
-    'Armstrong Number',
-    'GCD and LCM',
-    'Multiplication Table',
-    'Count Digits',
-    'Sum of Digits',
-    'Power Calculator',
-    'Temperature Converter',
-    'Grade System',
-    'Pattern – Star Pyramid',
-    'Pattern – Number Triangle',
-    'Sum of N Natural Numbers',
-    'Check Alphabet Type',
-    'Simple Interest Calculator',
-    'Swap Without Third Variable',
-    'Count Vowel',
-    'Character Frequency',
-  ],
-  intermediate: [
-    'Find Largest in Array',
-    'Find Second Largest',
-    'Reverse Array',
-    'Sort Array (Bubble Sort)',
-    'Linear Search',
-    'Binary Search',
-    'Remove Duplicates (Array)',
-    'Array Rotation',
-    'Sum of Array Elements',
-    'Count Even and Odd in Array',
-    'String Reverse',
-    'Palindrome String',
-    'Anagram Checker',
-    'Count Words in Sentence',
-    'Remove Spaces',
-    'String Compression',
-    'Matrix Addition',
-    'Matrix Multiplication',
-    'Transpose Matrix',
-    'Method Overloading Demo',
-    'Student Result System',
-    'Employee Salary System',
-    'Custom Exception Demo',
-    'Menu Driven Program',
-    'Number Guessing Game',
-  ],
-  advanced: [
-    'Student Management System',
-    'Library System',
-    'Contact Book',
-    'ATM Simulator',
-    'Shopping Cart System',
-    'Quiz Application',
-    'Voting System',
-    'Parking Lot System',
-    'Expense Tracker',
-    'Bank Account System',
-    'Inventory System',
-    'Password Validator',
-    'Ticket Booking System',
-    'Restaurant Billing System',
-    'Task Manager',
-    'Employee Management System',
-    'Stack Implementation',
-    'Queue Implementation',
-    'Simple Chat Simulation',
-    'Mini Banking Transaction History',
-    'Course Enrollment System',
-    'Simple Login System',
-    'Hotel Room Booking',
-    'E-Voting with ID Validation',
-    'Multi-User Scoreboard System',
-  ],
+const practiceProblemSets: Record<LearningConcept['level'], PracticeProblemSet> = {
+  basic: {
+    type: 'flat',
+    problems: [
+      { title: 'Even / Odd Checker', difficulty: 'Easy' },
+      { title: 'Largest of Three Numbers', difficulty: 'Easy' },
+      { title: 'Leap Year Checker', difficulty: 'Easy' },
+      { title: 'Temperature Converter', difficulty: 'Easy' },
+      { title: 'Grade System', difficulty: 'Easy' },
+      { title: 'Simple Interest Calculator', difficulty: 'Easy' },
+      { title: 'Swap Without Third Variable', difficulty: 'Easy' },
+      { title: 'Count Vowels', difficulty: 'Easy' },
+      { title: 'Character Frequency', difficulty: 'Easy' },
+      { title: 'Check Alphabet Type', difficulty: 'Easy' },
+      { title: 'Sum of N Natural Numbers', difficulty: 'Easy' },
+      { title: 'Multiplication Table', difficulty: 'Easy' },
+      { title: 'Count Digits', difficulty: 'Easy' },
+      { title: 'Sum of Digits', difficulty: 'Easy' },
+      { title: 'Basic Calculator', difficulty: 'Medium' },
+      { title: 'Factorial Calculator', difficulty: 'Medium' },
+      { title: 'Prime Number Checker', difficulty: 'Medium' },
+      { title: 'Fibonacci Series', difficulty: 'Medium' },
+      { title: 'Reverse a Number', difficulty: 'Medium' },
+      { title: 'Palindrome Number', difficulty: 'Medium' },
+      { title: 'Armstrong Number', difficulty: 'Medium' },
+      { title: 'GCD and LCM', difficulty: 'Medium' },
+      { title: 'Power Calculator', difficulty: 'Medium' },
+      { title: 'Pattern - Star Pyramid', difficulty: 'Hard' },
+      { title: 'Pattern - Number Triangle', difficulty: 'Hard' },
+    ],
+  },
+  intermediate: {
+    type: 'sectioned',
+    sections: [
+      {
+        title: 'Arrays',
+        problems: [
+          { title: 'Find Largest in Array', difficulty: 'Easy' },
+          { title: 'Reverse an Array', difficulty: 'Easy' },
+          { title: 'Linear Search', difficulty: 'Easy' },
+          { title: 'Sum of Array Elements', difficulty: 'Easy' },
+          { title: 'Count Even and Odd', difficulty: 'Easy' },
+          { title: 'Find Second Largest', difficulty: 'Medium' },
+          { title: 'Bubble Sort', difficulty: 'Medium' },
+          { title: 'Binary Search', difficulty: 'Medium' },
+          { title: 'Remove Duplicates', difficulty: 'Medium' },
+          { title: 'Array Rotation (Left by K)', difficulty: 'Hard' },
+        ],
+      },
+      {
+        title: 'Strings',
+        problems: [
+          { title: 'Reverse a String', difficulty: 'Easy' },
+          { title: 'Palindrome String', difficulty: 'Easy' },
+          { title: 'Count Words in a Sentence', difficulty: 'Easy' },
+          { title: 'Remove Spaces', difficulty: 'Easy' },
+          { title: 'Anagram Checker', difficulty: 'Medium' },
+          { title: 'String Compression', difficulty: 'Hard' },
+        ],
+      },
+      {
+        title: 'Matrices',
+        problems: [
+          { title: 'Matrix Addition', difficulty: 'Easy' },
+          { title: 'Transpose a Matrix', difficulty: 'Medium' },
+          { title: 'Matrix Multiplication', difficulty: 'Hard' },
+        ],
+      },
+      {
+        title: 'Methods & OOP',
+        problems: [
+          { title: 'Method Overloading Demo', difficulty: 'Medium' },
+          { title: 'Student Result System', difficulty: 'Medium' },
+          { title: 'Employee Salary System', difficulty: 'Medium' },
+          { title: 'Menu-Driven Program', difficulty: 'Medium' },
+          { title: 'Custom Exception Demo', difficulty: 'Hard' },
+          { title: 'Number Guessing Game', difficulty: 'Hard' },
+        ],
+      },
+    ],
+  },
+  advanced: {
+    type: 'sectioned',
+    sections: [
+      {
+        title: 'Data Systems',
+        problems: [
+          { title: 'Student Management System', difficulty: 'Easy' },
+          { title: 'Library System', difficulty: 'Easy' },
+          { title: 'Contact Book', difficulty: 'Easy' },
+          { title: 'ATM Simulator', difficulty: 'Medium' },
+          { title: 'Shopping Cart System', difficulty: 'Medium' },
+        ],
+      },
+      {
+        title: 'Interactive Apps',
+        problems: [
+          { title: 'Expense Tracker', difficulty: 'Easy' },
+          { title: 'Quiz Application', difficulty: 'Medium' },
+          { title: 'Voting System', difficulty: 'Medium' },
+          { title: 'Parking Lot System', difficulty: 'Medium' },
+          { title: 'Bank Account System', difficulty: 'Medium' },
+        ],
+      },
+      {
+        title: 'Management Tools',
+        problems: [
+          { title: 'Password Validator', difficulty: 'Easy' },
+          { title: 'Task Manager', difficulty: 'Easy' },
+          { title: 'Inventory System', difficulty: 'Medium' },
+          { title: 'Ticket Booking System', difficulty: 'Medium' },
+          { title: 'Restaurant Billing System', difficulty: 'Medium' },
+        ],
+      },
+      {
+        title: 'Advanced Systems',
+        problems: [
+          { title: 'Simple Chat Simulation', difficulty: 'Easy' },
+          { title: 'Simple Login System', difficulty: 'Easy' },
+          { title: 'Employee Management + Sort by Salary', difficulty: 'Medium' },
+          { title: 'Mini Banking Transaction History', difficulty: 'Medium' },
+          { title: 'Course Enrollment System', difficulty: 'Medium' },
+          { title: 'Hotel Room Booking', difficulty: 'Medium' },
+          { title: 'Stack Implementation (Manual)', difficulty: 'Hard' },
+          { title: 'Queue Implementation (Manual)', difficulty: 'Hard' },
+          { title: 'E-Voting with ID Validation', difficulty: 'Hard' },
+          { title: 'Multi-User Scoreboard System', difficulty: 'Hard' },
+        ],
+      },
+    ],
+  },
 };
 
 const Practice = () => {
@@ -573,6 +638,7 @@ const Practice = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [openLevels, setOpenLevels] = useState<string[]>([]);
   const [openPracticeLevels, setOpenPracticeLevels] = useState<string[]>([]);
+  const [openPracticeSections, setOpenPracticeSections] = useState<string[]>([]);
   const { toast } = useToast();
   
   const normalizeLevel = (value?: string | null) => {
@@ -713,8 +779,75 @@ const Practice = () => {
     }
     if (activeTab === 'practice-arena') {
       setOpenPracticeLevels([]);
+      setOpenPracticeSections([]);
     }
   }, [activeTab]);
+
+  const getProblemCount = (set: PracticeProblemSet) =>
+    set.type === 'flat'
+      ? set.problems.length
+      : set.sections.reduce((total, section) => total + section.problems.length, 0);
+
+  const getSolveKey = (level: LearningConcept['level'], title: string) =>
+    `practice:solved:${level}:${title}`;
+
+  const isProblemSolved = (level: LearningConcept['level'], title: string) => {
+    try {
+      return localStorage.getItem(getSolveKey(level, title)) === 'true';
+    } catch {
+      return false;
+    }
+  };
+
+  const renderProblemCard = (
+    level: LearningConcept['level'],
+    problem: PracticeProblem,
+    index: number,
+    keyPrefix: string
+  ) => {
+    const solved = isProblemSolved(level, problem.title);
+    return (
+      <Card key={`${keyPrefix}-${problem.title}`} className="border-border/20 bg-background/40">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
+                {String(index + 1).padStart(2, '0')}
+              </div>
+              <div>
+                <div className="text-sm font-medium">{problem.title}</div>
+                <div className="mt-1">
+                  <Badge variant="outline" className="text-xs">
+                    {problem.difficulty}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div
+                className={`h-7 w-7 rounded-full border flex items-center justify-center ${
+                  solved
+                    ? 'border-success/40 bg-success/10 text-success'
+                    : 'border-muted text-muted-foreground'
+                }`}
+              >
+                <CheckCheck className="w-4 h-4" />
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => navigate(`/practice/solve/${level}/${encodeURIComponent(problem.title)}`)}
+              >
+                <Play className="w-4 h-4" />
+                Solve
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   useEffect(() => {
     const loadCourses = () => {
@@ -890,7 +1023,7 @@ const Practice = () => {
                               concepts like OOP, collections, concurrency, JVM internals, and best practices.
                             </p>
                             <Button variant="link" className="h-auto px-0 text-primary" asChild>
-                              <Link to="#" className="inline-flex items-center gap-2">
+                              <Link to="/theory-course" className="inline-flex items-center gap-2">
                                 Open course
                                 <ExternalLink className="h-4 w-4" />
                               </Link>
@@ -979,71 +1112,6 @@ const Practice = () => {
                   </div>
                 </CardContent>
               </Card>
-
-              <Accordion
-                type="multiple"
-                value={openPracticeLevels}
-                onValueChange={setOpenPracticeLevels}
-                className="space-y-4"
-              >
-                {levelOrder.map((level) => {
-                  const sectionLocked = isConceptLocked(level);
-                  const problemsForLevel = practiceProblemSets[level];
-                  return (
-                    <AccordionItem key={level} value={level} className="border border-border/30 rounded-xl bg-gradient-card group">
-                      <AccordionTrigger className="px-6 py-4 hover:no-underline no-underline">
-                        <div className="flex items-center justify-between w-full">
-                          <div className="flex items-center gap-3">
-                            <span className={`w-2.5 h-2.5 rounded-full ${levelBulletClass[level]}`} />
-                            <span className="text-lg font-semibold">{levelLabel[level]}</span>
-                            <Badge variant="outline">{problemsForLevel.length} problems</Badge>
-                          </div>
-                          <div className="flex items-center gap-2 text-muted-foreground group-hover:text-primary">
-                            {sectionLocked ? <Lock className="w-4 h-4" /> : null}
-                            <span className="text-sm">{sectionLocked ? 'Locked' : 'Unlocked'}</span>
-                          </div>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="px-6 pb-6">
-                        {sectionLocked ? (
-                          <Card className="border-muted">
-                            <CardContent className="p-6 text-center">
-                              <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
-                                <Lock className="w-4 h-4" />
-                                <span>Locked</span>
-                              </div>
-                              <p className="text-sm text-muted-foreground">
-                                Unlocks at the {levelLabel[level]} level.
-                              </p>
-                            </CardContent>
-                          </Card>
-                        ) : (
-                          <div className="grid gap-3">
-                            {problemsForLevel.map((title, index) => (
-                              <Card key={`${level}-${title}`} className="border-border/20 bg-background/40">
-                                <CardContent className="p-4">
-                                  <div className="flex items-center justify-between gap-4">
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
-                                        {String(index + 1).padStart(2, '0')}
-                                      </div>
-                                      <div className="text-sm font-medium">{title}</div>
-                                    </div>
-                                    <Button variant="outline" size="sm" className="gap-2">
-                                      <Play className="w-4 h-4" />
-                                      Solve
-                                    </Button>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            ))}
-                          </div>
-                        )}
-                      </AccordionContent>
-                    </AccordionItem>
-                  );
-                })}
-              </Accordion>
 
               {/* Filters */}
               <Card className="border-muted">
@@ -1163,15 +1231,99 @@ const Practice = () => {
               {!isLoading && filteredProblems.length === 0 && (
                 <Card className="border-muted">
                   <CardContent className="p-12 text-center">
-                    <Target className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                    <h3 className="text-lg font-medium mb-2">
-                      {problems.length === 0 ? 'No practice problems yet' : 'No problems found'}
-                    </h3>
-                    <p className="text-muted-foreground">
-                      {problems.length === 0
-                        ? 'Problems will appear here once they are available.'
-                        : 'Try adjusting your search criteria or filters.'}
-                    </p>
+                    {problems.length === 0 ? (
+                      <div className="text-left">
+                        <Accordion
+                          type="multiple"
+                          value={openPracticeLevels}
+                          onValueChange={setOpenPracticeLevels}
+                          className="space-y-4"
+                        >
+                          {levelOrder.map((level) => {
+                            const sectionLocked = isConceptLocked(level);
+                            const problemsForLevel = practiceProblemSets[level];
+                            const totalCount = getProblemCount(problemsForLevel);
+                            return (
+                              <AccordionItem key={`empty-${level}`} value={level} className="border border-border/30 rounded-xl bg-gradient-card group">
+                                <AccordionTrigger className="px-6 py-4 hover:no-underline no-underline">
+                                  <div className="flex items-center justify-between w-full">
+                                    <div className="flex items-center gap-3">
+                                      <span className={`w-2.5 h-2.5 rounded-full ${levelBulletClass[level]}`} />
+                                      <span className="text-lg font-semibold">{levelLabel[level]}</span>
+                                      <Badge variant="outline">{totalCount} problems</Badge>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-muted-foreground group-hover:text-primary">
+                                      {sectionLocked ? <Lock className="w-4 h-4" /> : null}
+                                      <span className="text-sm">{sectionLocked ? 'Locked' : 'Unlocked'}</span>
+                                    </div>
+                                  </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="px-6 pb-6">
+                                  {sectionLocked ? (
+                                    <Card className="border-muted">
+                                      <CardContent className="p-6 text-center">
+                                        <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
+                                          <Lock className="w-4 h-4" />
+                                          <span>Locked</span>
+                                        </div>
+                                        <p className="text-sm text-muted-foreground">
+                                          Unlocks at the {levelLabel[level]} level.
+                                        </p>
+                                      </CardContent>
+                                    </Card>
+                                  ) : problemsForLevel.type === 'flat' ? (
+                                    <div className="grid gap-3">
+                                      {problemsForLevel.problems.map((problem, index) =>
+                                        renderProblemCard(level, problem, index, `empty-${level}`)
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <Accordion
+                                      type="multiple"
+                                      value={openPracticeSections}
+                                      onValueChange={setOpenPracticeSections}
+                                      className="space-y-3"
+                                    >
+                                      {problemsForLevel.sections.map((section) => (
+                                        <AccordionItem
+                                          key={`empty-${level}-${section.title}`}
+                                          value={`${level}-${section.title}`}
+                                          className="border border-border/20 rounded-lg bg-background/30"
+                                        >
+                                          <AccordionTrigger className="px-4 py-3 hover:no-underline no-underline">
+                                            <div className="flex items-center justify-between w-full">
+                                              <div className="text-sm font-semibold">{section.title}</div>
+                                              <Badge variant="outline" className="text-xs">
+                                                {section.problems.length} topics
+                                              </Badge>
+                                            </div>
+                                          </AccordionTrigger>
+                                          <AccordionContent className="px-4 pb-4">
+                                            <div className="grid gap-3">
+                                              {section.problems.map((problem, index) =>
+                                                renderProblemCard(level, problem, index, `empty-${level}-${section.title}`)
+                                              )}
+                                            </div>
+                                          </AccordionContent>
+                                        </AccordionItem>
+                                      ))}
+                                    </Accordion>
+                                  )}
+                                </AccordionContent>
+                              </AccordionItem>
+                            );
+                          })}
+                        </Accordion>
+                      </div>
+                    ) : (
+                      <>
+                        <Target className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                        <h3 className="text-lg font-medium mb-2">No problems found</h3>
+                        <p className="text-muted-foreground">
+                          Try adjusting your search criteria or filters.
+                        </p>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
               )}
