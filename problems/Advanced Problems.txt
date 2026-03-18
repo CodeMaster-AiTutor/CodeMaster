@@ -1,14 +1,9 @@
-
-Advanced
-
-
-Data Systems
-
-
-01   Student Management System	Easy
+Student Management System	
 	
 Problem Statement
-A console app that stores student records (name, roll number, marks) in an ArrayList. Users can add new students, view all records, and search by roll number.Core Features
+A console app that stores student records (name, roll number, marks) in an ArrayList. Users can add new students, view all records, and search by roll number. 
+
+Core Features
 ✦  Add a new student (name, roll, marks)
 ✦  View all students in a formatted list
 ✦  Search by roll number
@@ -37,10 +32,12 @@ Test Scenarios
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  02   Library System	Easy
+Library System
 	 
 Problem Statement
-A simple library manager that stores books (title, author, ISBN) in memory. Users can add books, search by title or author, and list all available books.Core Features
+A simple library manager that stores books (title, author, ISBN) in memory. Users can add books, search by title or author, and list all available books. 
+
+Core Features
 ✦  Add a book (title, author, ISBN)
 ✦  List all books
 ✦  Search by title keyword
@@ -62,18 +59,20 @@ Found: Clean Code — Robert Martin [9780132350884]
 Hint:  A Book class with three fields does the job. Use String.toLowerCase().contains() for case-insensitive search to make it user-friendly.
 
 Test Scenarios
-#	Scenario Description	        Expected Behaviour
-1	Add 5 books then list all	All 5 displayed in order of entry
-2	Search partial title 'java'	All books with 'java' in title listed
+#	Scenario Description	           Expected Behaviour
+1	Add 5 books then list all	       All 5 displayed in order of entry
+2	Search partial title 'java'	     All books with 'java' in title listed
 3	Search author who has no books	'No books found for that author'
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  03   Contact Book	Easy	
+Contact Book	
 
 
 Problem Statement
-Store contacts by name (key) and phone number (value) in a HashMap. Support adding, viewing all contacts, searching by name, and deleting a contact.	Core Features
+Store contacts by name (key) and phone number (value) in a HashMap. Support adding, viewing all contacts, searching by name, and deleting a contact.	
+
+Core Features
 ✦  Add contact (name → phone)
 ✦  View all contacts (sorted by name)
 ✦  Search contact by name
@@ -95,18 +94,19 @@ Bob → 9876543210
 Hint:  HashMap<String,String> maps names to numbers. To display sorted, dump keySet() into a TreeMap or sort the keys as a list before printing.
 
 Test Scenarios
-#	Scenario Description	                Expected Behaviour
-1	Add 4 contacts then view all sorted	Contacts printed alphabetically
-2	Delete a contact, then search for it	'Contact not found' after deletion
+#	Scenario Description	                  Expected Behaviour
+1	Add 4 contacts then view all sorted	    Contacts printed alphabetically
+2	Delete a contact, then search for it	  'Contact not found' after deletion
 3	Add contact with existing name	        Overwrites old number (HashMap behaviour)
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  04   ATM Simulator	Medium	
-
+ATM Simulator
 
 Problem Statement
-Simulate a basic ATM with a PIN-protected account. Support checking balance, depositing money, and withdrawing money with balance validation. All state lives in a single BankAccount object.	Core Features
+Simulate a basic ATM with a PIN-protected account. Support checking balance, depositing money, and withdrawing money with balance validation. All state lives in a single Bank Account object.	
+
+Core Features
 ✦  PIN verification at startup
 ✦  Check current balance
 ✦  Deposit any positive amount
@@ -131,17 +131,19 @@ Insufficient funds.
 Hint:  Encapsulate balance and PIN inside a BankAccount class. Only expose methods — never let main() touch the balance field directly. That is the OOP point of this exercise.
 
 Test Scenarios
-#	Scenario Description	        Expected Behaviour
-1	Enter wrong PIN	Access          denied, program exits or retries
+#	Scenario Description	          Expected Behaviour
+1	Enter wrong PIN	Access          Denied, program exits or retries
 2	Withdraw exact balance	        Balance becomes 0, withdrawal succeeds
-3	Withdraw more than balance	'Insufficient funds' message, no change
+3	Withdraw more than balance	    'Insufficient funds' message, no change
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  05   Shopping Cart System	Medium
+Shopping Cart System
 
 Problem Statement
-A shopping cart where users can add products (name, price, quantity), view the cart contents, remove items by name, and print a formatted bill with subtotals and total.	Core Features
+A shopping cart where users can add products (name, price, quantity), view the cart contents, remove items by name, and print a formatted bill with subtotals and total.	
+
+Core Features
 ✦  Add product (name, price, qty)
 ✦  View cart with subtotals
 ✦  Remove item by name
@@ -164,21 +166,18 @@ Total:           ₹120
 Hint:  A CartItem class with name, price, qty, and a subtotal() method keeps the logic clean. The bill printer loops through the ArrayList and accumulates the grand total.
 
 Test Scenarios
-#	Scenario Description	        Expected Behaviour
-1	Add 3 items then print bill	Each item's subtotal correct, total is sum
-2	Remove an item then view cart	Item no longer appears in cart
-3	Print bill with empty cart	'Cart is empty' message shown
+#	Scenario Description	         Expected Behaviour
+1	Add 3 items then print bill	   Each item's subtotal correct, total is sum
+2	Remove an item then view cart	 Item no longer appears in cart
+3	Print bill with empty cart	   'Cart is empty' message shown
 
 ============================================================================================================================================================================================
 
-Interactive Apps
-
-
-  09   Expense Tracker	Easy	
-
+Expense Tracker
 
 Problem Statement
-Track personal expenses in memory. Each expense has a category (Food, Travel, etc.) and an amount. Users can add expenses, view all entries grouped by category, and see the total spent.	Core Features
+Track personal expenses in memory. Each expense has a category (Food, Travel, etc.) and an amount. Users can add expenses, view all entries grouped by category, and see the total spent.	
+Core Features
 ✦  Add expense (category, description, amount)
 ✦  View all expenses
 ✦  Filter expenses by category
@@ -200,17 +199,19 @@ Total Spent: ₹120
 Hint:  An Expense class with category, description, and amount fields works well. For category totals, loop through and accumulate by matching category strings.
 
 Test Scenarios
-#	Scenario Description	                Expected Behaviour
-1	Add 5 expenses across 3 categories	Category totals shown correctly
-2	Filter by a category with no entries	'No expenses in this category'
-3	Add expenses then view total	        Sum matches sum of all amounts entered
+#	Scenario Description	                 Expected Behaviour
+1	Add 5 expenses across 3 categories	   Category totals shown correctly
+2	Filter by a category with no entries	 'No expenses in this category'
+3	Add expenses then view total	         Sum matches sum of all amounts entered
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  06   Quiz Application	Medium
+Quiz Application	
 
 Problem Statement
-A multiple-choice quiz engine. Questions (with 4 options and a correct answer) are stored in a list. The app presents each question, captures the user's choice, tracks the score, and shows a final result with percentage.	Core Features
+A multiple-choice quiz engine. Questions (with 4 options and a correct answer) are stored in a list. The app presents each question, captures the user's choice, tracks the score, and shows a final result with percentage.	
+
+Core Features
 ✦  Store 5+ questions with options A–D
 ✦  Present questions one by one
 ✦  Accept and validate user answer
@@ -235,17 +236,19 @@ Score: 4/5  (80%) — Grade: A
 Hint:  A Question class with fields for text, options[], and correctOption (char) keeps data tidy. Loop through an ArrayList<Question> in sequence and never reveal the answer before the user responds.
 
 Test Scenarios
-#	Scenario Description	          Expected Behaviour
+#	Scenario Description	            Expected Behaviour
 1	Answer all questions correctly	  Score: 5/5, encouraging message
-2	Answer all questions wrong	  Score: 0/5, try-again message
+2	Answer all questions wrong	      Score: 0/5, try-again message
 3	Enter invalid option (e.g. 'Z')	  'Invalid option, try again' prompt
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  07   Voting System	Medium	
+Voting System	
 
 Problem Statement
-A simple voting application with a fixed candidate list. Users vote by entering a candidate name; the system prevents double-voting using a voter ID. At any time, results can be displayed and a winner declared.	Core Features
+A simple voting application with a fixed candidate list. Users vote by entering a candidate name; the system prevents double-voting using a voter ID. At any time, results can be displayed and a winner declared.	
+
+Core Features
 ✦  Register candidates
 ✦  Cast vote by candidate name
 ✦  Prevent double-voting via voter ID
@@ -270,17 +273,19 @@ Winner: Alice
 Hint:  Use HashMap<String,Integer> for vote counts and HashSet<String> for voter IDs already used. Check the set before recording any vote.
 
 Test Scenarios
-#	Scenario Description	                                Expected Behaviour
-1	Three different voters each pick different candidates	Tie or single winner declared correctly
-2	Same voter ID attempts to vote twice	                Second vote rejected, tally unchanged
+#	Scenario Description	                                  Expected Behaviour
+1	Three different voters each pick different candidates	  Tie or single winner declared correctly
+2	Same voter ID attempts to vote twice	                  Second vote rejected, tally unchanged
 3	Invalid candidate name entered	                        'Candidate not found' message
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  08   Parking Lot System	Medium	
+Parking Lot System	
 
 Problem Statement
-Manage a parking lot with a fixed number of slots. Vehicles (by number plate) can park in any free slot. The system tracks which slots are occupied, allows vehicles to leave, and shows the full slot status at any time.	Core Features
+Manage a parking lot with a fixed number of slots. Vehicles (by number plate) can park in any free slot. The system tracks which slots are occupied, allows vehicles to leave, and shows the full slot status at any time.	
+
+Core Features
 ✦  Park vehicle (assign slot automatically)
 ✦  Remove vehicle by number plate
 ✦  View all slot statuses (free/occupied)
@@ -302,17 +307,19 @@ Slot 2: ---         [Free]
 Hint:  HashMap<Integer,String> maps slot number to plate. Scan the map to find the first slot whose value is null (or use a separate boolean array for slot states).
 
 Test Scenarios
-#	Scenario Description	                Expected Behaviour
+#	Scenario Description	                  Expected Behaviour
 1	Park vehicles until lot is full	        Next park attempt shows 'Lot is full'
-2	Remove a vehicle then park a new one	Freed slot is reused
-3	Try to remove a plate not in the lot	'Vehicle not found' message
+2	Remove a vehicle then park a new one	  Freed slot is reused
+3	Try to remove a plate not in the lot	  'Vehicle not found' message
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  10   Bank Account System	Medium	
+Bank Account System		
 
 Problem Statement
-Manage multiple bank accounts stored in an ArrayList. Each account has an ID, holder name, and balance. Operations include creating accounts, depositing/withdrawing by account ID, and printing all accounts.	Core Features
+Manage multiple bank accounts stored in an ArrayList. Each account has an ID, holder name, and balance. Operations include creating accounts, depositing/withdrawing by account ID, and printing all accounts.	
+
+Core Features
 ✦  Create new account (auto-ID)
 ✦  Deposit to account by ID
 ✦  Withdraw from account by ID
@@ -334,17 +341,14 @@ Deposited. Balance: ₹5,000
 Hint:  A BankAccount class with static int nextId handles auto-incrementing IDs cleanly. Search the ArrayList by account ID before every transaction.
 
 Test Scenarios
-#	Scenario Description	                         Expected Behaviour
+#	Scenario Description	                           Expected Behaviour
 1	Create 3 accounts, deposit into each, list all	 All balances reflect deposits correctly
-2	Withdraw more than balance	                 Transaction rejected, balance unchanged
-3	Enter non-existent account ID	                 'Account not found' message
+2	Withdraw more than balance	                     Transaction rejected, balance unchanged
+3	Enter non-existent account ID	                   'Account not found' message
 
 ============================================================================================================================================================================================
 
-Management Tools
-
-
-  12   Password Validator	Easy
+Password Validator	
 
 Problem Statement
 Validate a user's password against a set of strength rules and provide clear, specific feedback on what passes and what fails. Show an overall strength rating: Weak, Moderate, or Strong.	Core Features
@@ -368,17 +372,19 @@ Strength: STRONG
 Hint:  Write a separate boolean method for each rule (hasUppercase(), hasDigit(), etc.). Call them all and count how many pass. 5–6 passed = Strong, 3–4 = Moderate, <3 = Weak.
 
 Test Scenarios
-#	Scenario Description	                 Expected Behaviour
-1	Password: 'abc' (all rules fail)	 All checks show ✗, Strength: WEAK
-2	Password: 'Password1' (no special char)	 4 checks pass, Strength: MODERATE
-3	Password: 'P@ssword1' (all rules pass)	 All checks show ✓, Strength: STRONG
+#	Scenario Description	                    Expected Behaviour
+1	Password: 'abc' (all rules fail)	        All checks show ✗, Strength: WEAK
+2	Password: 'Password1' (no special char)	  4 checks pass, Strength: MODERATE
+3	Password: 'P@ssword1' (all rules pass)	  All checks show ✓, Strength: STRONG
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  15   Task Manager	Easy
+Task Manager
 
 Problem Statement
-A to-do list manager where tasks (with title, priority, and status) can be added, marked complete, removed, and filtered by status. All state lives in an ArrayList of Task objects.	Core Features
+A to-do list manager where tasks (with title, priority, and status) can be added, marked complete, removed, and filtered by status. All state lives in an ArrayList of Task objects.	
+
+Core Features
 ✦  Add task (title, priority: High/Med/Low)
 ✦  Mark task as complete
 ✦  Remove task by title
@@ -403,17 +409,19 @@ Task name: Buy groceries  →  Marked complete ✓
 Hint:  A Task class with title, priority, and boolean completed fields is the core. Print tasks in a numbered list so the user can refer to them by index easily.
 
 Test Scenarios
-#	Scenario Description	                      Expected Behaviour
-1	Add 4 tasks, complete 2, view pending	      Only 2 incomplete tasks shown
-2	Remove a task by name, view  all	      Task no longer in list
+#	Scenario Description	                        Expected Behaviour
+1	Add 4 tasks, complete 2, view pending	        Only 2 incomplete tasks shown
+2	Remove a task by name, view  all	            Task no longer in list
 3	Try to complete a task that doesn't exist     'Task not found' message
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  11   Inventory System	Medium	 
+Inventory System	 
 
 Problem Statement
-Track product inventory where each product (ID, name, quantity, price) can be added, restocked, sold, or removed. Display low-stock alerts when quantity falls below a threshold.	Core Features
+Track product inventory where each product (ID, name, quantity, price) can be added, restocked, sold, or removed. Display low-stock alerts when quantity falls below a threshold.	
+
+Core Features
 ✦  Add product to inventory
 ✦  Restock (increase qty)
 ✦  Sell units (decrease qty with check)
@@ -434,17 +442,19 @@ Sold 6 units. Remaining: 2
 Hint:  HashMap<String,Product> keyed on product ID gives fast lookup. After every sale, check if stock is below threshold and print a warning immediately.
 
 Test Scenarios
-#	Scenario Description	                Expected Behaviour
+#	Scenario Description	                  Expected Behaviour
 1	Sell more units than available	        'Insufficient stock' — quantity unchanged
-2	Restock a product, then view	        Updated quantity reflects restock
-3	View all when stock <5 for any item	Low-stock warning displayed per item
+2	Restock a product, then view	          Updated quantity reflects restock
+3	View all when stock <5 for any item	    Low-stock warning displayed per item
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  13   Ticket Booking System	Medium	
+Ticket Booking System	
 
 Problem Statement
-Simulate seat booking for a venue. A fixed grid of seats can be booked or cancelled by seat number. The system prevents double-booking and shows the current seating layout.	Core Features
+Simulate seat booking for a venue. A fixed grid of seats can be booked or cancelled by seat number. The system prevents double-booking and shows the current seating layout.
+
+Core Features
 ✦  Display seat map (available/booked)
 ✦  Book a seat by number
 ✦  Cancel a booking
@@ -468,17 +478,19 @@ Available: 19 seats
 Hint:  A boolean array seats[] where true = booked keeps state simple. Display as a grid (e.g. 5 seats per row) with [ ] for free and [X] for booked.
 
 Test Scenarios
-#	Scenario Description	                        Expected Behaviour
-1	Book seat 5, then try to book seat 5 again	'Seat already booked' message
-2	Book 3 seats then view map	                3 seats shown as [X], rest as [ ]
-3	Cancel a booking, then book same seat again	Seat becomes available and books again
+#	Scenario Description	                         Expected Behaviour
+1	Book seat 5, then try to book seat 5 again	   'Seat already booked' message
+2	Book 3 seats then view map	                   3 seats shown as [X], rest as [ ]
+3	Cancel a booking, then book same seat again	   Seat becomes available and books again
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  14   Restaurant Billing System	Medium	
+Restaurant Billing System	
 
 Problem Statement
-A restaurant order system where a menu is displayed, customers add items by code, and a formatted bill is generated including a 5% service charge and 18% GST.	Core Features
+A restaurant order system where a menu is displayed, customers add items by code, and a formatted bill is generated including a 5% service charge and 18% GST.	
+
+Core Features
 ✦  Display menu with item codes and prices
 ✦  Add item to order (by code)
 ✦  Remove item from order
@@ -505,18 +517,18 @@ Hint:  Store the menu in a HashMap<String,Double> (code→price). The order is a
 Test Scenarios
 #	Scenario Description	          Expected Behaviour
 1	Order 2 of same item	          Bill shows 'Pasta x2 ₹360' on one line
-2	Order items then remove one	  Removed item not present in final bill
-3	Print bill with no items	  'No items ordered' message
+2	Order items then remove one	    Removed item not present in final bill
+3	Print bill with no items	      'No items ordered' message
 
 
 ============================================================================================================================================================================================
 
-Advanced Systems
-
-  19   Simple Chat Simulation	Easy	
+Simple Chat Simulation	
 
 Problem Statement
-Simulate a two-user chat session where messages are stored in-memory as a list of (sender, message) pairs. Users take turns sending messages, and the full chat history can be displayed at any time with timestamps.	Core Features
+Simulate a two-user chat session where messages are stored in-memory as a list of (sender, message) pairs. Users take turns sending messages, and the full chat history can be displayed at any time with timestamps.	
+
+Core Features
 ✦  Two users (User1, User2) alternate sending
 ✦  Store messages with sender name
 ✦  Display full chat history
@@ -539,16 +551,18 @@ Hint:  A Message class with sender, content, and timestamp (LocalTime.now()) fie
 
 Test Scenarios
 #	Scenario Description	                Expected Behaviour
-1	Send 5 messages, display history	All 5 messages shown with senders and times
-2	Display history with no messages	'No messages yet' shown
-3	Exit chat, total shown	                'Chat ended. 5 messages exchanged.'
+1	Send 5 messages, display history	    All 5 messages shown with senders and times
+2	Display history with no messages	    'No messages yet' shown
+3	Exit chat, total shown	              'Chat ended. 5 messages exchanged.'
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  22   Simple Login System	Easy	
+Simple Login System
 
 Problem Statement
-An in-memory authentication system. Users can register with a username and password. Login attempts are validated against stored credentials. After 3 failed attempts, the account is temporarily locked.	Core Features
+An in-memory authentication system. Users can register with a username and password. Login attempts are validated against stored credentials. After 3 failed attempts, the account is temporarily locked.	
+
+Core Features
 ✦  Register new user (username, password)
 ✦  Login with username + password
 ✦  Account lockout after 3 failed attempts
@@ -572,16 +586,18 @@ Hint:  HashMap<String,String> stores username→password. A separate HashMap<Str
 
 Test Scenarios
 #	Scenario Description	                        Expected Behaviour
-1	Register and login with correct credentials	'Login successful. Welcome, alice!'
+1	Register and login with correct credentials	  'Login successful. Welcome, alice!'
 2	3 consecutive wrong passwords	                Account locked message on 3rd attempt
-3	Login with username that doesn't exist	        'User not found' message
+3	Login with username that doesn't exist	      'User not found' message
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  16   Employee Management + Sort by Salary	Medium	
+Employee Management + Sort by Salary		
 
 Problem Statement
-Manage employee records (ID, name, department, salary). In addition to standard CRUD operations, implement a sort function to list employees by salary in ascending or descending order without using Collections.sort() with a lambda — write your own comparator logic.	Core Features
+Manage employee records (ID, name, department, salary). In addition to standard CRUD operations, implement a sort function to list employees by salary in ascending or descending order without using Collections.sort() with a lambda — write your own comparator logic.	
+
+Core Features
 ✦  Add employee (ID, name, dept, salary)
 ✦  View all employees
 ✦  Search by department
@@ -603,17 +619,19 @@ E01  Alice     IT     ₹72,000
 Hint:  Implement a simple selection sort directly on the ArrayList. Swap Employee objects based on their getSalary() values. Avoid Collections.sort() with lambdas to practise manual sorting.
 
 Test Scenarios
-#	Scenario Description	             Expected Behaviour
+#	Scenario Description	               Expected Behaviour
 1	Add 4 employees, sort ascending	     Lowest salary appears first
-2	Search by department 'HR'	     Only HR employees listed
-3	Find highest earner	             Name and salary of top earner displayed
+2	Search by department 'HR'	           Only HR employees listed
+3	Find highest earner	                 Name and salary of top earner displayed
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  20   Mini Banking Transaction History	Medium	  
+Mini Banking Transaction History	  
 
 Problem Statement
-Extend a bank account to maintain a full transaction history. Every deposit and withdrawal is logged as a Transaction object. Users can view the complete ledger, filter by type, and see running balance after each transaction.	Core Features
+Extend a bank account to maintain a full transaction history. Every deposit and withdrawal is logged as a Transaction object. Users can view the complete ledger, filter by type, and see running balance after each transaction.	
+
+Core Features
 ✦  Deposit (logged with timestamp)
 ✦  Withdraw with balance check (logged)
 ✦  View full transaction history
@@ -634,17 +652,19 @@ Date/Time        Type        Amount   Balance
 Hint:  A Transaction class with type (DEPOSIT/WITHDRAWAL), amount, and balance-after fields gives you everything for the ledger. Append to an ArrayList<Transaction> after every operation.
 
 Test Scenarios
-#	Scenario Description	                Expected Behaviour
-1	Make 4 transactions, view history	All 4 lines with correct running balance
+#	Scenario Description	                  Expected Behaviour
+1	Make 4 transactions, view history	      All 4 lines with correct running balance
 2	Filter withdrawals only	                Only withdrawal entries listed
 3	View history on a fresh account	        'No transactions yet'
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  21   Course Enrollment System	Medium	
+Course Enrollment System	
 
 Problem Statement
-A college enrollment system where students can enroll in courses, drop courses, and view their schedule. Each course has a capacity limit. The system prevents over-enrollment and duplicate registrations.	Core Features
+A college enrollment system where students can enroll in courses, drop courses, and view their schedule. Each course has a capacity limit. The system prevents over-enrollment and duplicate registrations.	
+
+Core Features
 ✦  Add courses with max capacity
 ✦  Enroll student in course
 ✦  Drop a course
@@ -668,16 +688,18 @@ Hint:  HashMap<String, List<String>> maps courseCode → list of enrolled studen
 
 Test Scenarios
 #	Scenario Description	                        Expected Behaviour
-1	Enroll same student in same course twice	'Already enrolled' message
-2	Enroll until course is full, then one more	'Course is full' message
+1	Enroll same student in same course twice	    'Already enrolled' message
+2	Enroll until course is full, then one more	  'Course is full' message
 3	View courses for student with no enrollments	'Not enrolled in any courses'
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  23   Hotel Room Booking	Medium	
+Hotel Room Booking	
 
 Problem Statement
-A hotel management console app. Rooms have types (Single, Double, Suite) and rates. Guests can check available rooms, book a room by number, check out, and view all bookings with guest names and durations.	Core Features
+A hotel management console app. Rooms have types (Single, Double, Suite) and rates. Guests can check available rooms, book a room by number, check out, and view all bookings with guest names and durations.	
+
+Core Features
 ✦  Display available rooms by type
 ✦  Book room (guest name, nights)
 ✦  Check out by room number
@@ -703,17 +725,19 @@ Checked out. Room now available.
 Hint:  HashMap<Integer, Booking> maps room number to its current Booking (guest, nights, rate). A null value means the room is free. Print an invoice with subtotal and 10% tax on checkout.
 
 Test Scenarios
-#	Scenario Description	                Expected Behaviour
-1	Try to book an already-booked room	'Room not available' message
-2	Checkout, then book same room again	Room is available, new booking succeeds
-3	View all bookings when hotel is empty	'No current bookings'
+#	Scenario Description	                 Expected Behaviour
+1	Try to book an already-booked room	   'Room not available' message
+2	Checkout, then book same room again	   Room is available, new booking succeeds
+3	View all bookings when hotel is empty	 'No current bookings'
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  17   Stack Implementation (Manual)	Hardd	
+Stack Implementation (Manual)
 
 Problem Statement
-Implement a Stack data structure from scratch using a plain array (not Java's built-in Stack or Deque). Support push, pop, peek, isEmpty, and isFull. Then demonstrate it by using your stack to check if brackets are balanced in an expression.	Core Features
+Implement a Stack data structure from scratch using a plain array (not Java's built-in Stack or Deque). Support push, pop, peek, isEmpty, and isFull. Then demonstrate it by using your stack to check if brackets are balanced in an expression.	
+
+Core Features
 ✦  push(value) with overflow check
 ✦  pop() with underflow check
 ✦  peek() — view top without removing
@@ -735,17 +759,19 @@ Result: BALANCED
 Hint:  Use an int[] array of fixed capacity and an int top=-1 pointer. Push increments top; pop decrements it. For bracket checking: push on '(' / '{' / '[', pop and verify match on ')' / '}' / ']'.
 
 Test Scenarios
-#	Scenario Description	        Expected Behaviour
-1	Push 5 items then push a 6th	Stack Overflow message
-2	Pop from empty stack	        Stack Underflow message
-3	Bracket check on '((a+b)'	UNBALANCED — missing closing bracket
+#	Scenario Description	           Expected Behaviour
+1	Push 5 items then push a 6th	   Stack Overflow message
+2	Pop from empty stack	           Stack Underflow message
+3	Bracket check on '((a+b)'	       UNBALANCED — missing closing bracket
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  18   Queue Implementation (Manual)	Hardd	 
+Queue Implementation (Manual)		 
 
 Problem Statement
-Implement a Queue data structure from scratch using a circular array (to avoid wasted space). Support enqueue, dequeue, peek, isEmpty, and isFull. Demonstrate with a printer job queue simulation.	Core Features
+Implement a Queue data structure from scratch using a circular array (to avoid wasted space). Support enqueue, dequeue, peek, isEmpty, and isFull. Demonstrate with a printer job queue simulation.	
+
+Core Features
 ✦  enqueue(value) with overflow check
 ✦  dequeue() with underflow check
 ✦  peek() — view front
@@ -766,18 +792,20 @@ Queue capacity: 4
 Hint:  Use front and rear int pointers both starting at -1. On enqueue: rear = (rear+1) % capacity. On dequeue: front = (front+1) % capacity. Full when (rear+1)%capacity == front.
 
 Test Scenarios
-#	Scenario Description	                        Expected Behaviour
-1	Enqueue 4 items (full), then enqueue 1 more	Queue Full message
-2	Dequeue from empty queue	                Queue Empty message
-3	Enqueue 3, dequeue 2, enqueue 2 more	        Circular wrap works, items in correct FIFO order
+#	Scenario Description	                         Expected Behaviour
+1	Enqueue 4 items (full), then enqueue 1 more	   Queue Full message
+2	Dequeue from empty queue	                     Queue Empty message
+3	Enqueue 3, dequeue 2, enqueue 2 more	         Circular wrap works, items in correct FIFO order
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  24   E-Voting with ID Validation	Hardd	
+E-Voting with ID Validation	
 
 Problem Statement
-A secure e-voting system. Voters must present a valid registered ID before voting. Each ID can vote only once. The system stores candidate tallies and declares results with vote percentages.	Core Features
+A secure e-voting system. Voters must present a valid registered ID before voting. Each ID can vote only once. The system stores candidate tallies and declares results with vote percentages.	
+
+Core Features
 ✦  Pre-register valid voter IDs
 ✦  Validate ID before allowing vote
 ✦  One vote per ID (prevent re-voting)
@@ -803,17 +831,19 @@ Carol:  45 votes (18%)
 Hint:  Use HashSet<String> for valid IDs, HashSet<String> for used IDs, and HashMap<String,Integer> for vote counts. Always check both sets before recording a vote.
 
 Test Scenarios
-#	Scenario Description	                Expected Behaviour
-1	Valid ID votes successfully	        Vote recorded, tally incremented
-2	Same ID tries to vote a second time	'Already voted' error, tally unchanged
-3	Unregistered ID tries to vote	        'Invalid voter ID' message
+#	Scenario Description	                   Expected Behaviour
+1	Valid ID votes successfully	             Vote recorded, tally incremented
+2	Same ID tries to vote a second time	     'Already voted' error, tally unchanged
+3	Unregistered ID tries to vote	           'Invalid voter ID' message
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  25   Multi-User Scoreboard System	Hardd	
+Multi-User Scoreboard System	
 
 Problem Statement
-A real-time scoreboard for a multi-player game. Players can be added, scores updated, and the leaderboard displayed ranked by score. Support for adding bonus points and filtering top-N players.	Core Features
+A real-time scoreboard for a multi-player game. Players can be added, scores updated, and the leaderboard displayed ranked by score. Support for adding bonus points and filtering top-N players.	
+
+Core Features
 ✦  Add player (name, initial score)
 ✦  Update player score (add points)
 ✦  Display ranked leaderboard
@@ -838,9 +868,9 @@ Rank  Player    Score
 Hint:  Store Player objects in an ArrayList. Write your own rank-sort (selection or insertion sort on score). After every update, re-sort so the leaderboard is always current. Avoid Collections.sort().
 
 Test Scenarios
-#	Scenario Description	                          Expected Behaviour
+#	Scenario Description	                            Expected Behaviour
 1	Add 5 players, update scores, view leaderboard	  Players sorted highest score first
-2	Award bonus (500pts) to all scoring >3000	  Only qualifying players' scores increase
+2	Award bonus (500pts) to all scoring >3000	        Only qualifying players' scores increase
 3	Request top 3 from a list of 5	                  Only top 3 displayed in correct rank order
 
 

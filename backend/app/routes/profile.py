@@ -107,20 +107,20 @@ def update_streak_on_submit(user: User):
 @token_required
 def get_profile(current_user):
     solved_rows = (
-        db.session.query(PracticeProblem.difficulty, func.count(PracticeAttempt.id))
+        db.session.query(PracticeProblem.level, func.count(PracticeAttempt.id))
         .join(PracticeAttempt, PracticeAttempt.problem_id == PracticeProblem.id)
         .filter(
             PracticeAttempt.user_id == current_user.id,
             PracticeAttempt.status == 'passed'
         )
-        .group_by(PracticeProblem.difficulty)
+        .group_by(PracticeProblem.level)
         .all()
     )
     solved_map = {row[0]: row[1] for row in solved_rows}
 
     total_rows = (
-        db.session.query(PracticeProblem.difficulty, func.count(PracticeProblem.id))
-        .group_by(PracticeProblem.difficulty)
+        db.session.query(PracticeProblem.level, func.count(PracticeProblem.id))
+        .group_by(PracticeProblem.level)
         .all()
     )
     total_map = {row[0]: row[1] for row in total_rows}

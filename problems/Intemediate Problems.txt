@@ -1,9 +1,4 @@
-Intermediate
-
-
-Arrays
-
-01  Find Largest in Array   --> Easy
+Find Largest in Array  
 
 Problem Statement
 Accept N integers into an array and find the maximum value by scanning through every element. Keep track of the largest value seen so far as you loop.	
@@ -22,13 +17,13 @@ Hint:  Start by assuming the first element is the largest. Update it whenever yo
 
 Test Cases
 #	Input	                Expected Output
-1	[10, 20, 5, 30, 15]	30
-2	[-3, -7, -1, -9]	-1
+1	[10, 20, 5, 30, 15]	    30
+2	[-3, -7, -1, -9]	    -1
 3	[42]	                42
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-02  Reverse an Array	--> Easy
+Reverse an Array	
 
 Problem Statement
 Reverse the elements of an array in-place using a two-pointer approach. Swap the element at the start with the element at the end, then move both pointers inward until they meet.	
@@ -48,12 +43,12 @@ Hint:  Use a left index starting at 0 and a right index starting at length-1. Sw
 Test Cases
 #	Input	        Expected Output
 1	[10, 20, 30]	[30, 20, 10]
-2	[7]	        [7]
+2	[7]	            [7]
 3	[4, 8, 15, 16]	[16, 15, 8, 4]
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-03  Linear Search     -->  Easy
+Linear Search     
 
 Problem Statement
 Search for a target value in an unsorted array by checking each element one at a time from the beginning. Return the index if found, or -1 if the element is not in the array.	
@@ -73,13 +68,13 @@ Hint:  Loop from index 0 to length-1. The moment you find a match, return that i
 
 Test Cases
 #	Input	                Expected Output
-1	[5,3,9,1] target=9	Index: 2
-2	[1,2,3,4] target=7	Not found (-1)
-3	[10]      target=10	Index: 0
+1	[5,3,9,1] target=9	    Index: 2
+2	[1,2,3,4] target=7	    Not found (-1)
+3	[10]      target=10	    Index: 0
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-04  Sum of Array Elements   -->  Easy
+Sum of Array Elements   
 
 Problem Statement
 Write a method that accepts an integer array and returns the sum of all its elements. Use the method from your main code and display the result.	
@@ -98,13 +93,13 @@ Hint:  Create a method sumArray(int[] arr) with its own running total. Keep main
 
 Test Cases
 #	Input	        Expected Output
-1	[1,2,3,4,5]	15
-2	[-5, 5, 10]	10
+1	[1,2,3,4,5]   	15
+2	[-5, 5, 10] 	10
 3	[0,0,0]	        0
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-05  Count Even and Odd	 --> Easy
+Count Even and Odd	 
 
 Problem Statement
 Traverse an array and separately count how many elements are even and how many are odd. Display both counts. Use the modulus operator to check divisibility by 2.	
@@ -123,13 +118,13 @@ Hint:  Maintain two counters: evenCount and oddCount. Increment the right one in
 
 Test Cases
 #	Input	        Expected Output
-1	[2,4,6,8]	Even: 4  Odd: 0
-2	[1,3,5,7]	Even: 0  Odd: 4
-3	[0,7,14,21]	Even: 2  Odd: 2
+1	[2,4,6,8]	    Even: 4  Odd: 0
+2	[1,3,5,7]	    Even: 0  Odd: 4
+3	[0,7,14,21]	    Even: 2  Odd: 2
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-06  Find Second Largest    -->  Medium
+Find Second Largest   
 
 Problem Statement
 Find the second largest element in an array without sorting it. You need to track both the largest and second-largest values in a single pass through the array.	
@@ -148,13 +143,13 @@ Hint:  Use two variables: max1 and max2. When you find a new maximum, old max1 b
 
 Test Cases
 #	Input	              Expected Output
-1	[5, 5, 5]	      5 (or 'No distinct second')
+1	[5, 5, 5]	          5 (or 'No distinct second')
 2	[100, 90, 80, 70]     90
 3	[3, 1]	              1
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-07  Bubble Sort	    -->  Medium
+Bubble Sort	    
 
 Problem Statement
 Sort an array in ascending order using the Bubble Sort algorithm. Repeatedly compare adjacent pairs and swap them if they are out of order. Each full pass bubbles the next largest element to its correct position.	
@@ -175,11 +170,11 @@ Test Cases
 #	Input	            Expected Output
 1	[5, 1, 4, 2, 8]	    [1, 2, 4, 5, 8]
 2	[3, 3, 2, 1]	    [1, 2, 3, 3]
-3	[1]	            [1]
+3	[1]	                [1]
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-08  Binary Search	--> Medium
+Binary Search	
 
 Problem Statement
 Search for a target in a sorted array using Binary Search. Repeatedly halve the search space by comparing the target to the middle element. Much faster than linear search for large arrays.	
@@ -204,7 +199,7 @@ Test Cases
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-09  Remove Duplicates	 --> Medium
+Remove Duplicates	
 
 Problem Statement
 Print only the unique elements from an array, removing any that appear more than once. You may not use a Set — implement the check manually by comparing each element against all previous ones.	
@@ -223,13 +218,13 @@ Hint:  For each element, scan all elements before it. Only print it if no match 
 
 Test Cases
 #	Input	        Expected Output
-1	[5,5,5,5]	[5]
-2	[1,2,3,4,5]	[1,2,3,4,5]
+1	[5,5,5,5]	    [5]
+2	[1,2,3,4,5]  	[1,2,3,4,5]
 3	[4,1,4,2,1,3]	[4,1,2,3]
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-10  Array Rotation (Left by K)	  -->  Medium
+Array Rotation (Left by K)	  
 
 Problem Statement
 Rotate an array to the left by K positions. Each left rotation moves the first element to the end. For efficiency, handle K > N using modulo so you don't rotate more than necessary.	
@@ -248,16 +243,13 @@ Hint:  Store the first element, shift all others left by one, then place the sav
 
 Test Cases
 #	Input	                Expected Output
-1	[10,20,30,40]  K=1	[20,30,40,10]
-2	[1,2,3]        K=3	[1,2,3]
-3	[5,10,15]      K=5	[15,5,10]
+1	[10,20,30,40]  K=1	    [20,30,40,10]
+2	[1,2,3]        K=3	    [1,2,3]
+3	[5,10,15]      K=5	    [15,5,10]
 
 ===========================================================================================================================================================================================
 
-Strings
-
-
-11  Reverse a String	--> Easy
+Reverse a String	
 
 Problem Statement
 Reverse a string without using any built-in reverse() method. Iterate through the characters from the last index to the first and build up the reversed string manually.	
@@ -277,12 +269,12 @@ Hint:  Use a loop from str.length()-1 down to 0, appending each character to a n
 Test Cases
 #	Input	           Expected Output
 1	"Java"	           "avaJ"
-2	"racecar"	   "racecar"
-3	"a"	           "a"
-
+2	"racecar"	       "racecar"
+3	"a"	               "a"
+ 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-12  Palindrome String	    -->  Easy
+Palindrome String	    
 
 Problem Statement
 Check whether a string reads the same forwards and backwards. Ignore character case for a robust solution. Compare the original string with its reverse.	
@@ -301,13 +293,13 @@ Hint:  Convert to lowercase first. Then reverse the string and check if it equal
 
 Test Cases
 #	Input	        Expected Output
-1	"racecar"	Palindrome
+1	"racecar"	    Palindrome
 2	"hello"	        Not Palindrome
 3	"Level"	        Palindrome
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-13  Count Words in a Sentence	  --> Easy
+Count Words in a Sentence	  
 
 Problem Statement
 Count the number of words in a sentence without using split() or any regex. Manually scan characters and detect transitions from whitespace to non-whitespace to identify word boundaries.	
@@ -327,12 +319,12 @@ Hint:  Use a boolean 'inWord' flag. Flip it when you cross a space boundary. Eac
 Test Cases
 #	Input	              Expected Output
 1	"one"	                1
-2	"the quick brown"	3
+2	"the quick brown"	    3
 3	"   spaces   "	        1
  
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-14  Remove Spaces	--> Easy
+Remove Spaces	
 
 Problem Statement
 
@@ -353,12 +345,12 @@ Hint:  Check if each character equals ' ' (space). Only append it to your result
 Test Cases
 #	Input	        Expected Output
 1	"a b c"	        "abc"
-2	"no spaces"	"nospaces"
-3	"  hi  "	"hi"
+2	"no spaces"	    "nospaces"
+3	"  hi  "	    "hi"
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-15  Anagram Checker	--> Medium
+Anagram Checker	
 
 Problem Statement
 Two strings are anagrams if they contain exactly the same characters in any order (e.g. 'listen' and 'silent'). Check this without sorting — use a frequency count array of size 26 for each string.	
@@ -377,13 +369,13 @@ Hint:  Increment a count for each char in string A; decrement for each char in s
 
 Test Cases
 #	Input	                 Expected Output
-1	"hello"  "world"	 Not Anagram
+1	"hello"  "world"	     Not Anagram
 2	"triangle"  "integral"	 Anagram
 3	"abc"  "cab"	         Anagram
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-16  String Compression	  --> Hard
+String Compression	  
 
 Problem Statement
 Compress a string by replacing consecutive repeated characters with the character followed by its count. If the compressed result would be longer than the original, return the original.	
@@ -408,10 +400,7 @@ Test Cases
 
 ============================================================================================================================================================================================
 
-Matrices
-
-
-17  Matrix Addition	-->  Easy
+Matrix Addition	
 
 Problem Statement
 Add two 2D integer matrices of the same dimensions. The result matrix's element at position (i,j) is the sum of the corresponding elements from both input matrices.	
@@ -436,7 +425,7 @@ Test Cases
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-18  Transpose a Matrix	 --> Medium
+Transpose a Matrix	
 
 Problem Statement
 Compute the transpose of a matrix by swapping rows and columns. Element at position (i,j) in the original becomes element at (j,i) in the transposed matrix.	
@@ -461,7 +450,7 @@ Test Cases
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-19  Matrix Multiplication	--> Hard
+Matrix Multiplication	
 
 Problem Statement
 Multiply two matrices A (m×n) and B (n×p) to produce result C (m×p). Each element C[i][j] is the dot product of row i from A and column j from B. Requires three nested loops.	
@@ -487,10 +476,7 @@ Test Cases
 
 ============================================================================================================================================================================================
 
-Methods & OOP
-
-
-20  Method Overloading Demo	--> Medium
+Method Overloading Demo	
 
 Problem Statement
 Demonstrate method overloading by creating multiple versions of an add() method that each accept different parameter types or different counts: add(int,int), add(int,int,int), and add(double,double).	
@@ -516,7 +502,7 @@ Test Cases
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-21  Student Result System	--> Medium
+Student Result System	 
 
 Problem Statement
 Build a system using methods that computes a student's total marks, average percentage, and final grade. Use separate methods for each calculation to keep the code modular.	
@@ -542,7 +528,7 @@ Test Cases
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-22  Employee Salary System	--> Medium
+Employee Salary System	
 
 Problem Statement
 Calculate an employee's gross salary from their basic pay using standard allowances: HRA = 20% of Basic, DA = 10% of Basic. Display each component and the total gross salary.	
@@ -566,7 +552,7 @@ Test Cases
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-23  Menu-Driven Program      -->  Medium
+Menu-Driven Program      
 
 Problem Statement
 Build a loop-based menu system that displays options to the user, reads their choice, executes the corresponding action, and loops back until they choose to exit. Use a switch-case inside a do-while loop.
@@ -592,7 +578,7 @@ Test Cases
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-24  Custom Exception Demo	--> Hard
+Custom Exception Demo	
 
 Problem Statement
 Create a custom exception class (e.g. InvalidAgeException) and throw it when a user enters an age below 18. Demonstrate both throwing and catching the exception with a meaningful message.	
@@ -618,7 +604,7 @@ Test Cases
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-25  Number Guessing Game	-->  Hard
+Number Guessing Game	
 
 Problem Statement
 Generate a random number between 1 and 100. Ask the user to guess it. After each guess, tell them if they guessed too high, too low, or correctly. Count the number of attempts and display it when they win.	

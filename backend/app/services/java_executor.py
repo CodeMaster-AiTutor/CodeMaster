@@ -51,7 +51,7 @@ class JavaExecutor:
         except (FileNotFoundError, subprocess.CalledProcessError):
             raise Exception(f"OpenJDK not found. Install OpenJDK 17+ or use Docker.")
     
-    def compile_and_execute(self, java_code: str) -> Dict:
+    def compile_and_execute(self, java_code: str, input_data: str = "") -> Dict:
         """
         Compile and execute Java code
         
@@ -75,9 +75,9 @@ class JavaExecutor:
                 "compilation_time": 0
             }
         if self.use_docker:
-            return self._execute_with_docker(java_code)
+            return self._execute_with_docker(java_code, input_data=input_data)
         else:
-            return self._execute_with_subprocess(java_code)
+            return self._execute_with_subprocess(java_code, input_data=input_data)
     
     def _extract_class_name(self, java_code: str) -> str:
         """Extract class name from Java code"""
@@ -459,7 +459,7 @@ class JavaExecutor:
             })
         return errors
     
-    def _execute_with_docker(self, java_code: str) -> Dict:
+    def _execute_with_docker(self, java_code: str, input_data: str = "") -> Dict:
         """Execute Java code using Docker"""
         with tempfile.TemporaryDirectory() as temp_dir:
             class_name = self._extract_class_name(java_code)
@@ -480,7 +480,7 @@ class JavaExecutor:
                 }
             
             # Execute
-            execute_result = self._docker_execute(temp_dir, class_name)
+            execute_result = self._docker_execute(temp_dir, class_name, input_data=input_data)
             
             return {
                 "success": execute_result["success"],
@@ -557,16 +557,25 @@ class JavaExecutor:
                 "compilation_time": time.time() - start_time
             }
     
-    def _docker_execute(self, code_dir: str, class_name: str) -> Dict:
+    def _docker_execute(self, code_dir: str, class_name: str, input_data: str = "") -> Dict:
         """Execute compiled Java code in Docker container"""
         start_time = time.time()
         container = None
         
         try:
             nano_cpus = int(self.cpu_limit * 1_000_000_000) if self.cpu_limit > 0 else None
+            input_file = "__input.txt"
+            input_path = os.path.join(code_dir, input_file)
+            with open(input_path, "w", encoding="utf-8") as f:
+                f.write(input_data or "")
+            execute_command = [
+                "/bin/sh",
+                "-lc",
+                f"/opt/jdk-17.0.12/bin/java -cp /app/workspace {class_name} < /app/workspace/{input_file}",
+            ]
             container = self.docker_client.containers.create(
                 image=self.docker_image,
-                command=["/opt/jdk-17.0.12/bin/java", "-cp", "/app/workspace", class_name],
+                command=execute_command,
                 volumes={code_dir: {'bind': '/app/workspace', 'mode': 'rw'}},
                 working_dir='/app/workspace',
                 mem_limit=self.memory_limit,
@@ -622,7 +631,7 @@ class JavaExecutor:
                 "execution_time": time.time() - start_time
             }
     
-    def _execute_with_subprocess(self, java_code: str) -> Dict:
+    def _execute_with_subprocess(self, java_code: str, input_data: str = "") -> Dict:
         """Execute Java code using subprocess (OpenJDK on host)"""
         with tempfile.TemporaryDirectory() as temp_dir:
             class_name = self._extract_class_name(java_code)
@@ -643,7 +652,7 @@ class JavaExecutor:
                 }
             
             # Execute
-            execute_result = self._subprocess_execute(temp_dir, class_name)
+            execute_result = self._subprocess_execute(temp_dir, class_name, input_data=input_data)
             
             return {
                 "success": execute_result["success"],
@@ -694,7 +703,7 @@ class JavaExecutor:
                 "compilation_time": time.time() - start_time
             }
     
-    def _subprocess_execute(self, code_dir: str, class_name: str) -> Dict:
+    def _subprocess_execute(self, code_dir: str, class_name: str, input_data: str = "") -> Dict:
         """Execute compiled Java code using subprocess"""
         start_time = time.time()
         
@@ -708,7 +717,7 @@ class JavaExecutor:
                 cwd=code_dir
             )
             
-            stdout, stderr = process.communicate(timeout=self.timeout)
+            stdout, stderr = process.communicate(input=input_data or "", timeout=self.timeout)
             exit_code = process.returncode
             output = stdout + (stderr if exit_code != 0 else "")
             

@@ -2,16 +2,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Trophy, Circle, AlertCircle, BookOpen, Search, CheckCircle2, Target, Play, ArrowRight, Lock, ExternalLink, CheckCheck } from 'lucide-react';
+import { Trophy, BookOpen, Target, Play, ArrowRight, Lock, ExternalLink, CheckCheck } from 'lucide-react';
 import AppLayout from '@/components/layout/AppLayout';
-import { practiceAPI } from '@/lib/api';
+import { contentAPI, practiceAPI } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 interface Problem {
   id: number;
@@ -31,6 +29,8 @@ interface FeaturedCourse {
   completed: number;
   topics: string[];
   language?: string;
+  routePath?: string;
+  externalUrl?: string;
 }
 
 interface LearningConcept {
@@ -630,15 +630,12 @@ const practiceProblemSets: Record<LearningConcept['level'], PracticeProblemSet> 
 };
 
 const Practice = () => {
-  const [activeTab, setActiveTab] = useState('learning-paths');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [difficultyFilter, setDifficultyFilter] = useState('All');
-  const [statusFilter, setStatusFilter] = useState('All');
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') === 'practice-arena' ? 'practice-arena' : 'learning-paths';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [problems, setProblems] = useState<Problem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [openLevels, setOpenLevels] = useState<string[]>([]);
   const [openPracticeLevels, setOpenPracticeLevels] = useState<string[]>([]);
-  const [openPracticeSections, setOpenPracticeSections] = useState<string[]>([]);
   const { toast } = useToast();
   
   const normalizeLevel = (value?: string | null) => {
@@ -690,11 +687,6 @@ const Practice = () => {
     advanced: learningPathConcepts.filter((concept) => concept.level === 'advanced'),
   };
   
-  const handleStartProblem = (problem: Problem) => {
-    console.log('Starting problem:', problem.id);
-    // Navigate to compiler with problem
-  };
-
   const [featuredCourses, setFeaturedCourses] = useState<FeaturedCourse[]>([]);
 
   const readFeaturedCourses = (): FeaturedCourse[] => {
@@ -739,15 +731,44 @@ const Practice = () => {
   };
 
   useEffect(() => {
+    let isMounted = true;
+    const loadFeaturedCourses = async () => {
+      try {
+        const data = await contentAPI.getFeaturedCourses();
+        if (!isMounted) return;
+        const normalized = data.map((course) => ({
+          id: String(course.id ?? course.slug ?? ''),
+          title: String(course.title ?? ''),
+          description: String(course.description ?? ''),
+          modules: 0,
+          completed: 0,
+          topics: [],
+          language: course.language ? String(course.language) : 'Java',
+          routePath: course.route_path ? String(course.route_path) : undefined,
+          externalUrl: course.external_url ? String(course.external_url) : undefined,
+        }));
+        setFeaturedCourses(normalized.filter((course) => course.id && course.title));
+      } catch {
+        if (!isMounted) return;
+        setFeaturedCourses(readFeaturedCourses());
+      }
+    };
+    loadFeaturedCourses();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
     let isActive = true;
     const loadProblems = async () => {
-      setIsLoading(true);
       try {
         const data = await practiceAPI.getProblems({ level: userLevelLower });
         if (!isActive) return;
         const normalized = data.map((problem) => ({
           id: problem.id,
           title: problem.title,
+          description: problem.description,
           difficulty: normalizeDifficulty(problem.difficulty),
           status: normalizeStatus(problem.attempt_status ?? null),
           tags: problem.tags || [],
@@ -761,10 +782,6 @@ const Practice = () => {
           description: error instanceof Error ? error.message : 'Please try again later.',
           variant: 'destructive',
         });
-      } finally {
-        if (isActive) {
-          setIsLoading(false);
-        }
       }
     };
     loadProblems();
@@ -774,12 +791,18 @@ const Practice = () => {
   }, [toast, userLevelLower]);
 
   useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'practice-arena' || tab === 'learning-paths') {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     if (activeTab === 'learning-paths') {
       setOpenLevels([]);
     }
     if (activeTab === 'practice-arena') {
       setOpenPracticeLevels([]);
-      setOpenPracticeSections([]);
     }
   }, [activeTab]);
 
@@ -870,17 +893,6 @@ const Practice = () => {
       window.removeEventListener('storage', handleStorage);
     };
   }, []);
-
-  const filteredProblems = useMemo(() => {
-    return problems.filter((problem) => {
-      const searchMatch =
-        problem.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        problem.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-      const difficultyMatch = difficultyFilter === 'All' || problem.difficulty === difficultyFilter;
-      const statusMatch = statusFilter === 'All' || problem.status === statusFilter;
-      return searchMatch && difficultyMatch && statusMatch;
-    });
-  }, [problems, searchTerm, difficultyFilter, statusFilter]);
 
   const statusCounts = useMemo(() => {
     return problems.reduce(
@@ -1062,9 +1074,18 @@ const Practice = () => {
                                 ))}
                               </div>
                             </div>
-                            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground ml-4">
+                            <Button
+                              className="bg-primary hover:bg-primary/90 text-primary-foreground ml-4"
+                              onClick={() => {
+                                if (course.externalUrl) {
+                                  window.open(course.externalUrl, '_blank', 'noopener,noreferrer');
+                                  return;
+                                }
+                                navigate(course.routePath || '/theory-course');
+                              }}
+                            >
                               <Play className="w-4 h-4 mr-2" />
-                              Start
+                              Open course
                             </Button>
                           </div>
                         </CardHeader>
@@ -1113,220 +1134,75 @@ const Practice = () => {
                 </CardContent>
               </Card>
 
-              {/* Filters */}
               <Card className="border-muted">
-                <CardContent className="p-4">
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex-1">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                        <Input
-                          placeholder="Search problems..."
-                          className="pl-10"
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
-                      <SelectTrigger className="w-full sm:w-40">
-                        <SelectValue placeholder="Difficulty" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="All">All Difficulties</SelectItem>
-                        <SelectItem value="Basic">Basic</SelectItem>
-                        <SelectItem value="Medium">Medium</SelectItem>
-                        <SelectItem value="Advanced">Advanced</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
-                      <SelectTrigger className="w-full sm:w-40">
-                        <SelectValue placeholder="Status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="All">All Status</SelectItem>
-                        <SelectItem value="solved">Solved</SelectItem>
-                        <SelectItem value="attempted">Attempted</SelectItem>
-                        <SelectItem value="not-started">Not Started</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Problems List */}
-              <div className="grid gap-4">
-                {isLoading ? (
-                  <Card className="border-muted">
-                    <CardContent className="p-12 text-center">
-                      <Target className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                      <h3 className="text-lg font-medium mb-2">Loading practice problems</h3>
-                      <p className="text-muted-foreground">
-                        Fetching the latest problems for your level.
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  filteredProblems.map((problem) => (
-                    <Card key={problem.id} className="border-muted hover:border-primary/30 transition-colors">
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <div className="flex-shrink-0">
-                              {problem.status === 'solved' ? (
-                                <CheckCircle2 className="w-5 h-5 text-success" />
-                              ) : problem.status === 'attempted' ? (
-                                <AlertCircle className="w-5 h-5 text-warning" />
-                              ) : (
-                                <Circle className="w-5 h-5 text-muted-foreground" />
-                              )}
-                            </div>
-                            
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-3 mb-2">
-                                <h3 className="text-lg font-semibold">{problem.title}</h3>
-                                <Badge
-                                  variant={
-                                    problem.difficulty === 'Basic' ? 'default' :
-                                    problem.difficulty === 'Medium' ? 'secondary' : 'destructive'
-                                  }
-                                  className="text-xs"
-                                >
-                                  {problem.difficulty}
-                                </Badge>
+                <CardContent className="p-6">
+                  <Accordion
+                    type="multiple"
+                    value={openPracticeLevels}
+                    onValueChange={setOpenPracticeLevels}
+                    className="space-y-4"
+                  >
+                    {levelOrder.map((level) => {
+                      const sectionLocked = isConceptLocked(level);
+                      const problemsForLevel = practiceProblemSets[level];
+                      const totalCount = getProblemCount(problemsForLevel);
+                      return (
+                        <AccordionItem key={`empty-${level}`} value={level} className="border border-border/30 rounded-xl bg-gradient-card group">
+                          <AccordionTrigger className="px-6 py-4 hover:no-underline no-underline">
+                            <div className="flex items-center justify-between w-full">
+                              <div className="flex items-center gap-3">
+                                <span className={`w-2.5 h-2.5 rounded-full ${levelBulletClass[level]}`} />
+                                <span className="text-lg font-semibold">{levelLabel[level]}</span>
+                                <Badge variant="outline">{totalCount} problems</Badge>
                               </div>
-                              
-                              {problem.description ? (
-                                <p className="text-muted-foreground text-sm mb-3">{problem.description}</p>
-                              ) : null}
-                              
-                              <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                                <div className="flex flex-wrap gap-1">
-                                  {problem.tags.map((tag, index) => (
-                                    <Badge key={index} variant="outline" className="text-xs px-2 py-0">
-                                      {tag}
-                                    </Badge>
-                                  ))}
-                                </div>
+                              <div className="flex items-center gap-2 text-muted-foreground group-hover:text-primary">
+                                {sectionLocked ? <Lock className="w-4 h-4" /> : null}
+                                <span className="text-sm">{sectionLocked ? 'Locked' : 'Unlocked'}</span>
                               </div>
                             </div>
-                          </div>
-                          
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              variant="outline"
-                              onClick={() => handleStartProblem(problem)}
-                            >
-                              {problem.status === 'solved' ? 'Review' : 
-                               problem.status === 'attempted' ? 'Continue' : 'Start'}
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </div>
-
-              {!isLoading && filteredProblems.length === 0 && (
-                <Card className="border-muted">
-                  <CardContent className="p-12 text-center">
-                    {problems.length === 0 ? (
-                      <div className="text-left">
-                        <Accordion
-                          type="multiple"
-                          value={openPracticeLevels}
-                          onValueChange={setOpenPracticeLevels}
-                          className="space-y-4"
-                        >
-                          {levelOrder.map((level) => {
-                            const sectionLocked = isConceptLocked(level);
-                            const problemsForLevel = practiceProblemSets[level];
-                            const totalCount = getProblemCount(problemsForLevel);
-                            return (
-                              <AccordionItem key={`empty-${level}`} value={level} className="border border-border/30 rounded-xl bg-gradient-card group">
-                                <AccordionTrigger className="px-6 py-4 hover:no-underline no-underline">
-                                  <div className="flex items-center justify-between w-full">
-                                    <div className="flex items-center gap-3">
-                                      <span className={`w-2.5 h-2.5 rounded-full ${levelBulletClass[level]}`} />
-                                      <span className="text-lg font-semibold">{levelLabel[level]}</span>
-                                      <Badge variant="outline">{totalCount} problems</Badge>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-muted-foreground group-hover:text-primary">
-                                      {sectionLocked ? <Lock className="w-4 h-4" /> : null}
-                                      <span className="text-sm">{sectionLocked ? 'Locked' : 'Unlocked'}</span>
-                                    </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="px-6 pb-6">
+                            {sectionLocked ? (
+                              <Card className="border-muted">
+                                <CardContent className="p-6 text-center">
+                                  <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
+                                    <Lock className="w-4 h-4" />
+                                    <span>Locked</span>
                                   </div>
-                                </AccordionTrigger>
-                                <AccordionContent className="px-6 pb-6">
-                                  {sectionLocked ? (
-                                    <Card className="border-muted">
-                                      <CardContent className="p-6 text-center">
-                                        <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
-                                          <Lock className="w-4 h-4" />
-                                          <span>Locked</span>
-                                        </div>
-                                        <p className="text-sm text-muted-foreground">
-                                          Unlocks at the {levelLabel[level]} level.
-                                        </p>
-                                      </CardContent>
-                                    </Card>
-                                  ) : problemsForLevel.type === 'flat' ? (
+                                  <p className="text-sm text-muted-foreground">
+                                    Unlocks at the {levelLabel[level]} level.
+                                  </p>
+                                </CardContent>
+                              </Card>
+                            ) : problemsForLevel.type === 'flat' ? (
+                              <div className="grid gap-3">
+                                {problemsForLevel.problems.map((problem, index) =>
+                                  renderProblemCard(level, problem, index, `empty-${level}`)
+                                )}
+                              </div>
+                            ) : (
+                              <div className="space-y-5">
+                                {problemsForLevel.sections.map((section) => (
+                                  <div key={`${level}-${section.title}`} className="space-y-3">
+                                    <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                      {section.title}
+                                    </div>
                                     <div className="grid gap-3">
-                                      {problemsForLevel.problems.map((problem, index) =>
-                                        renderProblemCard(level, problem, index, `empty-${level}`)
+                                      {section.problems.map((problem, index) =>
+                                        renderProblemCard(level, problem, index, `empty-${level}-${section.title}`)
                                       )}
                                     </div>
-                                  ) : (
-                                    <Accordion
-                                      type="multiple"
-                                      value={openPracticeSections}
-                                      onValueChange={setOpenPracticeSections}
-                                      className="space-y-3"
-                                    >
-                                      {problemsForLevel.sections.map((section) => (
-                                        <AccordionItem
-                                          key={`empty-${level}-${section.title}`}
-                                          value={`${level}-${section.title}`}
-                                          className="border border-border/20 rounded-lg bg-background/30"
-                                        >
-                                          <AccordionTrigger className="px-4 py-3 hover:no-underline no-underline">
-                                            <div className="flex items-center justify-between w-full">
-                                              <div className="text-sm font-semibold">{section.title}</div>
-                                              <Badge variant="outline" className="text-xs">
-                                                {section.problems.length} topics
-                                              </Badge>
-                                            </div>
-                                          </AccordionTrigger>
-                                          <AccordionContent className="px-4 pb-4">
-                                            <div className="grid gap-3">
-                                              {section.problems.map((problem, index) =>
-                                                renderProblemCard(level, problem, index, `empty-${level}-${section.title}`)
-                                              )}
-                                            </div>
-                                          </AccordionContent>
-                                        </AccordionItem>
-                                      ))}
-                                    </Accordion>
-                                  )}
-                                </AccordionContent>
-                              </AccordionItem>
-                            );
-                          })}
-                        </Accordion>
-                      </div>
-                    ) : (
-                      <>
-                        <Target className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                        <h3 className="text-lg font-medium mb-2">No problems found</h3>
-                        <p className="text-muted-foreground">
-                          Try adjusting your search criteria or filters.
-                        </p>
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </AccordionContent>
+                        </AccordionItem>
+                      );
+                    })}
+                  </Accordion>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>

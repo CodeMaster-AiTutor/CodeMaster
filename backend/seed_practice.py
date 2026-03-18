@@ -9,7 +9,8 @@ from app.models.practice import PracticeProblem
 PROBLEMS = [
     {
         'title': 'Two Sum',
-        'difficulty': 'beginner',
+        'level': 'beginner',
+        'difficulty': 'Easy',
         'tags': ['arrays', 'hash-map'],
         'description': 'Given an array of integers nums and an integer target, return the indices of the two numbers that add up to target.',
         'starter_code': 'public class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        return new int[]{};\n    }\n}\n',
@@ -22,7 +23,8 @@ PROBLEMS = [
     },
     {
         'title': 'Reverse String',
-        'difficulty': 'beginner',
+        'level': 'beginner',
+        'difficulty': 'Easy',
         'tags': ['strings'],
         'description': 'Reverse a string in place.',
         'starter_code': 'public class Solution {\n    public void reverseString(char[] s) {\n    }\n}\n',
@@ -34,7 +36,8 @@ PROBLEMS = [
     },
     {
         'title': 'Binary Search',
-        'difficulty': 'intermediate',
+        'level': 'intermediate',
+        'difficulty': 'Medium',
         'tags': ['arrays', 'binary-search'],
         'description': 'Given a sorted array and a target, return its index or -1.',
         'starter_code': 'public class Solution {\n    public int search(int[] nums, int target) {\n        return -1;\n    }\n}\n',
@@ -46,7 +49,8 @@ PROBLEMS = [
     },
     {
         'title': 'Valid Parentheses',
-        'difficulty': 'intermediate',
+        'level': 'intermediate',
+        'difficulty': 'Medium',
         'tags': ['stack', 'strings'],
         'description': 'Return true if the parentheses are valid.',
         'starter_code': 'public class Solution {\n    public boolean isValid(String s) {\n        return false;\n    }\n}\n',
@@ -59,7 +63,8 @@ PROBLEMS = [
     },
     {
         'title': 'Longest Substring Without Repeating Characters',
-        'difficulty': 'advanced',
+        'level': 'advanced',
+        'difficulty': 'Hard',
         'tags': ['sliding-window', 'strings'],
         'description': 'Find the length of the longest substring without repeating characters.',
         'starter_code': 'public class Solution {\n    public int lengthOfLongestSubstring(String s) {\n        return 0;\n    }\n}\n',
@@ -72,7 +77,8 @@ PROBLEMS = [
     },
     {
         'title': 'LRU Cache',
-        'difficulty': 'advanced',
+        'level': 'advanced',
+        'difficulty': 'Hard',
         'tags': ['design', 'hash-map', 'linked-list'],
         'description': 'Design a data structure that follows the LRU cache constraint.',
         'starter_code': 'import java.util.*;\npublic class LRUCache {\n    public LRUCache(int capacity) {\n    }\n    public int get(int key) {\n        return -1;\n    }\n    public void put(int key, int value) {\n    }\n}\n',

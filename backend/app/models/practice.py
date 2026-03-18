@@ -7,7 +7,10 @@ class PracticeProblem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    difficulty = db.Column(db.String(20), nullable=False, index=True)
+    level = db.Column(db.String(20), nullable=False, index=True, default='beginner')
+    difficulty = db.Column(db.String(20), nullable=False, index=True, default='Easy')
+    section = db.Column(db.String(60), nullable=True, index=True)
+    order_index = db.Column(db.Integer, nullable=False, default=0, index=True)
     tags = db.Column(db.JSON, default=list)
     starter_code = db.Column(db.Text, default='')
     constraints = db.Column(db.Text, nullable=True)
@@ -22,7 +25,11 @@ class PracticeProblem(db.Model):
         return {
             'id': self.id,
             'title': self.title,
+            'description': self.description,
+            'level': self.level,
             'difficulty': self.difficulty,
+            'section': self.section,
+            'order_index': self.order_index,
             'tags': self.tags or []
         }
 
@@ -31,7 +38,10 @@ class PracticeProblem(db.Model):
             'id': self.id,
             'title': self.title,
             'description': self.description,
+            'level': self.level,
             'difficulty': self.difficulty,
+            'section': self.section,
+            'order_index': self.order_index,
             'tags': self.tags or [],
             'starter_code': self.starter_code or '',
             'constraints': self.constraints,
@@ -56,7 +66,9 @@ class PracticeAttempt(db.Model):
             'id': self.id,
             'problem_id': self.problem_id,
             'problem_title': self.problem.title if self.problem else None,
+            'level': self.problem.level if self.problem else None,
             'difficulty': self.problem.difficulty if self.problem else None,
+            'section': self.problem.section if self.problem else None,
             'status': self.status,
             'submitted_at': self.submitted_at.isoformat() if self.submitted_at else None,
             'score': self.score,

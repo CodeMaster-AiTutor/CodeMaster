@@ -4,8 +4,25 @@ from app.models.assessment import Assessment, Question
 from app.models.analytics import AnalyticsEvent
 from app.models.practice import PracticeProblem, PracticeAttempt, PracticeDraft
 from app.models.settings import UserSettings
+from app.models.featured_course import FeaturedCourse
+from app.models.learning_path import LearningPathConcept, LearningPathSubtopic
+from app.models.theory_course import TheoryCoursePage
 
-__all__ = ['User', 'CodeSubmission', 'Assessment', 'Question', 'AnalyticsEvent', 'PracticeProblem', 'PracticeAttempt', 'PracticeDraft', 'UserSettings']
+__all__ = [
+    'User',
+    'CodeSubmission',
+    'Assessment',
+    'Question',
+    'AnalyticsEvent',
+    'PracticeProblem',
+    'PracticeAttempt',
+    'PracticeDraft',
+    'UserSettings',
+    'FeaturedCourse',
+    'LearningPathConcept',
+    'LearningPathSubtopic',
+    'TheoryCoursePage',
+]
 
 # Import models for Flask-Migrate to detect them
 from app import db
