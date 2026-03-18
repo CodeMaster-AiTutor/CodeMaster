@@ -250,7 +250,7 @@ def parse_problem_descriptions_from_file(file_path):
                 candidate = (raw_lines[i] or "").strip()
                 if candidate and candidate.lower() not in non_title_labels:
                     title_raw_index = i
-                break
+                    break
         if title_raw_index == -1:
             continue
         title = extract_problem_title(raw_lines[title_raw_index])
@@ -261,6 +261,34 @@ def parse_problem_descriptions_from_file(file_path):
         key = normalize_problem_key(title)
         result[key] = description
     return result
+
+
+def extract_test_cases_from_description(description):
+    lines = [line.rstrip() for line in (description or "").replace("\t", "    ").split("\n")]
+    normalized = [line.strip().lower() for line in lines]
+    start_index = -1
+    for index, line in enumerate(normalized):
+        if line in {"test cases", "test scenarios"}:
+            start_index = index + 1
+            break
+    if start_index == -1:
+        return []
+    rows = []
+    for raw in lines[start_index:]:
+        line = raw.strip()
+        if not line:
+            continue
+        if line.startswith("#"):
+            continue
+        if not re.match(r"^\d+\s+", line):
+            continue
+        row = re.sub(r"^\d+\s+", "", line).strip()
+        parts = re.split(r"\s{2,}", row)
+        if len(parts) >= 2:
+            case_input = " ".join(part.strip() for part in parts[:-1] if part.strip())
+            expected = parts[-1].strip()
+            rows.append({"input": case_input, "output": expected})
+    return rows[:3]
 
 
 def load_all_problem_descriptions():
@@ -275,6 +303,14 @@ def load_all_problem_descriptions():
     for file_path in files:
         merged.update(parse_problem_descriptions_from_file(file_path))
     return merged
+
+
+def load_all_problem_test_cases(parsed_descriptions):
+    parsed = {}
+    for key, description in parsed_descriptions.items():
+        cases = extract_test_cases_from_description(description)
+        parsed[key] = cases
+    return parsed
 
 
 def build_problem_description(level, section, title, difficulty):
@@ -299,16 +335,20 @@ def build_problem_description(level, section, title, difficulty):
 def build_problem_test_cases(title):
     normalized = title.lower()
     if "even / odd checker" in normalized:
-        return [{"input": "8\n", "output": "Even"}, {"input": "5\n", "output": "Odd"}]
+        return [{"input": "7\n", "output": "Odd"}, {"input": "0\n", "output": "Even"}, {"input": "-4\n", "output": "Even"}]
     if "largest of three numbers" in normalized:
-        return [{"input": "10 7 3\n", "output": "10"}, {"input": "4 9 2\n", "output": "9"}]
+        return [{"input": "5 9 3\n", "output": "9"}, {"input": "12 12 8\n", "output": "12"}, {"input": "-1 -5 -3\n", "output": "-1"}]
     if "count digits" in normalized:
-        return [{"input": "12345\n", "output": "5"}, {"input": "9\n", "output": "1"}]
+        return [{"input": "9\n", "output": "1"}, {"input": "100\n", "output": "3"}, {"input": "56789\n", "output": "5"}]
     if "sum of digits" in normalized:
-        return [{"input": "1234\n", "output": "10"}, {"input": "900\n", "output": "9"}]
+        return [{"input": "999\n", "output": "27"}, {"input": "10\n", "output": "1"}, {"input": "45\n", "output": "9"}]
     if "prime number checker" in normalized:
-        return [{"input": "13\n", "output": "Prime"}, {"input": "12\n", "output": "Not Prime"}]
-    return [{"input": "", "output": "IMPLEMENTATION_PENDING"}]
+        return [{"input": "4\n", "output": "Not Prime"}, {"input": "2\n", "output": "Prime"}, {"input": "15\n", "output": "Not Prime"}]
+    return [
+        {"input": "", "output": "IMPLEMENTATION_PENDING"},
+        {"input": "", "output": "IMPLEMENTATION_PENDING"},
+        {"input": "", "output": "IMPLEMENTATION_PENDING"},
+    ]
 
 
 def upsert_featured_courses():
@@ -351,10 +391,12 @@ def upsert_theory_pages():
 
 def upsert_practice_problems():
     parsed_descriptions = load_all_problem_descriptions()
+    parsed_test_cases = load_all_problem_test_cases(parsed_descriptions)
     for idx, (level, section, title, difficulty) in enumerate(PRACTICE_PROBLEMS, start=1):
         row = PracticeProblem.query.filter_by(title=title).first()
         fallback_description = build_problem_description(level, section, title, difficulty)
-        db_description = parsed_descriptions.get(normalize_problem_key(title), fallback_description)
+        problem_key = normalize_problem_key(title)
+        db_description = parsed_descriptions.get(problem_key, fallback_description)
         if not row:
             row = PracticeProblem(title=title, description=db_description)
             db.session.add(row)
@@ -366,7 +408,11 @@ def upsert_practice_problems():
         row.order_index = idx
         row.tags = row.tags or []
         row.starter_code = row.starter_code or ""
-        row.test_cases = build_problem_test_cases(title)
+        parsed_cases = parsed_test_cases.get(problem_key, [])
+        if len(parsed_cases) >= 3:
+            row.test_cases = parsed_cases[:3]
+        else:
+            row.test_cases = build_problem_test_cases(title)
 
 
 def seed():

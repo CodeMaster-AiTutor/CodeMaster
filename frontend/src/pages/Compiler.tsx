@@ -652,9 +652,10 @@ const getStoredEditorThemeSupport = () => {
 type CompilerProps = {
   withLayout?: boolean;
   onExecutionSuccess?: () => void;
+  onCodeChange?: (code: string) => void;
 };
 
-const Compiler = ({ withLayout = true, onExecutionSuccess }: CompilerProps) => {
+const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: CompilerProps) => {
   const navigate = useNavigate();
   const initialCode = getFallbackCode() ?? '';
 
@@ -679,6 +680,10 @@ const Compiler = ({ withLayout = true, onExecutionSuccess }: CompilerProps) => {
   const lastSavedStateRef = useRef<Omit<CompilerState, 'version' | 'compressed' | 'updatedAt'> | null>(null);
   const [isClearing, setIsClearing] = useState(false);
   const sessionIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    onCodeChange?.(code);
+  }, [code, onCodeChange]);
 
   useEffect(() => {
     let isMounted = true;
@@ -918,6 +923,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess }: CompilerProps) => {
     const nextValue = value ?? '';
     codeRef.current = nextValue;
     setCode(nextValue);
+    onCodeChange?.(nextValue);
     const editor = editorRef.current;
     if (editor) {
       const model = editor.getModel();
@@ -931,7 +937,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess }: CompilerProps) => {
       scrollPositionRef.current = editor.getScrollTop();
     }
     scheduleSave(nextValue, selectionRef.current, scrollPositionRef.current);
-  }, [scheduleSave]);
+  }, [scheduleSave, onCodeChange]);
 
   const handleEditorMount: OnMount = useCallback((editor, monaco) => {
     editorRef.current = editor;

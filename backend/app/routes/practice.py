@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+import re
 
 from app import db
 from app.middleware.auth import token_required
@@ -10,6 +11,102 @@ practice_bp = Blueprint('practice', __name__)
 
 LEVEL_ORDER = ['beginner', 'intermediate', 'advanced']
 LEVEL_MIX = 0.0
+
+
+def _normalize_output_text(value: str):
+    text = (value or '').replace('\r\n', '\n').replace('\r', '\n').strip()
+    lines = [line.strip() for line in text.split('\n') if line.strip()]
+    collapsed = re.sub(r'\s+', ' ', text).strip()
+    return text, lines, collapsed
+
+
+def _line_matches(actual_line: str, expected_line: str):
+    actual_line = actual_line.strip()
+    expected_line = expected_line.strip()
+
+    if actual_line == expected_line:
+        return True
+
+    if actual_line.lower() == expected_line.lower():
+        return True
+
+    if ' ' not in expected_line and actual_line.lower().endswith(expected_line.lower()):
+        idx = len(actual_line) - len(expected_line)
+        if idx == 0 or actual_line[idx - 1] in ' :\t':
+            return True
+
+    if ':' in actual_line:
+        after_colon = actual_line.split(':', 1)[-1].strip()
+        if after_colon.lower() == expected_line.lower():
+            return True
+
+    try:
+        return float(actual_line.split()[-1]) == float(expected_line)
+    except (ValueError, IndexError):
+        pass
+
+    return False
+
+
+def _output_matches_expected(actual_output: str, expected_output: str):
+    _, expected_lines, _ = _normalize_output_text(expected_output)
+    _, actual_lines, _ = _normalize_output_text(actual_output)
+
+    if not expected_lines:
+        return not actual_lines
+
+    if len(expected_lines) > 1:
+        tail = actual_lines[-len(expected_lines):]
+        if len(tail) == len(expected_lines):
+            if all(_line_matches(a, e) for a, e in zip(tail, expected_lines)):
+                return True
+        return all(
+            any(_line_matches(a, e) for a in actual_lines)
+            for e in expected_lines
+        )
+
+    expected = expected_lines[0]
+    for line in actual_lines:
+        if _line_matches(line, expected):
+            return True
+
+    return False
+
+
+def _build_input_variants(case_input: str):
+    raw = str(case_input or "")
+    normalized = raw.replace('\\n', '\n').replace('\\r', '').strip()
+    variants = []
+
+    def add_variant(value: str):
+        candidate = (value or '').replace('\r\n', '\n').replace('\r', '\n')
+        if candidate and not candidate.endswith('\n'):
+            candidate = f"{candidate}\n"
+        if candidate and candidate not in variants:
+            variants.append(candidate)
+
+    add_variant(normalized)
+
+    if '|' in normalized:
+        pipe_parts = [part.strip() for part in normalized.split('|') if part.strip()]
+        if pipe_parts:
+            add_variant('\n'.join(pipe_parts))
+            add_variant(' '.join(pipe_parts))
+
+    bracket_matches = re.findall(r'\[([^\]]+)\]', normalized)
+    if bracket_matches:
+        for match in bracket_matches:
+            numbers = re.findall(r'-?\d+(?:\.\d+)?', match)
+            if numbers:
+                joined = ' '.join(numbers)
+                add_variant(joined)
+                add_variant('\n'.join(numbers))
+                add_variant(f"{len(numbers)}\n{joined}")
+
+    if not variants:
+        add_variant('')
+
+    return variants
 
 def _problems_for_level(level: str, include_mix: bool = True):
     main_problems = (
@@ -226,16 +323,31 @@ def validate_solution(current_user):
     results = []
     passed_count = 0
     for idx, test_case in enumerate(test_cases, start=1):
-        case_input = str((test_case or {}).get('input', ''))
+        original_input = str((test_case or {}).get('input', ''))
+        input_variants = _build_input_variants(original_input)
         expected_output = str((test_case or {}).get('output', '')).strip()
-        run = executor.compile_and_execute(code, input_data=case_input)
-        actual_output = str(run.get('output', '')).strip()
-        success = bool(run.get('success')) and actual_output == expected_output
+        run = None
+        actual_output = ''
+        success = False
+        used_input = input_variants[0] if input_variants else ''
+
+        for candidate_input in input_variants:
+            run = executor.compile_and_execute(code, input_data=candidate_input)
+            actual_output = str(run.get('output', '')).strip()
+            if bool(run.get('success')) and _output_matches_expected(actual_output, expected_output):
+                success = True
+                used_input = candidate_input
+                break
+
+        if run is None:
+            run = {"errors": []}
+
         if success:
             passed_count += 1
         results.append({
             'index': idx,
-            'input': case_input,
+            'input': original_input,
+            'used_input': used_input.strip(),
             'expected_output': expected_output,
             'actual_output': actual_output,
             'success': success,

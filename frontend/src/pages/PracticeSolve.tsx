@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import TopNavigation from '@/components/layout/TopNavigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, BookOpen } from 'lucide-react';
+import { ArrowLeft, BookOpen, CheckCircle2, Loader2, XCircle } from 'lucide-react';
 import Compiler from './Compiler';
 import { practiceAPI } from '@/lib/api';
 
@@ -22,6 +22,15 @@ const getCachedProblemDescription = (title: string, level: string) => {
   } catch {
     return '';
   }
+};
+
+type TestRunResult = {
+  index: number;
+  input: string;
+  expected_output: string;
+  actual_output: string;
+  success: boolean;
+  errors: string[];
 };
 
 const PracticeSolve = () => {
@@ -45,6 +54,12 @@ const PracticeSolve = () => {
   const [problemDescription, setProblemDescription] = useState<string>(() =>
     getCachedProblemDescription(decodedTitle, catalogLevel)
   );
+  const [problemId, setProblemId] = useState<number | null>(null);
+  const [currentCode, setCurrentCode] = useState<string>('');
+  const [isRunningTests, setIsRunningTests] = useState<boolean>(false);
+  const [testResults, setTestResults] = useState<TestRunResult[]>([]);
+  const [testSummary, setTestSummary] = useState<{ solved: boolean; passed: number; total: number } | null>(null);
+  const [testError, setTestError] = useState<string>('');
 
   useEffect(() => {
     let active = true;
@@ -67,8 +82,10 @@ const PracticeSolve = () => {
             item.title.trim().toLowerCase() === decodedTitle.trim().toLowerCase()
         );
         setProblemDescription(found?.description || '');
+        setProblemId(found?.id ?? null);
       } catch {
         setProblemDescription(cached || '');
+        setProblemId(null);
       }
     };
     loadDescription();
@@ -94,10 +111,35 @@ const PracticeSolve = () => {
   );
   const hasDescription = displayDescription.trim().length > 0;
   const handleExecutionSuccess = () => {
+    void 0;
+  };
+
+  const handleRunTestCases = async () => {
+    setTestError('');
+    setTestResults([]);
+    setTestSummary(null);
+    if (!problemId) {
+      setTestError('Problem mapping not found.');
+      return;
+    }
+    if (!currentCode.trim()) {
+      setTestError('Please write code before running test cases.');
+      return;
+    }
+    setIsRunningTests(true);
     try {
-      localStorage.setItem(solveKey, 'true');
-    } catch {
-      void 0;
+      const result = await practiceAPI.validateSolution(problemId, currentCode);
+      setTestResults(result.results || []);
+      setTestSummary({ solved: result.solved, passed: result.passed, total: result.total });
+      if (result.solved) {
+        localStorage.setItem(solveKey, 'true');
+      } else {
+        localStorage.removeItem(solveKey);
+      }
+    } catch (error) {
+      setTestError(error instanceof Error ? error.message : 'Failed to run test cases.');
+    } finally {
+      setIsRunningTests(false);
     }
   };
 
@@ -131,11 +173,62 @@ const PracticeSolve = () => {
                   <div className="text-sm text-zinc-100/90 whitespace-pre-wrap leading-6">
                     {hasDescription ? displayDescription : 'Description unavailable'}
                   </div>
+                  <div className="pt-2 space-y-3">
+                    <Button
+                      className="w-full"
+                      onClick={handleRunTestCases}
+                      disabled={isRunningTests || !problemId}
+                    >
+                      {isRunningTests ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Running test cases
+                        </>
+                      ) : (
+                        'Run Test Cases'
+                      )}
+                    </Button>
+                    {testError ? (
+                      <div className="text-xs text-red-300">{testError}</div>
+                    ) : null}
+                    {testSummary ? (
+                      <div className={`text-xs ${testSummary.solved ? 'text-green-300' : 'text-amber-300'}`}>
+                        {testSummary.solved
+                          ? `All test cases passed (${testSummary.passed}/${testSummary.total}). Problem marked complete.`
+                          : `Passed ${testSummary.passed}/${testSummary.total} test cases.`}
+                      </div>
+                    ) : null}
+                    {testResults.length > 0 ? (
+                      <div className="space-y-2">
+                        {testResults.map((test) => (
+                          <div
+                            key={`test-${test.index}`}
+                            className="rounded-md border border-border/40 bg-background/40 p-2 text-xs"
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              {test.success ? (
+                                <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
+                              ) : (
+                                <XCircle className="w-3.5 h-3.5 text-red-400" />
+                              )}
+                              <span>Test Case {test.index}</span>
+                            </div>
+                            <div className="text-zinc-200/90">Expected: {test.expected_output || '(empty)'}</div>
+                            <div className="text-zinc-200/90">Actual: {test.actual_output || '(empty)'}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
                 </CardContent>
               </Card>
             </div>
             <div className="w-full lg:w-[70%]">
-              <Compiler withLayout={false} onExecutionSuccess={handleExecutionSuccess} />
+              <Compiler
+                withLayout={false}
+                onExecutionSuccess={handleExecutionSuccess}
+                onCodeChange={setCurrentCode}
+              />
             </div>
           </div>
         </div>
