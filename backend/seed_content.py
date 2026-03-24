@@ -335,20 +335,189 @@ def build_problem_description(level, section, title, difficulty):
 def build_problem_test_cases(title):
     normalized = title.lower()
     if "even / odd checker" in normalized:
-        return [{"input": "7\n", "output": "Odd"}, {"input": "0\n", "output": "Even"}, {"input": "-4\n", "output": "Even"}]
+        return [{"input": "7", "output": "Odd"}, {"input": "0", "output": "Even"}, {"input": "-4", "output": "Even"}]
     if "largest of three numbers" in normalized:
-        return [{"input": "5 9 3\n", "output": "9"}, {"input": "12 12 8\n", "output": "12"}, {"input": "-1 -5 -3\n", "output": "-1"}]
+        return [{"input": "5\n9\n3", "output": "9"}, {"input": "12\n12\n8", "output": "12"}, {"input": "-1\n-5\n-3", "output": "-1"}]
+    if "leap year checker" in normalized:
+        return [{"input": "2000", "output": "Leap Year"}, {"input": "1900", "output": "Not a Leap Year"}, {"input": "2024", "output": "Leap Year"}]
+    if "temperature converter" in normalized:
+        return [{"input": "100\nC", "output": "212.0"}, {"input": "25\nC", "output": "77.0"}, {"input": "37\nC", "output": "98.6"}]
+    if "grade system" in normalized:
+        return [{"input": "95", "output": "Grade A+"}, {"input": "70", "output": "Grade B"}, {"input": "45", "output": "Fail"}]
+    if "simple interest calculator" in normalized:
+        return [{"input": "1000\n5\n2", "output": "100.0"}, {"input": "5000\n10\n3", "output": "1500.0"}, {"input": "2000\n8\n1", "output": "160.0"}]
+    if "swap without third variable" in normalized:
+        return [{"input": "5\n10", "output": "10\n5"}, {"input": "0\n7", "output": "7\n0"}, {"input": "-3\n9", "output": "9\n-3"}]
+    if "count vowels" in normalized:
+        return [{"input": "hello", "output": "2"}, {"input": "java", "output": "2"}, {"input": "rhythm", "output": "0"}]
+    if "character frequency" in normalized:
+        return [{"input": "mississippi\ns", "output": "4"}, {"input": "hello\nz", "output": "0"}, {"input": "java\na", "output": "2"}]
+    if "check alphabet type" in normalized:
+        return [{"input": "A", "output": "Uppercase"}, {"input": "z", "output": "Lowercase"}, {"input": "3", "output": "Not an Alphabet"}]
+    if "sum of n natural numbers" in normalized:
+        return [{"input": "5", "output": "15"}, {"input": "10", "output": "55"}, {"input": "1", "output": "1"}]
+    if "multiplication table" in normalized:
+        return [{"input": "2", "output": "2 x 1 = 2"}, {"input": "5", "output": "5 x 1 = 5"}, {"input": "10", "output": "10 x 1 = 10"}]
     if "count digits" in normalized:
-        return [{"input": "9\n", "output": "1"}, {"input": "100\n", "output": "3"}, {"input": "56789\n", "output": "5"}]
+        return [{"input": "9", "output": "1"}, {"input": "100", "output": "3"}, {"input": "56789", "output": "5"}, {"input": "0", "output": "1"}]
     if "sum of digits" in normalized:
-        return [{"input": "999\n", "output": "27"}, {"input": "10\n", "output": "1"}, {"input": "45\n", "output": "9"}]
+        return [{"input": "999", "output": "27"}, {"input": "10", "output": "1"}, {"input": "45", "output": "9"}]
+    if "basic calculator" in normalized:
+        return [{"input": "10\n5\n+", "output": "15"}, {"input": "10\n5\n-", "output": "5"}, {"input": "10\n5\n*", "output": "50"}]
+    if "factorial calculator" in normalized:
+        return [{"input": "5", "output": "120"}, {"input": "0", "output": "1"}, {"input": "10", "output": "3628800"}]
     if "prime number checker" in normalized:
-        return [{"input": "4\n", "output": "Not Prime"}, {"input": "2\n", "output": "Prime"}, {"input": "15\n", "output": "Not Prime"}]
+        return [{"input": "4", "output": "Not Prime"}, {"input": "2", "output": "Prime"}, {"input": "17", "output": "Prime"}]
+    if "fibonacci series" in normalized:
+        return [{"input": "5", "output": "0 1 1 2 3"}, {"input": "1", "output": "0"}, {"input": "7", "output": "0 1 1 2 3 5 8"}]
+    if "reverse a number" in normalized:
+        return [{"input": "1234", "output": "4321"}, {"input": "100", "output": "1"}, {"input": "-567", "output": "-765"}]
+    if "palindrome number" in normalized:
+        return [{"input": "121", "output": "Palindrome"}, {"input": "123", "output": "Not Palindrome"}, {"input": "0", "output": "Palindrome"}]
+    if "armstrong number" in normalized:
+        return [{"input": "153", "output": "Armstrong"}, {"input": "123", "output": "Not Armstrong"}, {"input": "370", "output": "Armstrong"}]
+    if "gcd and lcm" in normalized:
+        return [{"input": "12\n18", "output": "GCD: 6\nLCM: 36"}, {"input": "5\n7", "output": "GCD: 1\nLCM: 35"}, {"input": "8\n12", "output": "GCD: 4\nLCM: 24"}]
+    if "power calculator" in normalized:
+        return [{"input": "2\n10", "output": "1024"}, {"input": "3\n3", "output": "27"}, {"input": "5\n0", "output": "1"}]
+    if "pattern - star pyramid" in normalized:
+        return [{"input": "3", "output": "*\n**\n***"}, {"input": "1", "output": "*"}, {"input": "4", "output": "*\n**\n***\n****"}]
+    if "pattern - number triangle" in normalized:
+        return [{"input": "3", "output": "1\n1 2\n1 2 3"}, {"input": "1", "output": "1"}, {"input": "4", "output": "1\n1 2\n1 2 3\n1 2 3 4"}]
+    if "find largest in array" in normalized:
+        return [{"input": "5\n3 7 1 9 2", "output": "9"}, {"input": "3\n-1 -5 -3", "output": "-1"}, {"input": "4\n4 4 4 4", "output": "4"}, {"input": "3\n1 2 3", "output": "3"}, {"input": "1\n42", "output": "42"}]
+    if "reverse an array" in normalized:
+        return [{"input": "4\n1 2 3 4", "output": "4 3 2 1"}, {"input": "1\n5", "output": "5"}, {"input": "3\n7 8 9", "output": "9 8 7"}]
+    if "linear search" in normalized:
+        return [{"input": "5\n3 7 1 9 2\n7", "output": "Found at index 1"}, {"input": "3\n1 2 3\n5", "output": "Not Found"}, {"input": "4\n4 8 12 16\n12", "output": "Found at index 2"}]
+    if "sum of array elements" in normalized:
+        return [{"input": "4\n1 2 3 4", "output": "10"}, {"input": "3\n-1 0 1", "output": "0"}, {"input": "5\n5 5 5 5 5", "output": "25"}]
+    if "count even and odd" in normalized:
+        return [{"input": "5\n1 2 3 4 5", "output": "Even: 2\nOdd: 3"}, {"input": "3\n2 4 6", "output": "Even: 3\nOdd: 0"}, {"input": "2\n1 3", "output": "Even: 0\nOdd: 2"}]
+    if "find second largest" in normalized:
+        return [{"input": "5\n3 7 1 9 2", "output": "7"}, {"input": "3\n5 5 5", "output": "5"}, {"input": "4\n1 2 3 4", "output": "3"}]
+    if "bubble sort" in normalized:
+        return [{"input": "4\n4 2 7 1", "output": "1 2 4 7"}, {"input": "3\n3 1 2", "output": "1 2 3"}, {"input": "5\n5 4 3 2 1", "output": "1 2 3 4 5"}]
+    if "binary search" in normalized:
+        return [{"input": "5\n1 3 5 7 9\n7", "output": "Found at index 3"}, {"input": "4\n2 4 6 8\n5", "output": "Not Found"}, {"input": "3\n10 20 30\n10", "output": "Found at index 0"}]
+    if "remove duplicates" in normalized:
+        return [{"input": "5\n1 2 2 3 3", "output": "1 2 3"}, {"input": "4\n4 4 4 4", "output": "4"}, {"input": "3\n1 2 3", "output": "1 2 3"}]
+    if "array rotation" in normalized:
+        return [{"input": "5\n1 2 3 4 5\n2", "output": "3 4 5 1 2"}, {"input": "3\n1 2 3\n1", "output": "2 3 1"}, {"input": "4\n1 2 3 4\n4", "output": "1 2 3 4"}]
+    if "reverse a string" in normalized:
+        return [{"input": "hello", "output": "olleh"}, {"input": "java", "output": "avaj"}, {"input": "abcd", "output": "dcba"}]
+    if "palindrome string" in normalized:
+        return [{"input": "racecar", "output": "Palindrome"}, {"input": "hello", "output": "Not Palindrome"}, {"input": "madam", "output": "Palindrome"}]
+    if "count words in a sentence" in normalized:
+        return [{"input": "hello world", "output": "2"}, {"input": "java is fun", "output": "3"}, {"input": "one", "output": "1"}]
+    if "remove spaces" in normalized:
+        return [{"input": "hello world", "output": "helloworld"}, {"input": "a b c", "output": "abc"}, {"input": "no spaces", "output": "nospaces"}]
+    if "anagram checker" in normalized:
+        return [{"input": "listen\nsilent", "output": "Anagram"}, {"input": "hello\nworld", "output": "Not Anagram"}, {"input": "triangle\nintegral", "output": "Anagram"}]
+    if "string compression" in normalized:
+        return [{"input": "aabcccdd", "output": "a2b1c3d2"}, {"input": "abcd", "output": "a1b1c1d1"}, {"input": "aaaa", "output": "a4"}]
+    if "matrix addition" in normalized:
+        return [{"input": "2\n1 2\n3 4\n5 6\n7 8", "output": "6 8\n10 12"}, {"input": "1\n5\n3", "output": "8"}, {"input": "2\n0 0\n0 0\n1 1\n1 1", "output": "1 1\n1 1"}]
+    if "transpose a matrix" in normalized:
+        return [{"input": "2\n1 2\n3 4", "output": "1 3\n2 4"}, {"input": "1\n5", "output": "5"}, {"input": "3\n1 2 3\n4 5 6\n7 8 9", "output": "1 4 7\n2 5 8\n3 6 9"}]
+    if "matrix multiplication" in normalized:
+        return [{"input": "2\n1 2\n3 4\n5 6\n7 8", "output": "19 22\n43 50"}, {"input": "1\n3\n4", "output": "12"}, {"input": "2\n1 0\n0 1\n1 2\n3 4", "output": "1 2\n3 4"}]
+    if "method overloading" in normalized:
+        return [{"input": "2\n5\n3", "output": "8"}, {"input": "2\n2.5\n1.5", "output": "4.0"}, {"input": "3\n1\n2\n3", "output": "6"}]
+    if "student result system" in normalized:
+        return [{"input": "5\n70\n75\n80\n85\n90", "output": "B"},
+        {"input": "5\n95\n97\n98\n96\n99", "output": "A+"},
+        {"input": "5\n20\n25\n30\n35\n40", "output": "F"}]
+    if "employee salary system" in normalized:
+        return [{"input": "50000\n5000\n2000", "output": "53000"}, {"input": "30000\n3000\n1000", "output": "32000"}, {"input": "100000\n10000\n5000", "output": "105000"}]
+    if "menu-driven program" in normalized:
+        return [{"input": "1\n5\n0", "output": "Invalid Choice"}, {"input": "2\n0", "output": "Invalid Choice"}, {"input": "0", "output": "Exit"}]
+    if "custom exception demo" in normalized:
+        return [{"input": "-1", "output": "Exception"}, {"input": "0", "output": "Exception"}, {"input": "10", "output": "Valid"}]
+    if "number guessing game" in normalized:
+        return [{"input": "50\n0", "output": "Correct"}, {"input": "10\n0", "output": "Try Again"}, {"input": "90\n0", "output": "Try Again"}]
+    if "student management system" in normalized:
+        return [{"input": "1\nAsha\n2\n5", "output": "added"}, {"input": "2\n5", "output": "list"}, {"input": "3\nAsha\n5", "output": "Asha"}]
+    if "library system" in normalized:
+        return [{"input": "1\nJava Basics\n2\n5", "output": "added"}, {"input": "2\n5", "output": "list"}, {"input": "3\nJava\n5", "output": "Java"}]
+    if "contact book" in normalized:
+        return [{"input": "1\nRavi\n9876543210\n2\n5", "output": "saved"}, {"input": "3\nRavi\n5", "output": "Ravi"}, {"input": "4\nRavi\n5", "output": "deleted"}]
+    if "atm simulator" in normalized:
+        return [{"input": "1234\n1\n4", "output": "balance"}, {"input": "1234\n2\n1000\n4", "output": "deposit"}, {"input": "0000\n4", "output": "denied"}]
+    if "shopping cart system" in normalized:
+        return [{"input": "1\nApple\n50\n2\n4\n5", "output": "added"}, {"input": "3\nApple\n5", "output": "removed"}, {"input": "4\n5", "output": "total"}]
+    if "expense tracker" in normalized:
+        return [{"input": "1\nFood\nLunch\n100\n4\n5", "output": "total"}, {"input": "2\n5", "output": "list"}, {"input": "3\nFood\n5", "output": "Food"}]
+    if "quiz application" in normalized:
+        return [{"input": "A\nB\nC\nD", "output": "score"}, {"input": "A\nA\nA\nA", "output": "score"}, {"input": "Z\nZ\nZ\nZ", "output": "invalid"}]
+    if "voting system" in normalized:
+        return [{"input": "V101\nAlice\n5", "output": "recorded"}, {"input": "V101\nBob\n5", "output": "already"}, {"input": "V999\nAlice\n5", "output": "invalid"}]
+    if "parking lot system" in normalized:
+        return [{"input": "1\nMH01AB1234\n3\n4", "output": "parked"}, {"input": "2\nMH01AB1234\n4", "output": "removed"}, {"input": "3\n4", "output": "slot"}]
+    if "bank account system" in normalized:
+        return [{"input": "1\nRaj\n2\n1001\n500\n4\n5", "output": "account"}, {"input": "2\n1001\n5000\n5", "output": "deposit"}, {"input": "3\n1001\n999999\n5", "output": "insufficient"}]
+    if "password validator" in normalized:
+        return [{"input": "Strong@123", "output": "strong"}, {"input": "Medium12", "output": "moderate"}, {"input": "abc", "output": "weak"}]
+    if "task manager" in normalized:
+        return [{"input": "1\nStudy\nHigh\n4\n6", "output": "added"}, {"input": "2\nStudy\n6", "output": "complete"}, {"input": "3\nStudy\n6", "output": "removed"}]
+    if "inventory system" in normalized:
+        return [{"input": "1\nP001\nLaptop\n10\n50000\n4\n5", "output": "product"}, {"input": "3\nP001\n15\n5", "output": "insufficient"}, {"input": "2\nP001\n5\n5", "output": "restocked"}]
+    if "ticket booking system" in normalized:
+        return [{"input": "1\n3\n4", "output": "booked"}, {"input": "1\n3\n1\n3\n4", "output": "already"}, {"input": "2\n3\n4", "output": "cancelled"}]
+    if "restaurant billing system" in normalized:
+        return [{"input": "1\nPizza\n2\n200\n4\n5", "output": "total"}, {"input": "2\nPizza\n5", "output": "removed"}, {"input": "4\n5", "output": "bill"}]
+    if "simple chat simulation" in normalized:
+        return [{"input": "Hello everyone", "output": "message"}, {"input": "Hi team", "output": "chat"}, {"input": "Welcome", "output": "user"}]
+    if "simple login system" in normalized:
+        return [{"input": "1\nalice\nSecure@1\n2\nalice\nSecure@1\n3", "output": "welcome"}, {"input": "1\nbob\nPass@1\n2\nbob\nwrong\n2\nbob\nwrong\n2\nbob\nwrong\n3", "output": "locked"}, {"input": "2\nunknown\nPass@1\n3", "output": "invalid"}]
+    if "employee management + sort by salary" in normalized:
+        return [{"input": "1\n101\nAlice\nIT\n72000\n1\n102\nBob\nHR\n45000\n3\n1\n6\n5\n0", "output": "45000"}, {"input": "1\n201\nCarol\nHR\n50000\n4\nHR\n6\n5\n0", "output": "HR"}, {"input": "1\n301\nDan\nSales\n90000\n5\n6\n5\n0", "output": "90000"}]
+    if "mini banking transaction history" in normalized:
+        return [{"input": "1\n10000\n2\n3000\n3\n5", "output": "7000"}, {"input": "2\n500\n5", "output": "insufficient"}, {"input": "3\n5", "output": "transaction"}]
+    if "course enrollment system" in normalized:
+        return [{"input": "1\nCS101\n30\n2\nS001\nCS101\n5", "output": "enrolled"}, {"input": "1\nCS101\n1\n2\nS001\nCS101\n2\nS002\nCS101\n5", "output": "full"}, {"input": "2\nS001\nCS101\n2\nS001\nCS101\n5", "output": "already"}]
+    if "hotel room booking" in normalized:
+        return [{"input": "2\n101\nAsha\n4", "output": "booked"}, {"input": "2\n101\nAsha\n2\n101\nRavi\n4", "output": "not available"}, {"input": "3\n101\n4", "output": "checkout"}]
+    if "stack implementation (manual)" in normalized:
+        return [{"input": "1\n10\n1\n20\n2\n5", "output": "20"}, {"input": "2\n5", "output": "empty"}, {"input": "4\n((a+b)\n5", "output": "unbalanced"}]
+    if "queue implementation (manual)" in normalized:
+        return [{"input": "1\nReport.pdf\n1\nInvoice.pdf\n2\n5", "output": "report"}, {"input": "2\n5", "output": "empty"}, {"input": "1\nDoc1\n1\nDoc2\n4\n5", "output": "queue"}]
+    if "e-voting with id validation" in normalized:
+        return [{"input": "VID-001\nAlice\n5", "output": "recorded"}, {"input": "VID-001\nAlice\nVID-001\nBob\n5", "output": "already"}, {"input": "VID-999\nAlice\n5", "output": "invalid"}]
+    if "multi-user scoreboard system" in normalized:
+        return [{"input": "1\nPriya\n4500\n1\nRaj\n3200\n3\n6", "output": "4500"}, {"input": "2\nPriya\n500\n3\n6", "output": "updated"}, {"input": "4\n1\n6", "output": "top"}]
     return [
         {"input": "", "output": "IMPLEMENTATION_PENDING"},
         {"input": "", "output": "IMPLEMENTATION_PENDING"},
         {"input": "", "output": "IMPLEMENTATION_PENDING"},
     ]
+
+
+def build_problem_starter_code(title):
+    if title.lower() == "grade system":
+        return (
+            "import java.util.Scanner;\n\n"
+            "public class GradeSystem {\n"
+            "    public static void main(String[] args) {\n"
+            "        Scanner sc = new Scanner(System.in);\n"
+            "        int marks = sc.nextInt();\n\n"
+            "        if (marks >= 90 && marks <= 100) {\n"
+            "            System.out.println(\"Grade A+\");\n"
+            "        } else if (marks >= 80) {\n"
+            "            System.out.println(\"Grade A\");\n"
+            "        } else if (marks >= 70) {\n"
+            "            System.out.println(\"Grade B\");\n"
+            "        } else if (marks >= 60) {\n"
+            "            System.out.println(\"Grade C\");\n"
+            "        } else if (marks >= 50) {\n"
+            "            System.out.println(\"Grade D\");\n"
+            "        } else {\n"
+            "            System.out.println(\"Fail\");\n"
+            "        }\n"
+            "    }\n"
+            "}\n"
+        )
+    return ""
 
 
 def upsert_featured_courses():
@@ -407,12 +576,18 @@ def upsert_practice_problems():
         row.difficulty = difficulty
         row.order_index = idx
         row.tags = row.tags or []
-        row.starter_code = row.starter_code or ""
-        parsed_cases = parsed_test_cases.get(problem_key, [])
-        if len(parsed_cases) >= 3:
-            row.test_cases = parsed_cases[:3]
+        starter_code = build_problem_starter_code(title)
+        row.starter_code = starter_code if starter_code else (row.starter_code or "")
+        curated_cases = build_problem_test_cases(title)
+        is_curated_pending = all(case.get("output") == "IMPLEMENTATION_PENDING" for case in curated_cases)
+        if not is_curated_pending:
+            row.test_cases = curated_cases
         else:
-            row.test_cases = build_problem_test_cases(title)
+            parsed_cases = parsed_test_cases.get(problem_key, [])
+            if len(parsed_cases) >= 3:
+                row.test_cases = parsed_cases[:3]
+            else:
+                row.test_cases = curated_cases
 
 
 def seed():

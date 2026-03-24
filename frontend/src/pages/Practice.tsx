@@ -16,6 +16,7 @@ interface Problem {
   title: string;
   difficulty: 'Basic' | 'Medium' | 'Advanced';
   status: 'not-started' | 'attempted' | 'solved';
+  hasDraft?: boolean;
   tags: string[];
   description?: string;
   tutorialUrl?: string;
@@ -770,7 +771,10 @@ const Practice = () => {
           title: problem.title,
           description: problem.description,
           difficulty: normalizeDifficulty(problem.difficulty),
-          status: normalizeStatus(problem.attempt_status ?? null),
+          status: normalizeStatus(
+            problem.attempt_status ?? (problem.has_draft ? 'started' : null)
+          ),
+          hasDraft: Boolean(problem.has_draft),
           tags: problem.tags || [],
         }));
         setProblems(normalized);
@@ -811,12 +815,26 @@ const Practice = () => {
       ? set.problems.length
       : set.sections.reduce((total, section) => total + section.problems.length, 0);
 
+  const normalizeLevelKey = (level: LearningConcept['level']) =>
+    level === 'basic' ? 'beginner' : level;
+
   const getSolveKey = (level: LearningConcept['level'], title: string) =>
-    `practice:solved:${level}:${title}`;
+    `practice:solved:${normalizeLevelKey(level)}:${title}`;
+
+  const getTouchedKey = (level: LearningConcept['level'], title: string) =>
+    `practice:touched:${normalizeLevelKey(level)}:${title}`;
 
   const isProblemSolved = (level: LearningConcept['level'], title: string) => {
     try {
       return localStorage.getItem(getSolveKey(level, title)) === 'true';
+    } catch {
+      return false;
+    }
+  };
+
+  const isProblemTouched = (level: LearningConcept['level'], title: string) => {
+    try {
+      return localStorage.getItem(getTouchedKey(level, title)) === 'true';
     } catch {
       return false;
     }
@@ -828,7 +846,8 @@ const Practice = () => {
     index: number,
     keyPrefix: string
   ) => {
-    const solved = isProblemSolved(level, problem.title);
+    const solved = isProblemSolved(level, problem.title) || problem.status === 'solved';
+    const touched = solved || problem.status === 'attempted' || problem.hasDraft || isProblemTouched(level, problem.title);
     return (
       <Card key={`${keyPrefix}-${problem.title}`} className="border-border/20 bg-background/40">
         <CardContent className="p-4">
@@ -863,7 +882,7 @@ const Practice = () => {
                 onClick={() => navigate(`/practice/solve/${level}/${encodeURIComponent(problem.title)}`)}
               >
                 <Play className="w-4 h-4" />
-                Solve
+                {touched ? 'Resume' : 'Solve'}
               </Button>
             </div>
           </div>

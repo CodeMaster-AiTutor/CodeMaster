@@ -478,27 +478,34 @@ Test Cases
 
 Method Overloading Demo	
 
-Problem Statement
-Demonstrate method overloading by creating multiple versions of an add() method that each accept different parameter types or different counts: add(int,int), add(int,int,int), and add(double,double).	
+Problem Statement:
+Demonstrate method overloading by creating multiple versions of an `add()` method. Read the count of 
+numbers first, then the numbers themselves. Call the appropriate overloaded version based on count and 
+type.
 
-Concepts Covered
-▸  Method Overloading
-▸  Polymorphism
-▸  Return Types
-▸  Type Casting
+- If count is 2 and both are integers → call `add(int, int)`
+- If count is 2 and either is decimal → call `add(double, double)`
+- If count is 3 → call `add(int, int, int)`
 
-Example Input
-add(2,3)  /  add(1,2,3)  /  add(1.5,2.5)	
-Expected Output
-5  /  6  /  4.0
+Concepts Covered:
+- Method Overloading
+- Polymorphism
+- Return Types
+- Type Casting
 
-Hint:  Keep the method name identical — only change the parameter list. Java resolves which version to call based on argument types.
+Example Input:
+add(2: 10,20)  /  add(3: 5,10,15)  /  add(2: 2.2,3.3)
+Expected Output:
+30  /  30  /  5.5
+
+Hint: First line is always the count of numbers. Java resolves which overloaded method to call 
+based on argument count and types.
 
 Test Cases
-#	Input	        Expected Output
-1	add(10, 20)	30
-2	add(5, 10, 15)	30
-3	add(2.2, 3.3)	5.5
+#	Input	                    Expected Output
+1	count = 2 add(10, 20)             30
+2   count = 3 add(5, 10, 15)          30
+3   count = 2 add(2.2, 3.3)           5.5
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

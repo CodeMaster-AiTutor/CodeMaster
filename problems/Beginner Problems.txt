@@ -156,8 +156,8 @@ Test Cases
 
 Count Vowels
 
-Problem Statement	C
-ount how many vowel letters (a, e, i, o, u — both upper and lower case) appear in a given string. Loop through each character and check if it matches any vowel.
+Problem Statement	
+Count how many vowel letters (a, e, i, o, u — both upper and lower case) appear in a given string. Loop through each character and check if it matches any vowel.
 
 Concepts	
   •  Loop
@@ -179,8 +179,8 @@ Test Cases
 
 Character Frequency
 
-Problem Statement	C
-ount how many times a specific character appears in a given string. Read the string and the target character, then loop through each position and increment a counter whenever there is a match.
+Problem Statement	
+Count how many times a specific character appears in a given string. Read the string and the target character, then loop through each position and increment a counter whenever there is a match.
 
 Concepts	
   •  Loop

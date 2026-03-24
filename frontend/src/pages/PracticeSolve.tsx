@@ -24,6 +24,14 @@ const getCachedProblemDescription = (title: string, level: string) => {
   }
 };
 
+const getCachedProblemCode = (cacheKey: string) => {
+  try {
+    return localStorage.getItem(cacheKey) || '';
+  } catch {
+    return '';
+  }
+};
+
 type TestRunResult = {
   index: number;
   input: string;
@@ -49,12 +57,18 @@ const PracticeSolve = () => {
       : levelKey === 'intermediate'
         ? 'Intermediate'
         : 'Beginner';
-  const solveKey = `practice:solved:${levelKey}:${decodedTitle}`;
   const catalogLevel = levelKey === 'basic' ? 'beginner' : levelKey;
+  const storageLevelKey = catalogLevel;
+  const solveKey = `practice:solved:${storageLevelKey}:${decodedTitle}`;
+  const touchedKey = `practice:touched:${storageLevelKey}:${decodedTitle}`;
+  const codeScopeKey = `practice:code:${storageLevelKey}:${decodedTitle}`;
+  const codeCacheKey = `practice:code-cache:${storageLevelKey}:${decodedTitle}`;
   const [problemDescription, setProblemDescription] = useState<string>(() =>
     getCachedProblemDescription(decodedTitle, catalogLevel)
   );
   const [problemId, setProblemId] = useState<number | null>(null);
+  const [initialEditorCode, setInitialEditorCode] = useState<string>(() => getCachedProblemCode(codeCacheKey));
+  const [hasUserEdited, setHasUserEdited] = useState<boolean>(false);
   const [currentCode, setCurrentCode] = useState<string>('');
   const [isRunningTests, setIsRunningTests] = useState<boolean>(false);
   const [testResults, setTestResults] = useState<TestRunResult[]>([]);
@@ -93,6 +107,97 @@ const PracticeSolve = () => {
       active = false;
     };
   }, [catalogLevel, decodedTitle]);
+
+  useEffect(() => {
+    setInitialEditorCode(getCachedProblemCode(codeCacheKey));
+    if (!problemId) {
+      setHasUserEdited(false);
+      return;
+    }
+    setHasUserEdited(false);
+    let active = true;
+    const loadDraft = async () => {
+      try {
+        const draft = await practiceAPI.getDraft(problemId);
+        if (!active) {
+          return;
+        }
+        const hasDraft = Boolean(draft?.has_draft);
+        const nextCode = hasDraft ? (draft.code || '') : '';
+        const localCachedCode = getCachedProblemCode(codeCacheKey);
+        if (!localCachedCode) {
+          setInitialEditorCode(nextCode);
+        }
+        if (nextCode) {
+          try {
+            localStorage.setItem(codeCacheKey, nextCode);
+          } catch {
+            void 0;
+          }
+        }
+        if (hasDraft || nextCode.trim().length > 0) {
+          try {
+            localStorage.setItem(touchedKey, 'true');
+          } catch {
+            void 0;
+          }
+        }
+      } catch {
+        if (active) {
+          setInitialEditorCode(getCachedProblemCode(codeCacheKey));
+        }
+      }
+    };
+    loadDraft();
+    return () => {
+      active = false;
+    };
+  }, [problemId, touchedKey, codeCacheKey]);
+
+  useEffect(() => {
+    if (!problemId || !hasUserEdited) {
+      return;
+    }
+    const handle = window.setTimeout(async () => {
+      try {
+        await practiceAPI.saveDraft(problemId, currentCode);
+        try {
+          localStorage.setItem(codeCacheKey, currentCode);
+        } catch {
+          void 0;
+        }
+        if (currentCode.trim().length > 0) {
+          try {
+            localStorage.setItem(touchedKey, 'true');
+          } catch {
+            void 0;
+          }
+        }
+      } catch {
+        void 0;
+      }
+    }, 1200);
+    return () => {
+      window.clearTimeout(handle);
+    };
+  }, [problemId, currentCode, touchedKey, hasUserEdited, codeCacheKey]);
+
+  const handleCodeChange = (value: string) => {
+    setCurrentCode(value);
+    setHasUserEdited(true);
+    try {
+      localStorage.setItem(codeCacheKey, value);
+    } catch {
+      void 0;
+    }
+    if (value.trim().length > 0) {
+      try {
+        localStorage.setItem(touchedKey, 'true');
+      } catch {
+        void 0;
+      }
+    }
+  };
   const displayDescription = useMemo(
     () => {
       const normalizedTitle = decodedTitle.trim().toLowerCase();
@@ -131,6 +236,21 @@ const PracticeSolve = () => {
       const result = await practiceAPI.validateSolution(problemId, currentCode);
       setTestResults(result.results || []);
       setTestSummary({ solved: result.solved, passed: result.passed, total: result.total });
+      try {
+        await practiceAPI.saveDraft(problemId, currentCode);
+      } catch {
+        void 0;
+      }
+      try {
+        localStorage.setItem(codeCacheKey, currentCode);
+      } catch {
+        void 0;
+      }
+      try {
+        localStorage.setItem(touchedKey, 'true');
+      } catch {
+        void 0;
+      }
       if (result.solved) {
         localStorage.setItem(solveKey, 'true');
       } else {
@@ -225,9 +345,12 @@ const PracticeSolve = () => {
             </div>
             <div className="w-full lg:w-[70%]">
               <Compiler
+                key={codeScopeKey}
                 withLayout={false}
                 onExecutionSuccess={handleExecutionSuccess}
-                onCodeChange={setCurrentCode}
+                onCodeChange={handleCodeChange}
+                persistenceScope={codeScopeKey}
+                initialCode={initialEditorCode}
               />
             </div>
           </div>

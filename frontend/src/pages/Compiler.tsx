@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
@@ -42,6 +42,20 @@ const EDITOR_THEME_KEY = 'settings:editor-theme';
 const EDITOR_UPDATED_AT_KEY = 'settings:editor-updated-at';
 const SETTINGS_SUPPORTS_EDITOR_THEME_KEY = 'settings:supports-editor-theme';
 const EDITOR_THEME_VALUES = ['vs-dark', 'vs', 'hc-black', 'hc-light', 'github-dark', 'github-light', 'jellyfish'];
+
+type PersistenceKeys = {
+  sessionKey: string;
+  statePrefix: string;
+  outputKey: string;
+  fallbackKey: string;
+};
+
+const DEFAULT_PERSISTENCE_KEYS: PersistenceKeys = {
+  sessionKey: COMPILER_SESSION_KEY,
+  statePrefix: COMPILER_STATE_PREFIX,
+  outputKey: COMPILER_OUTPUT_KEY,
+  fallbackKey: COMPILER_FALLBACK_KEY
+};
 
 type CompilerState = {
   version: 1;
@@ -339,19 +353,40 @@ const formatErrors = (errors?: CompilerError[], code?: string) => {
   }).join('\n');
 };
 
-const getSessionId = () => {
-  const existing = sessionStorage.getItem(COMPILER_SESSION_KEY);
+const toScopeSuffix = (scope?: string) => {
+  if (!scope) {
+    return '';
+  }
+  const normalized = scope.trim().toLowerCase().replace(/[^a-z0-9:_-]+/g, '_');
+  return normalized ? `:${normalized}` : '';
+};
+
+const getPersistenceKeys = (scope?: string): PersistenceKeys => {
+  const suffix = toScopeSuffix(scope);
+  if (!suffix) {
+    return DEFAULT_PERSISTENCE_KEYS;
+  }
+  return {
+    sessionKey: `${COMPILER_SESSION_KEY}${suffix}`,
+    statePrefix: `${COMPILER_STATE_PREFIX}${suffix}:`,
+    outputKey: `${COMPILER_OUTPUT_KEY}${suffix}`,
+    fallbackKey: `${COMPILER_FALLBACK_KEY}${suffix}`
+  };
+};
+
+const getSessionId = (sessionKey: string) => {
+  const existing = sessionStorage.getItem(sessionKey);
   if (existing) {
     return existing;
   }
   const id = typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  sessionStorage.setItem(COMPILER_SESSION_KEY, id);
+  sessionStorage.setItem(sessionKey, id);
   return id;
 };
 
-const getCompilerStateKey = (sessionId: string) => `${COMPILER_STATE_PREFIX}${sessionId}`;
+const getCompilerStateKey = (statePrefix: string, sessionId: string) => `${statePrefix}${sessionId}`;
 
 const uint8ToBase64 = (bytes: Uint8Array) => {
   let binary = '';
@@ -401,7 +436,8 @@ const decompressString = async (value: string, compressed: boolean) => {
 };
 
 const saveCompilerState = async (
-  state: Omit<CompilerState, 'version' | 'compressed' | 'updatedAt'>
+  state: Omit<CompilerState, 'version' | 'compressed' | 'updatedAt'>,
+  keys: PersistenceKeys
 ) => {
   const { value, compressed } = await compressString(state.code);
   const payload: CompilerState = {
@@ -414,19 +450,19 @@ const saveCompilerState = async (
     sessionId: state.sessionId
   };
   try {
-    sessionStorage.setItem(getCompilerStateKey(state.sessionId), JSON.stringify(payload));
+    sessionStorage.setItem(getCompilerStateKey(keys.statePrefix, state.sessionId), JSON.stringify(payload));
   } catch {
     void 0;
   }
   try {
-    localStorage.setItem(COMPILER_FALLBACK_KEY, state.code);
+    localStorage.setItem(keys.fallbackKey, state.code);
   } catch {
     void 0;
   }
 };
 
-const loadCompilerState = async (sessionId: string) => {
-  const key = getCompilerStateKey(sessionId);
+const loadCompilerState = async (sessionId: string, keys: PersistenceKeys) => {
+  const key = getCompilerStateKey(keys.statePrefix, sessionId);
   let raw: string | null = null;
   try {
     raw = sessionStorage.getItem(key);
@@ -458,7 +494,7 @@ const loadCompilerState = async (sessionId: string) => {
     }
     let fallback: string | null = null;
     try {
-      fallback = localStorage.getItem(COMPILER_FALLBACK_KEY);
+      fallback = localStorage.getItem(keys.fallbackKey);
     } catch {
       fallback = null;
     }
@@ -512,10 +548,10 @@ const loadCompilerState = async (sessionId: string) => {
   }
 };
 
-const clearCompilerState = () => {
-  const keys = Object.keys(sessionStorage);
-  keys.forEach((key) => {
-    if (key.startsWith(COMPILER_STATE_PREFIX) || key === 'compiler:code') {
+const clearCompilerState = (keysToUse: PersistenceKeys) => {
+  const storageKeys = Object.keys(sessionStorage);
+  storageKeys.forEach((key) => {
+    if (key.startsWith(keysToUse.statePrefix)) {
       try {
         sessionStorage.removeItem(key);
       } catch {
@@ -529,17 +565,17 @@ const clearCompilerState = () => {
     void 0;
   }
   try {
-    localStorage.removeItem(COMPILER_FALLBACK_KEY);
+    localStorage.removeItem(keysToUse.fallbackKey);
   } catch {
     void 0;
   }
 };
 
-const cleanupCompilerStates = () => {
+const cleanupCompilerStates = (statePrefix: string) => {
   const keys = Object.keys(sessionStorage);
   const now = Date.now();
   keys.forEach((key) => {
-    if (!key.startsWith(COMPILER_STATE_PREFIX)) {
+    if (!key.startsWith(statePrefix)) {
       return;
     }
     let raw: string | null = null;
@@ -575,29 +611,29 @@ const cleanupCompilerStates = () => {
   });
 };
 
-const saveOutputState = (value: string) => {
+const saveOutputState = (value: string, outputKey: string) => {
   try {
     if (value) {
-      sessionStorage.setItem(COMPILER_OUTPUT_KEY, value);
+      sessionStorage.setItem(outputKey, value);
     } else {
-      sessionStorage.removeItem(COMPILER_OUTPUT_KEY);
+      sessionStorage.removeItem(outputKey);
     }
   } catch {
     void 0;
   }
 };
 
-const clearOutputState = () => {
+const clearOutputState = (outputKey: string) => {
   try {
-    sessionStorage.removeItem(COMPILER_OUTPUT_KEY);
+    sessionStorage.removeItem(outputKey);
   } catch {
     void 0;
   }
 };
 
-const getFallbackCode = () => {
+const getFallbackCode = (fallbackKey: string) => {
   try {
-    return localStorage.getItem(COMPILER_FALLBACK_KEY);
+    return localStorage.getItem(fallbackKey);
   } catch {
     return null;
   }
@@ -653,15 +689,24 @@ type CompilerProps = {
   withLayout?: boolean;
   onExecutionSuccess?: () => void;
   onCodeChange?: (code: string) => void;
+  persistenceScope?: string;
+  initialCode?: string;
 };
 
-const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: CompilerProps) => {
+const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persistenceScope, initialCode = '' }: CompilerProps) => {
   const navigate = useNavigate();
-  const initialCode = getFallbackCode() ?? '';
+  const persistenceKeys = useMemo(
+    () => getPersistenceKeys(withLayout ? undefined : persistenceScope),
+    [persistenceScope, withLayout]
+  );
+  const initialEditorCode = useMemo(
+    () => getFallbackCode(persistenceKeys.fallbackKey) ?? initialCode ?? '',
+    [persistenceKeys, initialCode]
+  );
 
   // Use refs for everything to prevent re-renders
-  const codeRef = useRef(initialCode);
-  const [code, setCode] = useState(initialCode);
+  const codeRef = useRef(initialEditorCode);
+  const [code, setCode] = useState(initialEditorCode);
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [executionStatus, setExecutionStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -821,7 +866,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
 
   // Ultra-simplified code change handler
   const scheduleSave = useCallback((nextCode: string, nextSelection: { start: number; end: number }, nextScrollTop: number) => {
-    const sessionId = sessionIdRef.current ?? getSessionId();
+    const sessionId = sessionIdRef.current ?? getSessionId(persistenceKeys.sessionKey);
     sessionIdRef.current = sessionId;
     if (!sessionId) {
       return;
@@ -842,7 +887,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
         return;
       }
       try {
-        await saveCompilerState(snapshot);
+        await saveCompilerState(snapshot, persistenceKeys);
         lastSavedStateRef.current = snapshot;
       } catch (error) {
         const isQuotaError = error instanceof DOMException && (
@@ -857,7 +902,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
         }
       }
     }, SAVE_DEBOUNCE_MS);
-  }, []);
+  }, [persistenceKeys]);
 
   useEffect(() => {
     return () => {
@@ -865,7 +910,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
         clearTimeout(saveTimerRef.current);
         saveTimerRef.current = null;
       }
-      const sessionId = sessionIdRef.current ?? getSessionId();
+      const sessionId = sessionIdRef.current ?? getSessionId(persistenceKeys.sessionKey);
       const currentCode = editorRef.current?.getValue() ?? codeRef.current;
       if (!sessionId) {
         return;
@@ -875,9 +920,9 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
         selection: selectionRef.current,
         scrollTop: scrollPositionRef.current,
         sessionId
-      });
+      }, persistenceKeys);
     };
-  }, []);
+  }, [persistenceKeys]);
 
   const restoreEditorState = useCallback((state: { code: string; selection: { start: number; end: number }; scrollTop: number }) => {
     codeRef.current = state.code;
@@ -1063,16 +1108,27 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
 
   // Handle fullscreen change events and cleanup
   useEffect(() => {
-    const sessionId = getSessionId();
+    const sessionId = getSessionId(persistenceKeys.sessionKey);
     sessionIdRef.current = sessionId;
-    cleanupCompilerStates();
+    cleanupCompilerStates(persistenceKeys.statePrefix);
     const navigationEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
     const navigationType = navigationEntry?.type ?? 'navigate';
     if (navigationType === 'reload') {
-      clearOutputState();
+      clearOutputState(persistenceKeys.outputKey);
     }
-    loadCompilerState(sessionId).then((state) => {
+    loadCompilerState(sessionId, persistenceKeys).then((state) => {
       if (!state) {
+        const fallbackCode = initialEditorCode || '';
+        codeRef.current = fallbackCode;
+        setCode(fallbackCode);
+        selectionRef.current = { start: fallbackCode.length, end: fallbackCode.length };
+        scrollPositionRef.current = 0;
+        lastSavedStateRef.current = null;
+        restoreEditorState({
+          code: fallbackCode,
+          selection: { start: fallbackCode.length, end: fallbackCode.length },
+          scrollTop: 0
+        });
         return;
       }
       restoreEditorState({
@@ -1090,9 +1146,11 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
       void 0;
     });
     if (navigationType !== 'reload') {
-      const savedOutput = sessionStorage.getItem(COMPILER_OUTPUT_KEY);
+      const savedOutput = sessionStorage.getItem(persistenceKeys.outputKey);
       if (savedOutput) {
         setOutput(savedOutput);
+      } else {
+        setOutput('');
       }
     }
 
@@ -1124,7 +1182,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
         clearTimeout(errorTimeout);
       }
     };
-  }, [exitFullscreen, restoreEditorState, toggleFullscreen]);
+  }, [exitFullscreen, restoreEditorState, toggleFullscreen, persistenceKeys, initialEditorCode]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -1140,7 +1198,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
     const handleBeforeUnload = () => {
       const currentCode = editorRef.current?.getValue() ?? codeRef.current;
       try {
-        localStorage.setItem(COMPILER_FALLBACK_KEY, currentCode);
+        localStorage.setItem(persistenceKeys.fallbackKey, currentCode);
       } catch {
         void 0;
       }
@@ -1156,13 +1214,13 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [persistenceKeys]);
 
   useEffect(() => {
     const handleStorage = (event: StorageEvent) => {
       if (event.key === 'access_token' && !event.newValue) {
-        clearCompilerState();
-        clearOutputState();
+        clearCompilerState(persistenceKeys);
+        clearOutputState(persistenceKeys.outputKey);
         codeRef.current = '';
         setCode('');
         setOutput('');
@@ -1187,7 +1245,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
       if (!sessionId) {
         return;
       }
-      const stateKey = getCompilerStateKey(sessionId);
+      const stateKey = getCompilerStateKey(persistenceKeys.statePrefix, sessionId);
       if (event.key === stateKey && event.newValue) {
         try {
           const parsed = JSON.parse(event.newValue) as CompilerState;
@@ -1211,7 +1269,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
     return () => {
       window.removeEventListener('storage', handleStorage);
     };
-  }, [restoreEditorState]);
+  }, [restoreEditorState, persistenceKeys]);
 
   useEffect(() => {
     return () => {
@@ -1246,7 +1304,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
       setExecutionStatus('error');
       const message = 'Missing Authorization Header. Please log in again.';
       setOutput(message);
-      saveOutputState(message);
+      saveOutputState(message, persistenceKeys.outputKey);
       toast({
         title: "Login required",
         description: "Please log in to run code.",
@@ -1262,9 +1320,9 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
     setIsRunning(true);
     setExecutionStatus('idle');
     setOutput('');
-    saveOutputState('');
+    saveOutputState('', persistenceKeys.outputKey);
     setOutput('Compiling...\r\n');
-    saveOutputState('Compiling...\r\n');
+    saveOutputState('Compiling...\r\n', persistenceKeys.outputKey);
     
     const currentCode = editorRef.current?.getValue() ?? codeRef.current;
     scheduleSave(currentCode, selectionRef.current, scrollPositionRef.current);
@@ -1293,7 +1351,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
         const errorMessage = formatErrors(result.errors, currentCode);
         setOutput(errorMessage);
         setExecutionStatus('error');
-        saveOutputState(errorMessage);
+        saveOutputState(errorMessage, persistenceKeys.outputKey);
         toast({
           title: "Compilation failed",
           description: "Please check your code for errors.",
@@ -1305,7 +1363,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
       const message = `Execution error: ${error instanceof Error ? error.message : 'Unknown error'}`;
       setOutput(message);
       setExecutionStatus('error');
-      saveOutputState(message);
+      saveOutputState(message, persistenceKeys.outputKey);
       toast({
         title: "Execution error",
         description: "An unexpected error occurred.",
@@ -1317,8 +1375,8 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
   };
 
   useEffect(() => {
-    saveOutputState(output);
-  }, [output]);
+    saveOutputState(output, persistenceKeys.outputKey);
+  }, [output, persistenceKeys]);
 
   const handleCopy = () => {
     const currentCode = editorRef.current?.getValue() ?? codeRef.current;
@@ -1331,7 +1389,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
 
   const handleClearOutput = () => {
     setOutput('');
-    saveOutputState('');
+    saveOutputState('', persistenceKeys.outputKey);
     setExecutionStatus('idle');
     toast({
       title: "Output cleared",
@@ -1346,8 +1404,8 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange }: Compi
       setTerminalSessionId(null);
       setTerminalWsUrl('');
     }
-    clearCompilerState();
-    clearOutputState();
+    clearCompilerState(persistenceKeys);
+    clearOutputState(persistenceKeys.outputKey);
     codeRef.current = '';
     setCode('');
     setOutput('');
