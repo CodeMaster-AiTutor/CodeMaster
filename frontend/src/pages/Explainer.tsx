@@ -6,8 +6,10 @@ import { Brain, Code2, Lightbulb, Copy, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import AppLayout from '@/components/layout/AppLayout';
 import { explainerAPI } from '@/lib/api';
+import { useNavigate } from 'react-router-dom';
 
 const Explainer = () => {
+  const navigate = useNavigate();
   const [code, setCode] = useState('');
   const [explanation, setExplanation] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -43,9 +45,19 @@ const Explainer = () => {
       
       setExplanation(formattedExplanation);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to explain code. Please try again.';
+      if (errorMessage.toLowerCase().includes('session expired')) {
+        toast({
+          title: "Session expired",
+          description: "Please login again to continue.",
+          variant: "destructive"
+        });
+        navigate('/login');
+        return;
+      }
       toast({
         title: "Explanation failed",
-        description: error instanceof Error ? error.message : 'Failed to explain code. Please try again.',
+        description: errorMessage,
         variant: "destructive"
       });
       setExplanation('');
@@ -182,12 +194,20 @@ Examples:
                             <pre className="bg-muted p-4 rounded-lg font-mono text-sm overflow-x-auto">
                               <code>{paragraph.slice(3, -3)}</code>
                             </pre>
-                          ) : paragraph.startsWith('•') ? (
-                            <ul className="ml-4 space-y-1">
-                              <li className="text-muted-foreground">{paragraph.slice(2)}</li>
+                          ) : /^[-*•]\s+/.test(paragraph.trim()) ? (
+                            <ul className="ml-2 space-y-2">
+                              {paragraph
+                                .split('\n')
+                                .map((line) => line.trim())
+                                .filter((line) => /^[-*•]\s+/.test(line))
+                                .map((line, bulletIndex) => (
+                                  <li key={`${index}-${bulletIndex}`} className="text-white leading-relaxed">
+                                    • {line.replace(/^[-*•]\s+/, '')}
+                                  </li>
+                                ))}
                             </ul>
                           ) : (
-                            <p className="text-foreground leading-relaxed">{paragraph}</p>
+                            <p className="text-white leading-relaxed">{paragraph}</p>
                           )}
                         </div>
                       ))}

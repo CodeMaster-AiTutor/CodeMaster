@@ -1,18 +1,22 @@
 """AI Service for code generation, explanation, and error fix suggestions using free models (Ollama/Hugging Face)"""
 import os
 import requests
-import json
+import importlib.util
 from typing import Dict, List, Optional
-from app.config import Config
 
 class AIService:
     """AI Service using Ollama (free, local) or Hugging Face Inference API"""
     
     def __init__(self):
-        self.service_type = os.getenv('AI_SERVICE', 'ollama').lower()
+        requested_service = os.getenv('AI_SERVICE', 'local_llm').lower().strip()
+        if requested_service in ('', 'local', 'local_llm', 'rag', 'ollama'):
+            self.service_type = 'local_llm'
+        else:
+            self.service_type = requested_service
         self.ollama_base_url = os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434')
         self.ollama_model = os.getenv('OLLAMA_MODEL', 'codellama:13b')
         self.huggingface_api_key = os.getenv('HUGGINGFACE_API_KEY', '')
+        self._rag_instance = None
         
     def _build_ollama_prompt(self, task: str, context: str, java_code: Optional[str] = None) -> str:
         """Build prompt for Ollama/Codellama with Java-specific context"""
@@ -44,6 +48,8 @@ Task: {task}
             return self._generate_with_ollama(prompt, context)
         elif self.service_type == 'huggingface':
             return self._generate_with_huggingface(prompt, context)
+        elif self.service_type == 'local_llm':
+            return self._generate_with_local_llm(prompt, context)
         else:
             raise ValueError(f"Unknown AI service type: {self.service_type}")
     
@@ -66,6 +72,8 @@ Task: {task}
         elif self.service_type == 'huggingface':
             full_prompt = f"Explain this Java code:\n```java\n{java_code}\n```"
             return self._generate_with_huggingface(full_prompt)
+        elif self.service_type == 'local_llm':
+            return self._explain_with_local_llm(java_code)
         else:
             raise ValueError(f"Unknown AI service type: {self.service_type}")
     
@@ -84,7 +92,10 @@ Task: {task}
         task = f"Fix this Java {error_type}: {error_message}"
         context = f"Provide: 1) Specific fix suggestion, 2) Corrected code snippet, 3) Brief explanation"
         
-        if self.service_type == 'ollama':
+        if self.service_type == 'local_llm':
+            full_prompt = f"Fix Java {error_type}: {error_message}\n\nCode:\n{code_context}"
+            response = self._generate_with_local_llm(full_prompt)
+        elif self.service_type == 'ollama':
             full_prompt = self._build_ollama_prompt(task, context, code_context)
             response = self._generate_with_ollama(full_prompt)
         elif self.service_type == 'huggingface':
@@ -115,7 +126,11 @@ Task: {task}
         task = f"Suggest improvements for this Java code focusing on: {focus}"
         context = "For each improvement, provide: 1) Type of improvement, 2) Current code, 3) Improved code, 4) Reason"
         
-        if self.service_type == 'ollama':
+        if self.service_type == 'local_llm':
+            response = self._generate_with_local_llm(
+                f"Improve this Java code ({focus}). Return practical improvements with examples:\n{java_code}"
+            )
+        elif self.service_type == 'ollama':
             full_prompt = self._build_ollama_prompt(task, context, java_code)
             response = self._generate_with_ollama(full_prompt)
         elif self.service_type == 'huggingface':
@@ -127,13 +142,16 @@ Task: {task}
         # Parse improvements from response
         return self._parse_improvements(response, java_code)
     
-    def _generate_with_ollama(self, prompt: str) -> str:
+    def _generate_with_ollama(self, prompt: str, context: Optional[str] = None) -> str:
         """Generate response using Ollama API"""
         try:
+            final_prompt = prompt
+            if context:
+                final_prompt = f"{prompt}\n\nContext:\n{context}"
             url = f"{self.ollama_base_url}/api/generate"
             payload = {
                 "model": self.ollama_model,
-                "prompt": prompt,
+                "prompt": final_prompt,
                 "stream": False
             }
             
@@ -146,12 +164,15 @@ Task: {task}
         except requests.exceptions.RequestException as e:
             raise Exception(f"Ollama API error: {str(e)}")
     
-    def _generate_with_huggingface(self, prompt: str) -> str:
+    def _generate_with_huggingface(self, prompt: str, context: Optional[str] = None) -> str:
         """Generate response using Hugging Face Inference API"""
         if not self.huggingface_api_key:
             raise ValueError("Hugging Face API key not configured")
         
         try:
+            final_prompt = prompt
+            if context:
+                final_prompt = f"{prompt}\n\nContext:\n{context}"
             # Using a code generation model
             model = "bigcode/starcoder"  # or "microsoft/CodeBERT"
             url = f"https://api-inference.huggingface.co/models/{model}"
@@ -161,7 +182,7 @@ Task: {task}
             }
             
             payload = {
-                "inputs": prompt,
+                "inputs": final_prompt,
                 "parameters": {
                     "max_new_tokens": 500,
                     "temperature": 0.7
@@ -178,6 +199,46 @@ Task: {task}
             
         except requests.exceptions.RequestException as e:
             raise Exception(f"Hugging Face API error: {str(e)}")
+
+    def _get_rag(self):
+        if self._rag_instance is not None:
+            return self._rag_instance
+        repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+        rag_path = os.path.join(repo_root, "LLM", "Rag.py")
+        if not os.path.exists(rag_path):
+            raise FileNotFoundError(f"LLM module not found at {rag_path}")
+        spec = importlib.util.spec_from_file_location("codemaster_rag", rag_path)
+        if spec is None or spec.loader is None:
+            raise RuntimeError("Unable to load LLM RAG module")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self._rag_instance = module.RAG()
+        return self._rag_instance
+
+    def _generate_with_local_llm(self, prompt: str, context: Optional[str] = None) -> str:
+        rag = self._get_rag()
+        query = (
+            "Generate Java code for this request. "
+            "Prioritize reading user input from stdin using Scanner unless user asks for hardcoded values:\n"
+            f"{prompt.strip()}"
+        )
+        if context:
+            query += f"\n\nAdditional context:\n{context.strip()}"
+        raw = rag.ask(query)
+        code = self._sanitize_generated_code(self._extract_code_snippet(raw) or raw)
+        if self._looks_like_java_code(code):
+            return code
+        retry = rag.ask(
+            f"{query}\n\nReturn only compilable Java code. "
+            f"No markdown, no Topic line, no Status line, no explanation."
+        )
+        retry_code = self._sanitize_generated_code(self._extract_code_snippet(retry) or retry)
+        return retry_code if retry_code else code
+
+    def _explain_with_local_llm(self, java_code: str) -> str:
+        rag = self._get_rag()
+        raw = rag.explain_code(java_code)
+        return self._format_explanation_as_bullets(raw)
     
     def _extract_code_snippet(self, text: str) -> str:
         """Extract code block from AI response"""
@@ -191,7 +252,63 @@ Task: {task}
         if code_match:
             return code_match.group(1)
         
-        return text[:300]  # Fallback: first 300 chars
+        return text.strip()
+
+    def _sanitize_generated_code(self, text: str) -> str:
+        import re
+        if not text:
+            return ""
+        cleaned = text.replace("```java", "").replace("```", "").strip()
+        cleaned_lines = []
+        for line in cleaned.splitlines():
+            stripped = line.strip()
+            lowered = stripped.lower()
+            if lowered.startswith("topic:"):
+                continue
+            if lowered.startswith("status:"):
+                continue
+            if lowered.startswith("here's a java solution for your request"):
+                continue
+            if lowered.startswith("answer:"):
+                continue
+            cleaned_lines.append(line)
+        cleaned = "\n".join(cleaned_lines).strip()
+        cleaned = re.sub(r'^\s*java\s*$', '', cleaned, flags=re.IGNORECASE | re.MULTILINE).strip()
+        return cleaned
+
+    def _looks_like_java_code(self, text: str) -> bool:
+        if not text:
+            return False
+        markers = ["public class", "class ", "public static void main", "System.out", ";", "{", "}"]
+        score = sum(1 for marker in markers if marker in text)
+        return score >= 2
+
+    def _format_explanation_as_bullets(self, text: str) -> str:
+        import re
+        if not text:
+            return ""
+        normalized = text.replace("\r\n", "\n").strip()
+        if not normalized:
+            return ""
+        chunks = [chunk.strip() for chunk in re.split(r'(?i)(?=line\s*\d+\s*:)', normalized) if chunk.strip()]
+        items = []
+        if len(chunks) > 1 or re.match(r'(?i)^line\s*\d+\s*:', normalized):
+            for chunk in chunks:
+                cleaned = re.sub(r'(?i)^line\s*\d+\s*:\s*', '', chunk).strip()
+                if cleaned:
+                    items.append(cleaned)
+        else:
+            for line in normalized.split("\n"):
+                cleaned = line.strip()
+                if not cleaned:
+                    continue
+                cleaned = re.sub(r'^[\-\*\u2022]\s*', '', cleaned).strip()
+                cleaned = re.sub(r'(?i)^line\s*\d+\s*:\s*', '', cleaned).strip()
+                if cleaned:
+                    items.append(cleaned)
+        if not items:
+            return normalized
+        return "\n".join([f"- {item}" for item in items])
     
     def _extract_fix_suggestion(self, text: str) -> str:
         """Extract fix suggestion from AI response"""

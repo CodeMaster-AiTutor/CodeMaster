@@ -7,6 +7,7 @@ from app.models.settings import UserSettings
 from app.models.featured_course import FeaturedCourse
 from app.models.learning_path import LearningPathConcept, LearningPathSubtopic
 from app.models.theory_course import TheoryCoursePage
+from app.models.generator_chat import GeneratorChat, GeneratorChatMessage
 
 __all__ = [
     'User',
@@ -22,6 +23,8 @@ __all__ = [
     'LearningPathConcept',
     'LearningPathSubtopic',
     'TheoryCoursePage',
+    'GeneratorChat',
+    'GeneratorChatMessage',
 ]
 
 # Import models for Flask-Migrate to detect them

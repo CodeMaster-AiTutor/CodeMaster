@@ -100,3 +100,6 @@ htmlcov/
 # Backup files
 *.bak
 *.backup
+
+# Local LLM model artifacts
+LLM/*.gguf

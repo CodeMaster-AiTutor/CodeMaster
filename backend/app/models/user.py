@@ -34,6 +34,7 @@ class User(db.Model):
     # Relationships
     code_submissions = db.relationship('CodeSubmission', backref='user', lazy=True, cascade='all, delete-orphan')
     assessments = db.relationship('Assessment', backref='user', lazy=True, cascade='all, delete-orphan')
+    generator_chats = db.relationship('GeneratorChat', backref='user', lazy=True, cascade='all, delete-orphan')
     
     def set_password(self, password):
         """Hash and set password"""
