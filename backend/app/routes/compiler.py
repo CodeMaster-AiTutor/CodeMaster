@@ -61,7 +61,9 @@ def execute_code(current_user):
                 ai_suggestions = ai_service.suggest_error_fix(
                     error_message=first_error["message"],
                     code_context=java_code,
-                    error_type=first_error.get("type", "compilation_error")
+                    error_type=first_error.get("type", "compilation_error"),
+                    error_line=first_error.get("line"),
+                    error_column=first_error.get("column")
                 )
                 
                 # Add AI suggestions to error object
@@ -101,6 +103,7 @@ def execute_code(current_user):
             "success": result["success"],
             "output": result.get("output", ""),
             "errors": result.get("errors", []),
+            "root_error_lines": result.get("root_error_lines", []),
             "improvements": improvements or [],
             "execution_time": result.get("execution_time", 0),
             "compilation_time": result.get("compilation_time", 0),
@@ -247,17 +250,68 @@ def suggest_fix(current_user):
         error_message = data.get('error', '')
         code_context = data.get('code_context', '')
         error_type = data.get('error_type', 'compilation_error')
+        error_line = data.get('error_line')
+        error_column = data.get('error_column')
         
         if not error_message or not code_context:
             return jsonify({'error': 'Error message and code context are required'}), 400
         
+        resolved_error = error_message
+        resolved_line = int(error_line) if isinstance(error_line, int) else None
+        resolved_column = int(error_column) if isinstance(error_column, int) else None
+        compile_errors = []
+        try:
+            executor = get_java_executor()
+            analysis = executor.compile_and_execute(code_context)
+            compile_errors = analysis.get("errors", []) if isinstance(analysis, dict) else []
+            if compile_errors:
+                matched = None
+                if isinstance(resolved_line, int) and resolved_line > 0:
+                    matched = next((err for err in compile_errors if err.get("line") == resolved_line), None)
+                if matched is None:
+                    matched = next((err for err in compile_errors if (err.get("message") or "") == error_message), None)
+                if matched is None:
+                    matched = compile_errors[0]
+                resolved_error = matched.get("message") or resolved_error
+                if isinstance(matched.get("line"), int):
+                    resolved_line = matched.get("line")
+                if isinstance(matched.get("column"), int):
+                    resolved_column = matched.get("column")
+        except Exception:
+            pass
+
         ai_service = get_ai_service()
-        suggestion = ai_service.suggest_error_fix(error_message, code_context, error_type)
+        suggestion = ai_service.suggest_error_fix(
+            resolved_error,
+            code_context,
+            error_type,
+            error_line=resolved_line,
+            error_column=resolved_column
+        )
         
         return jsonify(suggestion), 200
         
     except Exception as e:
         return jsonify({'error': 'Failed to generate fix suggestion', 'message': str(e)}), 500
+
+@compiler_bp.route('/root-error-lines', methods=['POST'])
+@token_required
+def root_error_lines(current_user):
+    try:
+        data = request.get_json() or {}
+        code_context = (data.get('code_context') or '').strip()
+        provided_errors = data.get('errors') or []
+        if not code_context:
+            return jsonify({'error': 'Code context is required'}), 400
+        executor = get_java_executor()
+        if provided_errors:
+            errors = [err for err in provided_errors if isinstance(err, dict)]
+            root_lines = executor._extract_root_error_lines(errors, code_context)
+            return jsonify(root_lines), 200
+        analysis = executor.compile_and_execute(code_context)
+        return jsonify(analysis.get("root_error_lines", [])), 200
+    except Exception as e:
+        return jsonify({'error': 'Failed to compute root error lines', 'message': str(e)}), 500
 
 @compiler_bp.route('/improve-code', methods=['POST'])
 @token_required

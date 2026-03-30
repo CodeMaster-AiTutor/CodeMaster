@@ -291,6 +291,51 @@ Code:
 Answer:
 """
 
+def build_error_explanation_prompt(
+    error_message,
+    code_text,
+    error_type="compilation_error",
+    error_line=None,
+    error_column=None,
+    error_line_text=""
+):
+    return f"""
+You are an expert Java compiler error assistant.
+
+Task:
+Explain only the specific error in the given Java code.
+Do not explain the full program flow.
+Use simple language.
+Do not use bullet points.
+
+Strict Output Format:
+Error Summary:
+<short 1-2 sentence explanation of what the error is>
+
+Suggested Fix:
+<detailed explanation of why this error happened in this code and how to resolve it with exact correction guidance>
+
+Error Type:
+{error_type}
+
+Error Line:
+{error_line if isinstance(error_line, int) and error_line > 0 else "unknown"}
+
+Error Column:
+{error_column if isinstance(error_column, int) and error_column > 0 else "unknown"}
+
+Error Line Text:
+{error_line_text or "unknown"}
+
+Compiler Error:
+{error_message}
+
+Java Code:
+{code_text}
+
+Answer:
+"""
+
 # =========================
 # GENERATE RESPONSE
 # =========================
@@ -385,6 +430,34 @@ class RAG:
         print("🤖 Generating...")
         try:
             return generate(build_code_explanation_prompt(code_text))
+        except Exception as e:
+            return f"Error: {str(e)}"
+
+    def explain_error(
+        self,
+        error_message,
+        code_text,
+        error_type="compilation_error",
+        error_line=None,
+        error_column=None,
+        error_line_text=""
+    ):
+        if not error_message or not str(error_message).strip():
+            return "Please provide the compiler error"
+        if not code_text or not str(code_text).strip():
+            return "Please provide the code"
+        print("🤖 Generating...")
+        try:
+            return generate(
+                build_error_explanation_prompt(
+                    error_message,
+                    code_text,
+                    error_type,
+                    error_line=error_line,
+                    error_column=error_column,
+                    error_line_text=error_line_text
+                )
+            )
         except Exception as e:
             return f"Error: {str(e)}"
 

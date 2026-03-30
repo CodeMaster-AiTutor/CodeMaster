@@ -31,19 +31,8 @@ const Explainer = () => {
     try {
       // Call backend API for code explanation
       const response = await explainerAPI.explainCode(code, 'java');
-      
-      // Format explanation with breakdown if available
-      let formattedExplanation = response.explanation || '';
-      
-      if (response.breakdown && response.breakdown.length > 0) {
-        formattedExplanation += '\n\n**Line-by-Line Breakdown:**\n\n';
-        response.breakdown.forEach(item => {
-          formattedExplanation += `**Line ${item.line}: ${item.code.trim()}**\n`;
-          formattedExplanation += `${item.explanation}\n\n`;
-        });
-      }
-      
-      setExplanation(formattedExplanation);
+
+      setExplanation(response.explanation || '');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to explain code. Please try again.';
       if (errorMessage.toLowerCase().includes('session expired')) {

@@ -10,7 +10,9 @@ import {
   Terminal as TerminalIcon,
   Code2,
   Trash2,
-  Loader2
+  Loader2,
+  Wrench,
+  X
 } from 'lucide-react';
 import Editor from '@monaco-editor/react';
 import type { OnMount } from '@monaco-editor/react';
@@ -72,146 +74,10 @@ type CompilerError = {
   column?: number;
   message?: string;
   file?: string;
-};
-
-const normalizeLineForMatch = (line: string) => {
-  const cleaned: string[] = [];
-  let inString = false;
-  let inChar = false;
-  let escape = false;
-  let stringLen = 0;
-  let charLen = 0;
-  for (const ch of line) {
-    if (inString) {
-      if (escape) {
-        escape = false;
-        stringLen += 1;
-        continue;
-      }
-      if (ch === '\\') {
-        escape = true;
-        stringLen += 1;
-        continue;
-      }
-      if (ch === '"') {
-        cleaned.push(`"<str:${stringLen}>"`);
-        inString = false;
-        stringLen = 0;
-        continue;
-      }
-      stringLen += 1;
-      continue;
-    }
-    if (inChar) {
-      if (escape) {
-        escape = false;
-        charLen += 1;
-        continue;
-      }
-      if (ch === '\\') {
-        escape = true;
-        charLen += 1;
-        continue;
-      }
-      if (ch === "'") {
-        cleaned.push(`'<char:${charLen}>'`);
-        inChar = false;
-        charLen = 0;
-        continue;
-      }
-      charLen += 1;
-      continue;
-    }
-    if (ch === '"') {
-      inString = true;
-      stringLen = 0;
-      continue;
-    }
-    if (ch === "'") {
-      inChar = true;
-      charLen = 0;
-      continue;
-    }
-    cleaned.push(ch);
-  }
-  if (inString) {
-    cleaned.push(`"<str:${stringLen}>"`);
-  }
-  if (inChar) {
-    cleaned.push(`'<char:${charLen}>'`);
-  }
-  return cleaned.join('').replace(/\s+/g, '').trim();
-};
-
-const normalizeLineForFuzzy = (line: string) => line.replace(/\s+/g, '').trim();
-
-const buildLineIndex = (code: string) => {
-  const normalized: string[] = [];
-  const normalizedMap = new Map<string, number[]>();
-  const fuzzy: string[] = [];
-  const fuzzyMap = new Map<string, number[]>();
-  const lines = code.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-  lines.forEach((line, index) => {
-    const normalizedLine = normalizeLineForMatch(line);
-    const fuzzyLine = normalizeLineForFuzzy(line);
-    normalized.push(normalizedLine);
-    fuzzy.push(fuzzyLine);
-    if (normalizedLine) {
-      const list = normalizedMap.get(normalizedLine) ?? [];
-      list.push(index + 1);
-      normalizedMap.set(normalizedLine, list);
-    }
-    if (fuzzyLine) {
-      const list = fuzzyMap.get(fuzzyLine) ?? [];
-      list.push(index + 1);
-      fuzzyMap.set(fuzzyLine, list);
-    }
-  });
-  return { normalized, normalizedMap, fuzzy, fuzzyMap };
-};
-
-const findBestLineMatch = (
-  normalizedContext: string,
-  fuzzyContext: string,
-  reportedLine: number,
-  normalized: string[],
-  normalizedMap: Map<string, number[]>,
-  fuzzy: string[],
-  fuzzyMap: Map<string, number[]>
-) => {
-  if (normalizedContext) {
-    if (reportedLine > 0 && reportedLine <= normalized.length) {
-      if (normalized[reportedLine - 1] === normalizedContext) {
-        return reportedLine;
-      }
-    }
-    const candidates = normalizedMap.get(normalizedContext);
-    if (candidates && candidates.length > 0) {
-      if (reportedLine > 0) {
-        return candidates.reduce((best, value) => (
-          Math.abs(value - reportedLine) < Math.abs(best - reportedLine) ? value : best
-        ), candidates[0]);
-      }
-      return candidates[0];
-    }
-  }
-  if (fuzzyContext) {
-    if (reportedLine > 0 && reportedLine <= fuzzy.length) {
-      if (fuzzy[reportedLine - 1] === fuzzyContext) {
-        return reportedLine;
-      }
-    }
-    const candidates = fuzzyMap.get(fuzzyContext);
-    if (candidates && candidates.length > 0) {
-      if (reportedLine > 0) {
-        return candidates.reduce((best, value) => (
-          Math.abs(value - reportedLine) < Math.abs(best - reportedLine) ? value : best
-        ), candidates[0]);
-      }
-      return candidates[0];
-    }
-  }
-  return reportedLine;
+  type?: string;
+  ai_fix_suggestion?: string;
+  corrected_code?: string;
+  explanation?: string;
 };
 
 const buildPointer = (lineText: string, column: number) => {
@@ -281,11 +147,45 @@ const buildErrorBlock = (payload: {
   return lines.join('\n');
 };
 
+const reduceParsedCompilerErrors = <T extends { file?: string; line: number; message: string }>(items: T[]) => {
+  const deduped = items.filter((item, index, arr) =>
+    index === arr.findIndex((other) =>
+      (other.file || '') === (item.file || '')
+      && other.line === item.line
+      && other.message.trim().toLowerCase() === item.message.trim().toLowerCase()
+    )
+  );
+  const grouped = new Map<string, T[]>();
+  deduped.forEach((item) => {
+    const key = `${item.file || ''}:${item.line}`;
+    const list = grouped.get(key) || [];
+    list.push(item);
+    grouped.set(key, list);
+  });
+  const reduced: T[] = [];
+  grouped.forEach((group) => {
+    const hasNotStatement = group.some((entry) => entry.message.toLowerCase().includes('not a statement'));
+    group.forEach((entry) => {
+      const isSemicolonExpected = entry.message.toLowerCase().includes("';' expected");
+      if (hasNotStatement && isSemicolonExpected) {
+        return;
+      }
+      reduced.push(entry);
+    });
+  });
+  return reduced;
+};
+
 const parseJavacOutput = (output: string, code: string) => {
   const lines = output.split(/\r?\n/);
-  const { normalized, normalizedMap, fuzzy, fuzzyMap } = buildLineIndex(code);
   const sourceLines = code.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-  const results: string[] = [];
+  const parsed: Array<{
+    file?: string;
+    line: number;
+    column: number;
+    message: string;
+    codeLine?: string;
+  }> = [];
   for (let index = 0; index < lines.length; index += 1) {
     const lineText = lines[index].trim();
     if (!lineText.toLowerCase().includes('error:')) {
@@ -300,27 +200,21 @@ const parseJavacOutput = (output: string, code: string) => {
     const caretLine = lines[index + 2] ?? '';
     const caretIndex = caretLine.indexOf('^');
     const column = caretIndex >= 0 ? caretIndex + 1 : 0;
-    const normalizedContext = normalizeLineForMatch(contextLine);
-    const fuzzyContext = normalizeLineForFuzzy(contextLine);
     let lineNumber = Number.parseInt(lineNum, 10) || 0;
-    lineNumber = findBestLineMatch(
-      normalizedContext,
-      fuzzyContext,
-      lineNumber,
-      normalized,
-      normalizedMap,
-      fuzzy,
-      fuzzyMap
-    );
+    if (lineNumber < 1 || lineNumber > sourceLines.length) {
+      lineNumber = 0;
+    }
     const codeLine = lineNumber > 0 ? sourceLines[lineNumber - 1] : contextLine;
-    results.push(buildErrorBlock({
+    parsed.push({
       file: filename,
       line: lineNumber,
       column,
       message,
       codeLine
-    }));
+    });
   }
+  const reducedParsed = reduceParsedCompilerErrors(parsed);
+  const results = reducedParsed.map((item) => buildErrorBlock(item));
   if (results.length > 0) {
     return results.join('\n');
   }
@@ -338,19 +232,21 @@ const formatErrors = (errors?: CompilerError[], code?: string) => {
     }
   }
   const sourceLines = code ? code.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n') : [];
-  return errors.map((err) => {
+  const parsed = errors.map((err) => {
     const line = typeof err.line === 'number' ? err.line : 0;
     const column = typeof err.column === 'number' ? err.column : 0;
     const message = err.message?.trim() || 'Compilation failed';
     const codeLine = line > 0 ? sourceLines[line - 1] : '';
-    return buildErrorBlock({
+    return {
       file: err.file,
       line,
       column,
       message,
       codeLine
-    });
-  }).join('\n');
+    };
+  });
+  const reduced = reduceParsedCompilerErrors(parsed);
+  return reduced.map((item) => buildErrorBlock(item)).join('\n');
 };
 
 const toScopeSuffix = (scope?: string) => {
@@ -710,6 +606,11 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [executionStatus, setExecutionStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [compilerErrors, setCompilerErrors] = useState<CompilerError[]>([]);
+  const [selectedError, setSelectedError] = useState<CompilerError | null>(null);
+  const [isErrorPanelOpen, setIsErrorPanelOpen] = useState(false);
+  const [isExplainingError, setIsExplainingError] = useState(false);
+  const [errorExplainMessage, setErrorExplainMessage] = useState('');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [terminalSessionId, setTerminalSessionId] = useState<string | null>(null);
   const [terminalWsUrl, setTerminalWsUrl] = useState('');
@@ -720,6 +621,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
   const monacoRef = useRef<Parameters<OnMount>[1] | null>(null);
   const errorDetectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const scrollPositionRef = useRef(0);
+  const errorWidgetsRef = useRef<Array<MonacoEditor.IContentWidget>>([]);
   const selectionRef = useRef<{start: number; end: number}>({ start: 0, end: 0 });
   const saveTimerRef = useRef<number | null>(null);
   const lastSavedStateRef = useRef<Omit<CompilerState, 'version' | 'compressed' | 'updatedAt'> | null>(null);
@@ -863,6 +765,115 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
     
     return errors;
   };
+
+  const actionableErrors = useMemo(() => {
+    const seen = new Set<number>();
+    const rows = (compilerErrors || [])
+      .filter((err) => typeof err.line === 'number' && (err.line ?? 0) > 0 && !!err.message)
+      .sort((a, b) => (a.line ?? 0) - (b.line ?? 0));
+    const unique: CompilerError[] = [];
+    for (const err of rows) {
+      const line = err.line as number;
+      if (seen.has(line)) continue;
+      seen.add(line);
+      unique.push(err);
+    }
+    return unique;
+  }, [compilerErrors]);
+
+  const handleErrorLineAction = useCallback(async (error: CompilerError) => {
+    setSelectedError(error);
+    setIsErrorPanelOpen(true);
+    setErrorExplainMessage('');
+    if (error.explanation && error.explanation.trim()) {
+      return;
+    }
+    if (!error.message || !codeRef.current.trim()) {
+      return;
+    }
+    setIsExplainingError(true);
+    try {
+      const ai = await compilerAPI.suggestFix(
+        error.message,
+        codeRef.current,
+        error.type || 'compilation_error',
+        error.line,
+        error.column
+      );
+      const enriched: CompilerError = {
+        ...error,
+        ai_fix_suggestion: ai.fix_suggestion || error.ai_fix_suggestion,
+        corrected_code: ai.corrected_code || error.corrected_code,
+        explanation: ai.explanation || error.explanation,
+      };
+      setSelectedError(enriched);
+      setCompilerErrors((prev) => prev.map((item) =>
+        item.line === error.line && item.column === error.column && (item.message || '') === (error.message || '')
+          ? { ...item, ...enriched }
+          : item
+      ));
+    } catch (e) {
+      setErrorExplainMessage(e instanceof Error ? e.message : 'Failed to fetch AI explanation');
+    } finally {
+      setIsExplainingError(false);
+    }
+  }, []);
+
+  const clearErrorWidgets = useCallback(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    for (const widget of errorWidgetsRef.current) {
+      editor.removeContentWidget(widget);
+    }
+    errorWidgetsRef.current = [];
+  }, []);
+
+  const renderErrorWidgets = useCallback(() => {
+    clearErrorWidgets();
+    const editor = editorRef.current;
+    const monaco = monacoRef.current;
+    const model = editor?.getModel();
+    if (!editor || !monaco || !model || actionableErrors.length === 0) {
+      return;
+    }
+    const lineCount = model.getLineCount();
+    const widgets: MonacoEditor.IContentWidget[] = [];
+    actionableErrors.forEach((error, index) => {
+      const lineNumber = error.line as number;
+      if (lineNumber < 1 || lineNumber > lineCount) return;
+      const node = document.createElement('button');
+      node.type = 'button';
+      node.className = 'compiler-error-line-btn';
+      node.textContent = 'Fix';
+      node.onclick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        void handleErrorLineAction(error);
+      };
+      const id = `compiler-error-line-btn-${lineNumber}-${index}`;
+      const widget: MonacoEditor.IContentWidget = {
+        getId: () => id,
+        getDomNode: () => node,
+        getPosition: () => ({
+          position: {
+            lineNumber,
+            column: model.getLineMaxColumn(lineNumber),
+          },
+          preference: [monaco.editor.ContentWidgetPositionPreference.EXACT],
+        }),
+      };
+      editor.addContentWidget(widget);
+      widgets.push(widget);
+    });
+    errorWidgetsRef.current = widgets;
+  }, [actionableErrors, clearErrorWidgets, handleErrorLineAction]);
+
+  useEffect(() => {
+    renderErrorWidgets();
+    return () => {
+      clearErrorWidgets();
+    };
+  }, [renderErrorWidgets, clearErrorWidgets, code]);
 
   // Ultra-simplified code change handler
   const scheduleSave = useCallback((nextCode: string, nextSelection: { start: number; end: number }, nextScrollTop: number) => {
@@ -1077,7 +1088,8 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
       scrollPositionRef.current = editor.getScrollTop();
       scheduleSave(codeRef.current, selectionRef.current, scrollPositionRef.current);
     });
-  }, [editorTheme, scheduleSave, updateSelectionFromEditor]);
+    renderErrorWidgets();
+  }, [editorTheme, scheduleSave, updateSelectionFromEditor, renderErrorWidgets]);
 
   // Fullscreen functions
   const exitFullscreen = useCallback(() => {
@@ -1320,6 +1332,9 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
     setIsRunning(true);
     setExecutionStatus('idle');
     setOutput('');
+    setCompilerErrors([]);
+    setSelectedError(null);
+    setIsErrorPanelOpen(false);
     saveOutputState('', persistenceKeys.outputKey);
     setOutput('Compiling...\r\n');
     saveOutputState('Compiling...\r\n', persistenceKeys.outputKey);
@@ -1348,6 +1363,13 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
         });
       } else {
         console.log('[Compiler] Session failed:', result.errors);
+        const rawErrors = (result.errors || []) as CompilerError[];
+        const normalizedErrors = rawErrors.map((err) => ({
+          ...err,
+          line: typeof err.line === 'number' ? err.line : 0,
+          message: err.message?.trim() || 'Compilation failed',
+        }));
+        setCompilerErrors(reduceParsedCompilerErrors(normalizedErrors));
         const errorMessage = formatErrors(result.errors, currentCode);
         setOutput(errorMessage);
         setExecutionStatus('error');
@@ -1362,6 +1384,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
       console.error('[Compiler] Error:', error);
       const message = `Execution error: ${error instanceof Error ? error.message : 'Unknown error'}`;
       setOutput(message);
+      setCompilerErrors([]);
       setExecutionStatus('error');
       saveOutputState(message, persistenceKeys.outputKey);
       toast({
@@ -1389,6 +1412,9 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
 
   const handleClearOutput = () => {
     setOutput('');
+    setCompilerErrors([]);
+    setSelectedError(null);
+    setIsErrorPanelOpen(false);
     saveOutputState('', persistenceKeys.outputKey);
     setExecutionStatus('idle');
     toast({
@@ -1409,6 +1435,9 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
     codeRef.current = '';
     setCode('');
     setOutput('');
+    setCompilerErrors([]);
+    setSelectedError(null);
+    setIsErrorPanelOpen(false);
     selectionRef.current = { start: 0, end: 0 };
     scrollPositionRef.current = 0;
     const editor = editorRef.current;
@@ -1450,6 +1479,22 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
 
   const compilerContent = (
     <div ref={compilerRef}>
+      <style>{`
+        .compiler-error-line-btn {
+          background: rgba(239, 68, 68, 0.15);
+          border: 1px solid rgba(239, 68, 68, 0.45);
+          color: #fecaca;
+          border-radius: 6px;
+          font-size: 10px;
+          line-height: 1;
+          padding: 2px 6px;
+          margin-left: 10px;
+          cursor: pointer;
+        }
+        .compiler-error-line-btn:hover {
+          background: rgba(239, 68, 68, 0.28);
+        }
+      `}</style>
       <div className={`${isFullscreen ? 'h-screen bg-black overflow-y-auto' : 'min-h-screen'} bg-gradient-to-br from-background via-background to-background/95`}> 
         <div className={`${isFullscreen ? 'p-4' : 'pt-1 px-1 pb-1 sm:pt-1 sm:px-1 sm:pb-1 md:pt-1 md:px-2 md:pb-2 lg:pt-1 lg:px-2 lg:pb-2'}`}> 
           <div className={`${isFullscreen ? 'max-w-full' : 'max-w-7xl'} mx-auto space-y-1`}> 
@@ -1566,6 +1611,51 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
                           </div>
                         )}
                         <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-primary/5 via-transparent to-accent/5 opacity-30"></div> 
+                        <div
+                          className={`absolute top-0 right-0 h-full w-[360px] max-w-[92%] bg-card/95 border-l border-primary/20 shadow-2xl transition-transform duration-300 z-40 ${
+                            isErrorPanelOpen ? 'translate-x-0' : 'translate-x-full'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between p-4 border-b border-border/20">
+                            <div className="flex items-center gap-2">
+                              <Wrench className="w-4 h-4 text-primary" />
+                              <span className="text-sm font-semibold">Error Helper</span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0"
+                              onClick={() => setIsErrorPanelOpen(false)}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <div className="p-4 space-y-4 text-sm overflow-y-auto h-[calc(100%-60px)]">
+                            {selectedError ? (
+                              <>
+                                <div className="text-muted-foreground">
+                                  {typeof selectedError.line === 'number' ? `Line ${selectedError.line}` : 'Line unknown'}
+                                  {typeof selectedError.column === 'number' && (selectedError.column ?? 0) > 0 ? `, Col ${selectedError.column}` : ''}
+                                </div>
+                                <div className="font-medium text-foreground">{selectedError.message || 'Compilation error'}</div>
+                                {isExplainingError ? (
+                                  <div className="text-muted-foreground">Generating detailed AI explanation...</div>
+                                ) : null}
+                                {errorExplainMessage ? (
+                                  <div className="text-destructive text-xs">{errorExplainMessage}</div>
+                                ) : null}
+                                {selectedError.ai_fix_suggestion ? (
+                                  <div>
+                                    <div className="text-xs text-muted-foreground mb-1">Suggested Fix</div>
+                                    <div className="text-foreground whitespace-pre-wrap">{selectedError.ai_fix_suggestion}</div>
+                                  </div>
+                                ) : null}
+                              </>
+                            ) : (
+                              <div className="text-muted-foreground">Select an error line button to view details.</div>
+                            )}
+                          </div>
+                        </div>
                       </div> 
                     </div> 
                   </div> 
