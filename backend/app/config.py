@@ -2,7 +2,8 @@ import os
 from datetime import timedelta
 from dotenv import load_dotenv
 
-load_dotenv()
+_ENV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.env'))
+load_dotenv(dotenv_path=_ENV_PATH, override=True)
 
 class Config:
     """Base configuration"""

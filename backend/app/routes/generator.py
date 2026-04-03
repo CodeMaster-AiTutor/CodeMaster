@@ -3,6 +3,7 @@ from app import db
 from app.middleware.auth import token_required
 from app.models.generator_chat import GeneratorChat, GeneratorChatMessage
 from app.services.ai_service import get_ai_service
+from app.services.skill_points_service import consume_generation_points, GENERATION_COST
 import re
 
 generator_bp = Blueprint('generator', __name__)
@@ -68,6 +69,8 @@ def generate_code(current_user):
             return jsonify({'error': 'Prompt is required'}), 400
         if _is_non_java_language_request(prompt):
             return jsonify({'error': 'Only Java Language Supported. '}), 400
+        if int(current_user.total_points or 0) < GENERATION_COST:
+            return jsonify({'error': f'Insufficient skill points. {GENERATION_COST} points required per generation.'}), 402
 
         chat = _get_user_chat(current_user.id, chat_id)
         if chat is None:
@@ -90,6 +93,9 @@ def generate_code(current_user):
         # Generate code using AI service
         ai_service = get_ai_service()
         generated_code = ai_service.generate_code(prompt, merged_context)
+        spent_ok, spent_error, remaining_points = consume_generation_points(current_user, prompt)
+        if not spent_ok:
+            return jsonify({'error': spent_error}), 402
 
         db.session.add(GeneratorChatMessage(
             chat_id=chat.id,
@@ -105,6 +111,8 @@ def generate_code(current_user):
             'prompt': prompt,
             'chat_id': chat.id,
             'chat_title': chat.title,
+            'points_spent': GENERATION_COST,
+            'remaining_points': int(current_user.total_points or remaining_points),
         }), 200
         
     except Exception as e:
@@ -126,6 +134,8 @@ def chat(current_user):
             return jsonify({'error': 'Message is required'}), 400
         if _is_non_java_language_request(message):
             return jsonify({'error': 'Only Java Language Supported. '}), 400
+        if int(current_user.total_points or 0) < GENERATION_COST:
+            return jsonify({'error': f'Insufficient skill points. {GENERATION_COST} points required per generation.'}), 402
 
         chat = _get_user_chat(current_user.id, chat_id)
         if chat is None:
@@ -148,6 +158,9 @@ def chat(current_user):
         # Generate response
         ai_service = get_ai_service()
         response = ai_service.generate_code(message, context)
+        spent_ok, spent_error, remaining_points = consume_generation_points(current_user, message)
+        if not spent_ok:
+            return jsonify({'error': spent_error}), 402
 
         db.session.add(GeneratorChatMessage(
             chat_id=chat.id,
@@ -162,6 +175,8 @@ def chat(current_user):
             'role': 'assistant',
             'chat_id': chat.id,
             'chat_title': chat.title,
+            'points_spent': GENERATION_COST,
+            'remaining_points': int(current_user.total_points or remaining_points),
         }), 200
         
     except Exception as e:

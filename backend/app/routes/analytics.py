@@ -3,6 +3,7 @@ from app import db
 from app.models.code_submission import CodeSubmission
 from app.models.assessment import Assessment
 from app.models.analytics import AnalyticsEvent
+from app.models.practice import PracticeAttempt
 from app.middleware.auth import token_required
 from datetime import datetime, timedelta
 from sqlalchemy import func, and_
@@ -38,17 +39,32 @@ def get_overview(current_user):
             )
         ).count()
         
-        # Calculate streak (consecutive days with activity)
-        streak = _calculate_streak(current_user.id)
+        streak = int(current_user.streak_days or 0)
+        problems_solved = db.session.query(func.count(func.distinct(PracticeAttempt.problem_id))).filter(
+            PracticeAttempt.user_id == current_user.id,
+            PracticeAttempt.status == 'passed'
+        ).scalar() or 0
+        week_start_date = datetime.utcnow().date() - timedelta(days=datetime.utcnow().date().weekday())
+        week_start = datetime.combine(week_start_date, datetime.min.time())
+        weekly_goal = 5
+        weekly_progress_count = db.session.query(func.count(func.distinct(PracticeAttempt.problem_id))).filter(
+            PracticeAttempt.user_id == current_user.id,
+            PracticeAttempt.status == 'passed',
+            PracticeAttempt.submitted_at >= week_start
+        ).scalar() or 0
+        weekly_progress = min(int(weekly_progress_count), weekly_goal)
         
         return jsonify({
             'total_submissions': total_submissions,
             'successful_submissions': successful_submissions,
+            'problems_solved': int(problems_solved),
             'success_rate': success_rate,
             'average_time': average_time,
             'total_assessments': total_assessments,
             'passed_assessments': passed_assessments,
             'streak': streak,
+            'weekly_goal': weekly_goal,
+            'weekly_progress': weekly_progress,
             'skill_level': current_user.skill_level,
             'total_points': current_user.total_points
         }), 200

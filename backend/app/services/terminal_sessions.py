@@ -279,12 +279,9 @@ class TerminalSessionManager:
 
     def _parse_compiler_errors(self, error_output: str, java_code: Optional[str] = None) -> list:
         errors = []
-        line_keys = []
-        index_map = {}
-        fuzzy_keys = []
-        fuzzy_map = {}
+        source_line_count = 0
         if java_code:
-            line_keys, index_map, fuzzy_keys, fuzzy_map = self._build_line_index(java_code)
+            source_line_count = len(java_code.replace('\r\n', '\n').replace('\r', '\n').split('\n'))
         cleaned_output = self._strip_ansi(error_output)
         lines = cleaned_output.splitlines()
         index = 0
@@ -300,22 +297,9 @@ class TerminalSessionManager:
                         caret_index = lines[index + 2].find('^')
                         if caret_index != -1:
                             column = caret_index + 1
-                    normalized_context = ''
-                    fuzzy_context = ''
-                    if java_code and index + 1 < len(lines):
-                        normalized_context = self._normalize_line_for_match(lines[index + 1])
-                        fuzzy_context = self._normalize_line_for_fuzzy(lines[index + 1])
                     reported_line = int(line_num)
-                    if normalized_context:
-                        reported_line = self._find_best_line_match(
-                            normalized_context,
-                            fuzzy_context,
-                            reported_line,
-                            line_keys,
-                            index_map,
-                            fuzzy_keys,
-                            fuzzy_map
-                        )
+                    if source_line_count > 0 and (reported_line < 1 or reported_line > source_line_count):
+                        reported_line = 0
                     errors.append({
                         "type": "compilation_error",
                         "line": reported_line,
@@ -579,11 +563,10 @@ class TerminalSessionManager:
         with open(java_file, "w", encoding="utf-8") as f:
             f.write(java_code)
         validation_errors = self._validate_structure(java_code)
-        if validation_errors:
-            shutil.rmtree(temp_dir, ignore_errors=True)
-            return {"success": False, "errors": validation_errors, "compilation_time": 0}
         compile_result = self._docker_compile(temp_dir, class_name, java_code) if self.use_docker else self._subprocess_compile(temp_dir, class_name, java_code)
         if not compile_result["success"]:
+            if not compile_result.get("errors") and validation_errors:
+                compile_result["errors"] = validation_errors
             shutil.rmtree(temp_dir, ignore_errors=True)
             return {"success": False, "errors": compile_result["errors"], "compilation_time": compile_result["compilation_time"]}
         try:

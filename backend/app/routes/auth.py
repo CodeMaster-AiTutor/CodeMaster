@@ -6,6 +6,7 @@ from app.models.user import User
 from app.utils.validators import validate_email, validate_password, validate_username
 from app.middleware.auth import token_required
 from app.config import Config
+from app.services.skill_points_service import apply_daily_login_streak
 import requests
 import secrets
 import string
@@ -68,9 +69,11 @@ def register():
             email=email,
             username=username,
             skill_level=skill_level,
-            total_points=0
+            total_points=50
         )
         user.set_password(password)
+        user.last_login = datetime.utcnow()
+        apply_daily_login_streak(user, user.last_login)
         user.password_updated_at = datetime.utcnow()
         user.ensure_csrf_token()
         
@@ -120,6 +123,7 @@ def login():
         
         # Update last login
         user.last_login = datetime.utcnow()
+        apply_daily_login_streak(user, user.last_login)
         user.ensure_csrf_token()
         db.session.commit()
         
@@ -308,8 +312,10 @@ def google_callback():
                 google_id=google_id,
                 password_hash=None,  # No password for OAuth users
                 skill_level='beginner',
-                total_points=0
+                total_points=50
             )
+            user.last_login = datetime.utcnow()
+            apply_daily_login_streak(user, user.last_login)
             user.ensure_csrf_token()
             db.session.add(user)
         else:
@@ -320,6 +326,7 @@ def google_callback():
                 user.google_id = google_id
             # Update last login
             user.last_login = datetime.utcnow()
+            apply_daily_login_streak(user, user.last_login)
             user.ensure_csrf_token()
         
         db.session.commit()

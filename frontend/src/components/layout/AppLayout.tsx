@@ -28,9 +28,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     if (!token) {
       return;
     }
+    let isMounted = true;
     const syncProfile = async () => {
       try {
         const profile = await profileAPI.getProfile();
+        if (!isMounted) {
+          return;
+        }
         const stored = localStorage.getItem('user');
         const currentUser = stored ? JSON.parse(stored) : {};
         localStorage.setItem(
@@ -44,6 +48,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             skill_level: profile.skill_level,
             created_at: profile.created_at,
             streak_days: profile.streak_days,
+            total_points: profile.total_points,
             bio: profile.bio,
           })
         );
@@ -51,7 +56,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         void 0;
       }
     };
-    syncProfile();
+    void syncProfile();
+    const interval = window.setInterval(() => {
+      void syncProfile();
+    }, 15000);
+    return () => {
+      isMounted = false;
+      window.clearInterval(interval);
+    };
   }, []);
 
   const handleMenuClick = () => {

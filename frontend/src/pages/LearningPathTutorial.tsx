@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { ArrowLeft, Lock } from 'lucide-react';
+import { contentAPI } from '@/lib/api';
+import { toast } from '@/hooks/use-toast';
 
 type LearningConcept = {
   id: string;
@@ -487,6 +489,37 @@ const LearningPathTutorial = () => {
     [conceptId]
   );
   const locked = concept ? conceptRank[concept.level] > accessRank : false;
+  const earnablePoints = concept ? (concept.level === 'basic' ? 10 : concept.level === 'intermediate' ? 15 : 20) : 0;
+  const [videoPointsAwarded, setVideoPointsAwarded] = useState<number>(0);
+
+  useEffect(() => {
+    const markVideoComplete = async () => {
+      if (!concept || locked) return;
+      try {
+        const response = await contentAPI.completeVideo(concept.id, concept.level);
+        if (response.awarded) {
+          setVideoPointsAwarded(response.points_awarded || 0);
+          try {
+            const raw = localStorage.getItem('user');
+            if (raw) {
+              const user = JSON.parse(raw) as Record<string, unknown>;
+              user.total_points = response.current_points;
+              localStorage.setItem('user', JSON.stringify(user));
+            }
+          } catch {
+            void 0;
+          }
+          toast({
+            title: "Skill points earned",
+            description: `+${response.points_awarded} points for watching this video.`,
+          });
+        }
+      } catch {
+        void 0;
+      }
+    };
+    void markVideoComplete();
+  }, [concept, locked]);
 
   return (
     <AppLayout>
@@ -518,6 +551,8 @@ const LearningPathTutorial = () => {
                   </HoverCardContent>
                 </HoverCard>
                 <Badge variant="outline" className="capitalize">{concept.level}</Badge>
+                <Badge variant="secondary">Earnable +{earnablePoints} pts</Badge>
+                {videoPointsAwarded > 0 ? <Badge className="bg-emerald-600">+{videoPointsAwarded} earned</Badge> : null}
               </div>
             ) : (
               <div className="space-y-1">

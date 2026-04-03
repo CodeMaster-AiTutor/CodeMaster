@@ -5,13 +5,27 @@ from math import gcd
 from app import db
 from app.middleware.auth import token_required
 from app.models.practice import PracticeProblem, PracticeAttempt, PracticeDraft
+from app.models.skill_points import SkillPointTransaction
 from app.routes.profile import update_streak_on_submit
 from app.services.java_executor import get_java_executor
+from app.services.skill_points_service import award_practice_problem_points, award_weekly_goal_completion, get_practice_points
 
 practice_bp = Blueprint('practice', __name__)
 
 LEVEL_ORDER = ['beginner', 'intermediate', 'advanced']
 LEVEL_MIX = 0.0
+
+
+def _practice_reward_key(problem_id: int) -> str:
+    return f"problem:{problem_id}"
+
+
+def _practice_earned_map(user_id: int):
+    rows = SkillPointTransaction.query.filter_by(
+        user_id=user_id,
+        event_type='practice_problem_solved'
+    ).all()
+    return {row.event_key for row in rows}
 
 
 def _extract_numbers(text: str):
@@ -908,11 +922,14 @@ def list_problems(current_user):
         d.problem_id
         for d in PracticeDraft.query.filter_by(user_id=current_user.id).all()
     }
+    earned_keys = _practice_earned_map(current_user.id)
     result = []
     for p in problems:
         summary = p.to_summary()
         summary['attempt_status'] = attempted_ids.get(p.id)
         summary['has_draft'] = p.id in drafted_ids
+        summary['earnable_points'] = get_practice_points(p.level)
+        summary['points_earned'] = _practice_reward_key(p.id) in earned_keys
         result.append(summary)
     return jsonify(result)
 
@@ -934,11 +951,14 @@ def get_catalog(current_user):
         d.problem_id
         for d in PracticeDraft.query.filter_by(user_id=current_user.id).all()
     }
+    earned_keys = _practice_earned_map(current_user.id)
     payload = []
     for p in problems:
         item = p.to_summary()
         item['attempt_status'] = attempted_ids.get(p.id)
         item['has_draft'] = p.id in drafted_ids
+        item['earnable_points'] = get_practice_points(p.level)
+        item['points_earned'] = _practice_reward_key(p.id) in earned_keys
         payload.append(item)
     return jsonify(payload)
 
@@ -952,6 +972,12 @@ def get_problem(current_user, problem_id):
         user_id=current_user.id, problem_id=problem_id
     ).first()
     detail['draft_code'] = draft.code if draft else problem.starter_code
+    detail['earnable_points'] = get_practice_points(problem.level)
+    detail['points_earned'] = bool(SkillPointTransaction.query.filter_by(
+        user_id=current_user.id,
+        event_type='practice_problem_solved',
+        event_key=_practice_reward_key(problem_id)
+    ).first())
     return jsonify(detail)
 
 
@@ -968,7 +994,7 @@ def create_attempt(current_user):
         return jsonify({'error': 'problem_id is required'}), 400
     if status not in ('started', 'passed', 'failed'):
         return jsonify({'error': 'Invalid status'}), 400
-    PracticeProblem.query.get_or_404(problem_id)
+    problem = PracticeProblem.query.get_or_404(problem_id)
     attempt = PracticeAttempt(
         user_id=current_user.id,
         problem_id=problem_id,
@@ -980,6 +1006,8 @@ def create_attempt(current_user):
     db.session.add(attempt)
     if status == 'passed':
         update_streak_on_submit(current_user)
+        award_practice_problem_points(current_user, problem_id, problem.level)
+        award_weekly_goal_completion(current_user)
     db.session.commit()
     return jsonify(attempt.to_dict()), 201
 
@@ -994,6 +1022,10 @@ def update_attempt(current_user, attempt_id):
             setattr(attempt, field, data[field])
     if data.get('status') == 'passed':
         update_streak_on_submit(current_user)
+        problem = PracticeProblem.query.get(attempt.problem_id)
+        if problem:
+            award_practice_problem_points(current_user, attempt.problem_id, problem.level)
+            award_weekly_goal_completion(current_user)
     db.session.commit()
     return jsonify(attempt.to_dict())
 
@@ -1148,7 +1180,17 @@ def validate_solution(current_user):
         })
 
     solved = passed_count == len(test_cases)
+    points_awarded = 0
+    weekly_bonus_awarded = 0
     persist_attempt(solved, passed_count, len(test_cases))
+    if solved:
+        awarded, points_awarded = award_practice_problem_points(current_user, problem.id, problem.level)
+        if not awarded:
+            points_awarded = 0
+        weekly_awarded, weekly_bonus_awarded, _ = award_weekly_goal_completion(current_user)
+        if not weekly_awarded:
+            weekly_bonus_awarded = 0
+        db.session.commit()
     return jsonify({
         'problem_id': problem.id,
         'title': problem.title,
@@ -1156,4 +1198,7 @@ def validate_solution(current_user):
         'passed': passed_count,
         'total': len(test_cases),
         'results': results,
+        'points_awarded': points_awarded,
+        'weekly_bonus_awarded': weekly_bonus_awarded,
+        'current_points': int(current_user.total_points or 0),
     })

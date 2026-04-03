@@ -1,0 +1,1697 @@
+================================================================================
+  🟢 BEGINNER LEVEL
+================================================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION A : MCQ (Multiple Choice Questions) — 20 Questions
+  [Each question has exactly ONE correct answer]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    According to the course, Java was developed in which year and by whom?
+    A) 1990, Bill Gates at Microsoft
+    B) 1995, James Gosling at Sun Microsystems
+    C) 2000, Linus Torvalds at IBM
+    D) 1985, Dennis Ritchie at Bell Labs
+    Answer: B
+
+    The course describes a variable as a "labeled box". What does the label represent?
+    A) The data type
+    B) The memory address
+    C) The variable name
+    D) The initial value
+    Answer: C
+
+    According to the course, which data type stores whole numbers without decimals
+    and is used for counting and indexing?
+    A) double
+    B) float
+    C) int
+    D) long
+    Answer: C
+
+    The course explains that Strings are immutable. What does this mean?
+    A) Strings cannot be printed
+    B) Once created, their content cannot change; any "change" creates a new String
+    C) Strings can only hold uppercase letters
+    D) Strings cannot be compared with equals()
+    Answer: B
+
+    According to the course, which Scanner method is used to read an integer from user input?
+    A) scanner.readInt()
+    B) scanner.getInt()
+    C) scanner.nextInt()
+    D) scanner.parseInt()
+    Answer: C
+
+    The course states: "Java uses short-circuit evaluation". What does this mean for
+    the expression (A && B) when A is false?
+    A) B is evaluated first
+    B) B is not checked at all
+    C) Both A and B are always evaluated
+    D) The expression throws an error
+    Answer: B
+
+    According to the course, what is the difference between prefix (++n) and
+    postfix (n++) increment?
+    A) Prefix adds 2; postfix adds 1
+    B) Prefix changes value first then uses it; postfix uses current value first then updates
+    C) They are identical in all situations
+    D) Postfix works only with double type
+    Answer: B
+
+    The course describes the ternary operator. Which of the following correctly
+    represents the ternary operator syntax?
+    A) if (condition) ? value1 : value2
+    B) condition ? value1 : value2
+    C) condition : value1 ? value2
+    D) value1 if condition else value2
+    Answer: B
+
+    According to the conditionals topic in the course, what makes the switch
+    statement different from an if-else ladder?
+    A) Switch can only test boolean conditions
+    B) Switch matches a single variable against multiple constant values
+    C) Switch cannot use the break keyword
+    D) Switch works only with String types
+    Answer: B
+
+    The course states that every loop depends on three parts. Which of the
+     following is NOT one of those three parts?
+    A) Initialization
+    B) Condition
+    C) Update
+    D) Return
+    Answer: D
+
+    According to the loops topic, which loop checks the condition AFTER the body
+     executes, guaranteeing at least one execution?
+    A) for loop
+    B) while loop
+    C) do-while loop
+    D) for-each loop
+    Answer: C
+
+    The course explains the for-each loop. When should you use it according to the material?
+    A) When you need to modify elements by index
+    B) When you only need to access elements, not modify them by index
+    C) Only with primitive arrays
+    D) Only when the array has more than 10 elements
+    Answer: B
+
+    According to the methods topic, what is the primary reason to use methods?
+    A) To increase file size
+    B) To group reusable steps, remove repetition, and make programs readable
+    C) To declare global variables
+    D) To prevent the program from compiling
+    Answer: B
+
+    The course defines static methods. According to the material, how are static
+     methods different from instance methods?
+    A) Static methods are faster
+    B) Static methods belong to the class and can be called from main directly without an object
+    C) Static methods cannot have parameters
+    D) Static methods always return void
+    Answer: B
+
+    According to the arrays topic, what does "contiguous memory" mean for arrays?
+    A) Array elements are stored randomly in memory
+    B) Array elements are stored side-by-side in memory, enabling constant-time O(1) access
+    C) Arrays share memory with other variables
+    D) Arrays are stored on the stack always
+    Answer: B
+
+    The course states three key properties of an array. Which of the following is
+     one of those properties?
+    A) Arrays can grow in size automatically
+    B) Arrays store mixed types
+    C) Arrays have a fixed size decided at creation
+    D) Arrays use linked memory nodes
+    Answer: C
+
+    According to the strings topic, which method should always be used to compare
+     String content (not references)?
+    A) ==
+    B) compareTo()
+    C) equals()
+    D) contains()
+    Answer: C
+
+    The course covers StringBuilder. Why does the course recommend using
+     StringBuilder over String concatenation inside loops?
+    A) StringBuilder is immutable and more secure
+    B) String concatenation in loops creates many temporary objects; StringBuilder avoids this
+    C) StringBuilder prints faster to the console
+    D) StringBuilder supports more characters than String
+    Answer: B
+
+    According to the course, what does the String method substring(1, 5) do?
+    A) Returns characters from index 1 to index 5 inclusive
+    B) Returns characters from index 1 up to but not including index 5
+    C) Removes the first and last 5 characters
+    D) Returns the length of the string between positions 1 and 5
+    Answer: B
+
+    The course explains method overloading. According to the material, which
+     scenario correctly demonstrates method overloading?
+    A) A method calling itself recursively
+    B) Two methods in the same class with the same name but different parameter lists
+    C) A child class rewriting a parent's method
+    D) A method that returns different types on different calls
+    Answer: B
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION B : MSQ (Multiple Select Questions) — 20 Questions
+  [Each question may have MORE THAN ONE correct answer]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    According to the course's Hello World topic, which of the following are
+     features of Java? (Select all that apply)
+    A) Platform Independence — write once, run anywhere
+    B) Direct memory management using pointers
+    C) Object-Oriented Programming model
+    D) Both compiled (to bytecode) and interpreted (by JVM)
+    Answer: A, C, D
+
+    The course covers data types in the Variables topic. Which of the following
+     are primitive data types covered in the course? (Select all that apply)
+    A) int
+    B) double
+    C) String
+    D) boolean
+    E) char
+    Answer: A, B, D, E
+
+    According to the Variables topic, which of the following statements about
+     the int data type are TRUE? (Select all that apply)
+    A) int stores whole numbers without decimals
+    B) int is used for counting and indexing
+    C) int can store decimal values like 3.14
+    D) int has a default value of 0 for instance variables
+    Answer: A, B, D
+
+    The course explains types of operators. Which of the following operator
+     categories are covered in the Operators topic? (Select all that apply)
+    A) Arithmetic operators (+, -, *, /, %)
+    B) Relational operators (==, !=, >, <, >=, <=)
+    C) Logical operators (&&, ||, !)
+    D) Ternary operator
+    E) Memory allocation operator
+    Answer: A, B, C, D
+
+    According to the Operators topic, which of the following statements about
+     logical operators are TRUE? (Select all that apply)
+    A) && returns true only when both sides are true
+    B) || returns true if at least one side is true
+    C) ! flips the boolean result
+    D) && evaluates the right side even when the left side is false (no short-circuit)
+    Answer: A, B, C
+
+    The course covers assignment operators. Which of the following are valid
+     assignment operators in Java according to the Operators topic? (Select all)
+    A) =
+    B) +=
+    C) -=
+    D) **=
+    E) %=
+    Answer: A, B, C, E
+
+    According to the Conditionals topic, which of the following are types of
+     conditional statements covered in the course? (Select all that apply)
+    A) if statement
+    B) if-else
+    C) nested if
+    D) switch statement
+    E) goto statement
+    Answer: A, B, C, D
+
+    The course explains the switch statement. Which of the following are TRUE
+     about switch according to the course? (Select all that apply)
+    A) switch matches a single variable against multiple constant case values
+    B) break prevents fall-through to the next case
+    C) default case handles values not matched by any case
+    D) switch can work with float values
+    Answer: A, B, C
+
+    According to the Loops topic, which of the following loop types are covered
+     in the course? (Select all that apply)
+    A) while loop
+    B) do-while loop
+    C) for loop
+    D) for-each (enhanced for) loop
+    E) repeat-until loop
+    Answer: A, B, C, D
+
+    The course explains loop anatomy. According to the material, which of the
+     following are the three required parts of a loop? (Select all that apply)
+    A) Initialization
+    B) Condition
+    C) Update
+    D) Return type
+    Answer: A, B, C
+
+    According to the Methods topic, which of the following are TRUE about
+     methods in Java? (Select all that apply)
+    A) Methods group reusable steps to remove code repetition
+    B) A static method can be called from main() without creating an object
+    C) A method's local variables are separate from other methods' variables
+    D) All methods must always return a value
+    Answer: A, B, C
+
+    The course covers method overloading. Which of the following are valid forms
+     of method overloading according to the course? (Select all that apply)
+    A) Same name, different number of parameters
+    B) Same name, different parameter types
+    C) Same name, different return type only (with identical parameters)
+    D) Same name, different order of parameters
+    Answer: A, B, D
+
+    According to the Arrays topic, which of the following are TRUE about arrays?
+     (Select all that apply)
+    A) Arrays have a fixed size decided at creation time
+    B) Arrays store elements of the same data type only
+    C) Array elements are stored in contiguous memory for O(1) access
+    D) Arrays can dynamically resize when full
+    Answer: A, B, C
+
+    The course lists limitations of arrays. Which of the following are limitations
+     of arrays mentioned in the course? (Select all that apply)
+    A) Size is fixed after creation
+    B) No mixed types allowed
+    C) Insertion and deletion in the middle is costly
+    D) Arrays always use more memory than ArrayList
+    Answer: A, B, C
+
+    According to the Strings topic, which of the following String methods are
+     covered in the course? (Select all that apply)
+    A) length()
+    B) charAt()
+    C) substring()
+    D) toUpperCase()
+    E) shuffle()
+    Answer: A, B, C, D
+
+    The course explains String immutability. Which of the following are benefits
+     of String immutability mentioned or implied in the course? (Select all)
+    A) Thread-safety
+    B) Caching (String Constant Pool reuse)
+    C) Security
+    D) Faster arithmetic operations
+    Answer: A, B, C
+
+    According to the course, which of the following statements about StringBuilder
+     are TRUE? (Select all that apply)
+    A) StringBuilder is mutable (its content can be changed)
+    B) StringBuilder is preferred over String concatenation inside loops
+    C) StringBuilder's append() method adds content to the builder
+    D) StringBuilder is immutable like String
+    Answer: A, B, C
+
+    The course covers the Scanner class in the Input/Output topic. Which of the
+     following are TRUE about Scanner according to the course? (Select all)
+    A) Scanner is used to read user input
+    B) nextInt() reads an integer from input
+    C) Scanner must be imported from java.util
+    D) Scanner can only read String values
+    Answer: A, B, C
+
+    According to the course's Operators topic, which of the following statements
+     about relational operators are TRUE? (Select all that apply)
+    A) Relational operators compare two values and return true or false
+    B) == compares content of String objects (same as equals())
+    C) For String content comparison, equals() should be used instead of ==
+    D) Relational operators include ==, !=, >, <, >=, <=
+    Answer: A, C, D
+
+    The course explains when to use arrays. Which of the following are scenarios
+     where the course says arrays are appropriate? (Select all that apply)
+    A) Number of elements is known beforehand
+    B) Frequent reading and indexed access are needed
+    C) When elements need to be added and removed dynamically at runtime
+    D) Performance-critical code where memory is predictable
+    Answer: A, B, D
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION C : CODING Questions — 10 Questions
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+----------------------------------------------------------------------------------------------------------------------------
+Positive, Negative or Zero                                                                    
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Accept an integer from the user and print whether it is Positive, Negative, or Zero.
+Use an if-else ladder to check all three conditions.
+
+Concepts Covered
+  •  Variables & Data Types
+  •  If-Else Ladder
+  •  Comparison Operators
+
+Example Input
+-7
+Expected Output
+Negative
+
+----------------------------------------------------------------------------------------------------------------------------
+Simple Interest Calculator                                                                    
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Calculate Simple Interest using the formula SI = (P × R × T) / 100.
+Accept Principal (P), Rate (R), and Time (T) as inputs and print the result.
+
+Concepts Covered
+  •  Variables & Data Types
+  •  Arithmetic Operators
+  •  Formula Application
+
+Example Input
+P = 1000   R = 5   T = 2
+Expected Output
+SI = 100.0
+
+----------------------------------------------------------------------------------------------------------------------------
+Count Vowels in a String                                                                      
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Count how many vowel characters (a, e, i, o, u — both uppercase and lowercase)
+appear in a given string. Loop through each character and check if it is a vowel.
+
+Concepts Covered
+  •  Loops
+  •  String Traversal (charAt)
+  •  Character Matching
+  •  if-else / switch
+
+Example Input
+"hello"
+Expected Output
+2
+
+----------------------------------------------------------------------------------------------------------------------------
+Multiplication Table                                                                          
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Accept a number N from the user and print its multiplication table from 1 to 10.
+Use a for loop to calculate and display each product on a new line.
+
+Concepts Covered
+  •  for Loop
+  •  Arithmetic Operators
+  •  Formatted Output
+
+Example Input
+5
+Expected Output
+5 x 1 = 5
+5 x 2 = 10
+...
+5 x 10 = 50
+
+----------------------------------------------------------------------------------------------------------------------------
+Sum of Digits                                                                                 
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Accept an integer and calculate the sum of all its individual digits.
+Use modulus (% 10) to extract the last digit each iteration, add it to a total,
+then divide by 10 to move to the next digit. Repeat until the number becomes 0.
+
+Concepts Covered
+  •  while Loop
+  •  Modulus Operator
+  •  Accumulator Variable
+
+Example Input
+123
+Expected Output
+6
+
+----------------------------------------------------------------------------------------------------------------------------
+Swap Without a Third Variable                                                                 
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Swap the values of two integer variables without using a temporary variable.
+Use arithmetic operations: a = a + b,  b = a - b,  a = a - b.
+Print the values before and after swapping.
+
+Concepts Covered
+  •  Variables & Data Types
+  •  Arithmetic Logic
+  •  Variable Manipulation
+
+Example Input
+a = 5   b = 10
+Expected Output
+Before: a=5, b=10
+After:  a=10, b=5
+
+----------------------------------------------------------------------------------------------------------------------------
+Reverse a Number                                                                              
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Reverse the digits of a given integer using a loop.
+Extract the last digit using (% 10), build the reversed number by multiplying the
+current result by 10 and adding the digit, then divide the original by 10.
+Handle the case where the input is 0.
+
+Concepts Covered
+  •  while Loop
+  •  Modulus & Integer Division
+  •  Variable Manipulation
+
+Example Input
+1234
+Expected Output
+4321
+
+----------------------------------------------------------------------------------------------------------------------------
+Fibonacci Series                                                                              
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Print the first N numbers of the Fibonacci sequence, where each number is the sum
+of the two preceding ones. The sequence starts with 0 and 1.
+Accept N from the user and print the series on one line separated by spaces.
+
+Concepts Covered
+  •  for Loop
+  •  Variable Swapping / Update
+  •  Conditional Edge Case (N=1, N=2)
+
+Example Input
+7
+Expected Output
+0 1 1 2 3 5 8
+
+----------------------------------------------------------------------------------------------------------------------------
+Prime Number Checker                                                                          
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Accept a number N and check whether it is prime. A prime number is divisible only
+by 1 and itself. Test divisibility from 2 up to N/2. Numbers less than 2 are not prime.
+Also print all prime numbers from 1 to 50.
+
+Concepts Covered
+  •  for / while Loop
+  •  Conditional Logic
+  •  Divisibility Check
+  •  Methods (isPrime)
+
+Example Input
+7
+Expected Output
+Prime
+
+----------------------------------------------------------------------------------------------------------------------------
+Pattern — Right-Angled Star Triangle                                                          
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Print a right-angled star triangle with N rows using nested loops.
+Row 1 prints 1 star, row 2 prints 2 stars, and so on up to row N.
+Then also print the inverted version of the same triangle (N stars down to 1).
+
+Concepts Covered
+  •  Nested Loops (outer for rows, inner for stars)
+  •  Pattern Logic
+  •  String/Character Output
+
+Example Input
+4
+Expected Output (Normal)        Expected Output (Inverted)
+*                               ****
+**                              ***
+***                             **
+****                            *
+
+
+================================================================================
+  🟡 INTERMEDIATE LEVEL
+================================================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION A : MCQ (Multiple Choice Questions) — 20 Questions
+  [Each question has exactly ONE correct answer]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    The course describes a class as "a blueprint or template". According to the
+    OOP Intro topic, what is the relationship: "Building map → Class"?
+    A) Building map is the object; class is the construction
+    B) Building map is the class (blueprint); the actual house is the object
+    C) Both are the same thing
+    D) Building map represents inheritance
+    Answer: B
+
+    According to the Constructors topic, what is the primary purpose of a constructor?
+    A) To destroy an object after use
+    B) To set initial values for object attributes so the object is ready to use immediately
+    C) To declare static variables
+    D) To override parent class methods
+    Answer: B
+
+    The course covers the this keyword in the Constructors topic. What does
+    this keyword refer to?
+    A) The parent class object
+    B) The current object being operated on
+    C) The main method
+    D) A static reference to the class
+    Answer: B
+
+    According to the Encapsulation topic, what is the standard approach to
+    achieve encapsulation?
+    A) Make all fields public
+    B) Make fields private and expose them through public getters and setters
+    C) Use static fields for all data
+    D) Inherit from a base class
+    Answer: B
+
+    The course explains a problem without encapsulation. What issue arises when
+    fields are public, according to the Encapsulation topic?
+    A) The program compiles slower
+    B) Any part of the program can set fields to invalid values (e.g., negative age)
+    C) Methods cannot access the fields
+    D) The class cannot be instantiated
+    Answer: B
+
+    According to the Inheritance topic, what keyword is used to inherit from a
+    parent class in Java?
+    A) implements
+    B) inherits
+    C) extends
+    D) super
+    Answer: C
+
+    The course states that inheritance establishes an "is-a" relationship. Which
+    example from the course illustrates this?
+    A) A Car has an Engine
+    B) A Dog is an Animal
+    C) A HashMap contains keys
+    D) A Thread runs a Runnable
+    Answer: B
+
+    According to the Polymorphism topic, what is compile-time polymorphism
+    achieved through?
+    A) Method overriding
+    B) Interface implementation
+    C) Method overloading
+    D) Dynamic dispatch
+    Answer: C
+
+    The course explains runtime polymorphism. According to the Polymorphism topic,
+    runtime polymorphism is achieved through?
+    A) Method overloading
+    B) Constructor chaining
+    C) Method overriding (with parent reference pointing to child object)
+    D) Static method calls
+    Answer: C
+
+    According to the Abstraction topic, what is the difference between
+     abstract classes and interfaces in Java?
+    A) Abstract classes allow multiple inheritance; interfaces do not
+    B) Abstract classes are used for "is-a" (shared identity); interfaces for "can-do" (capability)
+    C) Interfaces cannot have any methods
+    D) Abstract classes cannot have any concrete methods
+    Answer: B
+
+    The course describes ArrayList. According to the ArrayList topic, what is the
+     key difference between ArrayList and a standard array?
+    A) ArrayList can only store Strings
+    B) ArrayList is fixed-size like a standard array
+    C) ArrayList grows automatically when elements are added
+    D) ArrayList stores primitives directly without boxing
+    Answer: C
+
+    According to the ArrayList topic, which statement is listed as an "Exam Point"?
+    A) ArrayList is synchronized by default
+    B) ArrayList maintains insertion order and allows duplicates
+    C) ArrayList uses a linked list internally
+    D) ArrayList does not allow null values
+    Answer: B
+
+    The course covers exception handling. According to the Exception Handling topic,
+     what is an exception?
+    A) A compile-time syntax error
+    B) An unexpected runtime event that disrupts the normal flow of a program
+    C) A warning printed to the console
+    D) A planned program exit
+    Answer: B
+
+    According to the Exception Handling topic, what is the purpose of the
+     finally block?
+    A) It runs only when an exception is caught
+    B) It runs only when no exception occurs
+    C) It always runs, whether or not an exception was thrown
+    D) It catches exceptions that were missed by catch blocks
+    Answer: C
+
+    The course covers checked vs unchecked exceptions. According to the material,
+     which type must be declared with throws or handled with try-catch?
+    A) Unchecked (Runtime) exceptions
+    B) Errors
+    C) Checked exceptions
+    D) Custom exceptions only
+    Answer: C
+
+    According to the Exception Handling topic, what does try-with-resources do?
+    A) Catches all runtime exceptions automatically
+    B) Automatically closes resources that implement AutoCloseable when the block ends
+    C) Retries failed operations up to three times
+    D) Converts checked exceptions to unchecked exceptions
+    Answer: B
+
+    The course covers File Handling. According to the material, which class
+     is recommended for improved reading performance by buffering input?
+    A) FileReader
+    B) FileInputStream
+    C) BufferedReader
+    D) DataInputStream
+    Answer: C
+
+    According to the File Handling topic, which FileWriter constructor mode is
+     used to append to an existing file instead of overwriting it?
+    A) new FileWriter("file.txt")
+    B) new FileWriter("file.txt", true)
+    C) new FileWriter("file.txt", false)
+    D) new FileWriter("file.txt", "append")
+    Answer: B
+
+    The course explains constructor overloading. According to the Constructors
+     topic, what is constructor overloading?
+    A) A constructor calling the parent's constructor
+    B) A class having multiple constructors with different parameter lists
+    C) A constructor returning a value
+    D) Two classes sharing the same constructor
+    Answer: B
+
+    According to the OOP Intro topic, which of the following correctly describes
+     real-world modelling in OOP?
+    A) Programs should avoid modeling real-world entities
+    B) Objects have state (data) and behavior (actions) just like real-world entities
+    C) Behavior and state are always kept in separate classes
+    D) OOP only models digital entities, not real-world ones
+    Answer: B
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION B : MSQ (Multiple Select Questions) — 20 Questions
+  [Each question may have MORE THAN ONE correct answer]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    According to the OOP Intro topic, which of the following correctly describe
+     a class in Java? (Select all that apply)
+    A) A class is a blueprint that defines what data an object will store
+    B) A class defines what actions (behaviors) an object can perform
+    C) A class is the actual object created in memory
+    D) A class is a design, not the real thing itself
+    Answer: A, B, D
+
+    The course covers Constructors. Which of the following are TRUE about
+     constructors according to the course? (Select all that apply)
+    A) A constructor has the same name as the class
+    B) A constructor runs automatically when the new keyword is used
+    C) A class can have multiple constructors (constructor overloading)
+    D) If no constructor is defined, the compiler provides a default constructor
+    Answer: A, B, C, D
+
+    According to the Encapsulation topic, which of the following are benefits of
+     encapsulation? (Select all that apply)
+    A) Prevents setting invalid values to fields (e.g., negative age)
+    B) Makes code harder to read
+    C) Provides controlled access to data through getters and setters
+    D) Hides internal implementation details from the outside
+    Answer: A, C, D
+
+    The course covers Inheritance. Which of the following are TRUE about
+     inheritance in Java according to the course? (Select all that apply)
+    A) The extends keyword is used to inherit from a parent class
+    B) The super keyword refers to the parent class
+    C) Inheritance promotes code reusability by defining common attributes once
+    D) Java supports multiple class inheritance (a class can extend two classes)
+    Answer: A, B, C
+
+    According to the Inheritance topic, which of the following are covered as
+     subtopics in the course? (Select all that apply)
+    A) extends keyword
+    B) super keyword
+    C) Method overriding
+    D) @Override annotation
+    E) Pointer arithmetic
+    Answer: A, B, C, D
+
+    The course covers Polymorphism. According to the material, which of the
+     following are TRUE about method overloading? (Select all that apply)
+    A) Multiple methods share the same name with different parameter lists
+    B) The compiler determines which method to call based on argument types and count
+    C) Overloading is resolved at compile time
+    D) Overloading requires the methods to be in different classes
+    Answer: A, B, C
+
+    According to the Abstraction topic, which of the following are TRUE about
+     abstract classes? (Select all that apply)
+    A) An abstract class cannot be instantiated on its own
+    B) An abstract class can have both abstract methods and concrete methods
+    C) Abstract methods have no body and must be implemented by the child class
+    D) Abstract classes can only have abstract methods
+    Answer: A, B, C
+
+    The course explains interfaces in the Abstraction topic. Which of the following
+     are TRUE about interfaces according to the course? (Select all that apply)
+    A) Interfaces represent a "can-do" capability shared across unrelated classes
+    B) A class uses the implements keyword to use an interface
+    C) A class can implement multiple interfaces
+    D) Interfaces can have instance variables (non-static, non-final fields)
+    Answer: A, B, C
+
+    According to the ArrayList topic, which of the following are TRUE about
+     ArrayList? (Select all that apply)
+    A) ArrayList is backed by a resizable array
+    B) ArrayList maintains insertion order
+    C) ArrayList allows duplicate elements
+    D) ArrayList is synchronized by default
+    Answer: A, B, C
+
+    The course covers the ArrayList topic's size vs capacity distinction. Which of
+     the following are TRUE? (Select all that apply)
+    A) size() returns how many elements are currently in the list
+    B) Capacity is the length of the internal backing array
+    C) ArrayList resizes when size reaches capacity, which is a costly operation
+    D) size() and capacity are always the same value
+    Answer: A, B, C
+
+    According to the Exception Handling topic, which of the following are TRUE
+     about the try-catch-finally structure? (Select all that apply)
+    A) Multiple catch blocks can handle different exception types
+    B) The finally block always executes regardless of whether an exception occurred
+    C) throw is used to explicitly raise an exception in code
+    D) throws in a method signature declares which checked exceptions it may propagate
+    Answer: A, B, C, D
+
+    The course covers exception types. Which of the following are unchecked
+     (runtime) exceptions covered or referenced in the course? (Select all)
+    A) NullPointerException
+    B) ArrayIndexOutOfBoundsException
+    C) IOException
+    D) ArithmeticException (divide by zero)
+    Answer: A, B, D
+
+    According to the File Handling topic, which of the following are TRUE about
+     file I/O in Java? (Select all that apply)
+    A) FileInputStream reads bytes from a file
+    B) FileReader reads characters from a file
+    C) BufferedWriter improves write performance through buffering
+    D) bw.newLine() is recommended over "\n" for cross-platform compatibility
+    Answer: A, B, C, D
+
+    The course covers File class methods in the File Handling topic. Which of the
+     following are File class methods mentioned in the course? (Select all)
+    A) file.exists()
+    B) file.length()
+    C) file.getName()
+    D) file.createNewFile()
+    E) file.toArray()
+    Answer: A, B, C, D
+
+    According to the Polymorphism topic, which of the following subtopics are
+     covered in the course's Polymorphism chapter? (Select all that apply)
+    A) Compile-time polymorphism (overloading)
+    B) Runtime polymorphism (overriding)
+    C) Dynamic method dispatch
+    D) Upcasting and downcasting
+    Answer: A, B, C, D
+
+    The course covers constructor features. Which of the following are TRUE
+     about the this keyword in constructors according to the Constructors topic?
+     (Select all that apply)
+    A) this refers to the current object
+    B) this() can be used to call another constructor in the same class (constructor chaining)
+    C) this refers to the parent class
+    D) this is commonly used to resolve naming conflicts between fields and parameters
+    Answer: A, B, D
+
+    According to the Exception Handling topic, which of the following are TRUE
+     about custom exceptions? (Select all that apply)
+    A) A custom checked exception extends Exception
+    B) A custom unchecked exception extends RuntimeException
+    C) Custom exceptions can have constructors and custom messages
+    D) Custom exceptions cannot be thrown with the throw keyword
+    Answer: A, B, C
+
+    The course explains ArrayList operations. Which of the following are core
+     operations on ArrayList covered in the ArrayList topic? (Select all)
+    A) add() — adds an element
+    B) remove() — removes an element
+    C) get(index) — retrieves an element by index
+    D) size() — returns number of elements
+    E) sort() using Collections.sort()
+    Answer: A, B, C, D, E
+
+    According to the Abstraction topic, which of the following correctly
+     distinguish abstract classes from interfaces? (Select all that apply)
+    A) Use abstract class when classes share a common identity ("is-a" relationship)
+    B) Use interface when unrelated classes share a capability ("can-do" relationship)
+    C) Abstract classes support 0–100% abstraction; interfaces provide 100% abstraction
+    D) Both abstract classes and interfaces can be instantiated directly
+    Answer: A, B, C
+
+    The course covers File Handling common mistakes. Which of the following are
+     common mistakes mentioned in the File Handling topic? (Select all that apply)
+    A) Forgetting to close the file, leaving data stuck in the buffer
+    B) Using "\n" instead of bw.newLine() causing issues on some OS
+    C) Not checking if readLine() returned null at end of file
+    D) Using FileWriter when you should always use FileInputStream
+    Answer: A, B, C
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION C : CODING Questions — 10 Questions
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+----------------------------------------------------------------------------------------------------------------------------
+Find Largest in Array                                                                         
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Accept N integers into an array and find the maximum value by scanning through
+every element. Keep a running variable for the largest value seen so far and
+update it whenever you find something bigger. Do not use Arrays.sort() or any
+built-in max utility.
+
+Concepts Covered
+  •  Arrays
+  •  Loop Traversal
+  •  Comparison Logic
+
+Example Input
+5 elements: 3 7 1 9 4
+Expected Output
+Largest: 9
+
+----------------------------------------------------------------------------------------------------------------------------
+Palindrome String Checker                                                                     
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Check whether a given string reads the same forwards and backwards (palindrome).
+Ignore character case for a robust comparison. Manually reverse the string using a
+loop — do not use StringBuilder.reverse() or similar utility.
+
+Concepts Covered
+  •  String Traversal
+  •  Character Access (charAt)
+  •  String Comparison
+  •  Case Insensitivity (toLowerCase)
+
+Example Input
+"Madam"
+Expected Output
+Palindrome
+
+----------------------------------------------------------------------------------------------------------------------------
+Count Words in a Sentence                                                                     
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Count the number of words in a sentence without using split() or any regex.
+Manually scan characters and detect transitions from whitespace to non-whitespace
+to identify word boundaries. Handle leading/trailing spaces and multiple spaces
+between words correctly.
+
+Concepts Covered
+  •  String Traversal (charAt)
+  •  State Tracking (boolean flag)
+  •  Manual Parsing
+  •  Loops
+
+Example Input
+"  Hello World  Java  "
+Expected Output
+Word Count: 3
+
+----------------------------------------------------------------------------------------------------------------------------
+Student Result System                                                                         
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Build a modular system using separate methods that computes a student's total
+marks, average percentage, and final grade from an array of subject marks.
+Use these bands: 90–100 → A+, 80–89 → A, 70–79 → B, 60–69 → C, 50–59 → D,
+below 50 → Fail.
+
+Concepts Covered
+  •  Methods (calcTotal, calcAverage, assignGrade)
+  •  Return Values
+  •  Array Traversal
+  •  Grade Logic
+
+Example Input
+Marks: [78, 85, 90, 72, 88]
+Expected Output
+Total: 413   Avg: 82.6   Grade: A
+
+----------------------------------------------------------------------------------------------------------------------------
+Anagram Checker                                                                               
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Check whether two strings are anagrams (same characters in any order, e.g.
+"listen" and "silent"). Implement the check without sorting — use a frequency
+count array of size 26. Increment count for each character in string A; decrement
+for each character in string B. If all counts are zero they are anagrams.
+
+Concepts Covered
+  •  String Handling
+  •  Character Frequency Array
+  •  String Methods (toLowerCase, charAt)
+  •  Loop Logic
+
+Example Input
+"listen"   "silent"
+Expected Output
+Anagram
+
+----------------------------------------------------------------------------------------------------------------------------
+Custom Exception — Age Validator                                                              
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Create a custom checked exception class InvalidAgeException that extends Exception.
+Write a method validateAge(int age) that throws this exception when the age entered
+is below 18 or above 120. In main(), use try-catch-finally to handle it gracefully
+with a meaningful message. Also demonstrate the throws keyword in the method signature.
+
+Concepts Covered
+  •  Custom Exceptions
+  •  throw / throws
+  •  try-catch-finally
+  •  OOP Inheritance (Exception)
+
+Example Input
+Age: 15
+Expected Output
+Exception: Age must be between 18 and 120.
+
+----------------------------------------------------------------------------------------------------------------------------
+Bubble Sort                                                                                   
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Sort an integer array in ascending order using the Bubble Sort algorithm.
+Repeatedly compare adjacent pairs and swap them if out of order. Add an early-exit
+flag: if no swap occurred in a full pass, the array is already sorted — stop early.
+Print the array after every pass to show progress.
+
+Concepts Covered
+  •  Nested Loops
+  •  Adjacent Swapping
+  •  Sorting Logic
+  •  Optimization (early exit flag)
+
+Example Input
+[64, 34, 25, 12, 22]
+Expected Output
+[12, 22, 25, 34, 64]
+
+----------------------------------------------------------------------------------------------------------------------------
+Word Frequency Counter                                                                        
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Count the frequency of each word in a given sentence using a HashMap<String, Integer>.
+Ignore character case (convert everything to lowercase). Print the words and their
+frequencies sorted alphabetically. Use a TreeMap or sort the HashMap entries manually.
+
+Concepts Covered
+  •  String Handling (split, toLowerCase)
+  •  Collections — HashMap / TreeMap
+  •  Map Iteration (entrySet)
+  •  Sorting
+
+Example Input
+"java is great and java is fun"
+Expected Output
+and=1   fun=1   great=1   is=2   java=2
+
+----------------------------------------------------------------------------------------------------------------------------
+Matrix Addition and Transpose                                                                 
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Part A — Matrix Addition: Add two 2D integer matrices of the same dimensions.
+result[i][j] = A[i][j] + B[i][j]. Print the result matrix.
+
+Part B — Transpose: Compute the transpose of a matrix by swapping rows and columns.
+transposed[j][i] = original[i][j]. Create a new matrix with swapped dimensions.
+Print both the original and transposed matrices.
+
+Concepts Covered
+  •  2D Arrays
+  •  Nested Loops
+  •  Element-wise Operations
+  •  Index Swapping
+
+Example Input (Part A)
+A = [[1,2],[3,4]]   B = [[5,6],[7,8]]
+Expected Output
+[[6,8],[10,12]]
+
+Example Input (Part B)
+[[1,2,3],[4,5,6]]
+Expected Output
+[[1,4],[2,5],[3,6]]
+
+----------------------------------------------------------------------------------------------------------------------------
+Number Guessing Game                                                                          
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Generate a random number between 1 and 100 using Math.random() or the Random class.
+Ask the user to guess the number in a loop. After each guess:
+  •  Print "Too High!" if the guess is above the target
+  •  Print "Too Low!"  if the guess is below the target
+  •  Print "Correct! You got it in X attempts." when the guess matches
+Count the total number of attempts. Also implement a 10-attempt limit — if the user
+does not guess correctly in 10 tries, reveal the number and end the game.
+
+Concepts Covered
+  •  Random Number Generation (Math.random / Random)
+  •  while Loop with exit conditions
+  •  Attempt Counter
+  •  Conditional Statements
+  •  User Input (Scanner)
+
+Example Interaction
+Guess: 50  → Too High!
+Guess: 25  → Too Low!
+Guess: 37  → Correct! You got it in 3 attempts.
+
+
+================================================================================
+  🔵 ADVANCED LEVEL
+================================================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION A : MCQ (Multiple Choice Questions) — 20 Questions
+  [Each question has exactly ONE correct answer]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    According to the Packages topic, what is the primary purpose of a package in Java?
+    A) To speed up compilation
+    B) To group related Java classes, avoid name conflicts, and control access
+    C) To replace the import statement
+    D) To declare global constants
+    Answer: B
+
+    The course covers built-in packages. According to the Packages topic, which
+    package is automatically imported into every Java class?
+    A) java.util
+    B) java.io
+    C) java.lang
+    D) java.net
+    Answer: C
+
+    According to the Collections topic, which Collection interface is used for
+    ordered, index-based storage that allows duplicates?
+    A) Set
+    B) Map
+    C) List
+    D) Queue
+    Answer: C
+
+    The course explains HashMap in the Collections topic. According to the material,
+    how does HashMap store data?
+    A) As an ordered list of values only
+    B) As key-value pairs with fast lookup
+    C) As a sorted tree of elements
+    D) As a stack of objects
+    Answer: B
+
+    According to the Collections topic, which Set implementation maintains
+    insertion order while still preventing duplicates?
+    A) HashSet
+    B) TreeSet
+    C) LinkedHashSet
+    D) ArrayList
+    Answer: C
+
+    The course covers the Lambda topic. According to the course, what is a lambda
+    expression?
+    A) A class that implements multiple interfaces
+    B) A short, anonymous function written inline to pass behavior as an argument
+    C) A loop that processes collections automatically
+    D) A type of constructor
+    Answer: B
+
+    According to the Lambda topic, what is a functional interface?
+    A) An interface with multiple abstract methods
+    B) An interface with exactly one abstract method
+    C) An interface that cannot be implemented
+    D) An interface that extends Runnable only
+    Answer: B
+
+    The course covers Stream operations. According to the Streams topic, which
+    statement about Streams is listed as a key concept?
+    A) Streams modify the original collection
+    B) Streams are eager — all operations execute immediately
+    C) Streams are lazy — intermediate operations don't run until a terminal operation is called
+    D) Streams can be reused multiple times
+    Answer: C
+
+    According to the Streams topic, which of the following is a terminal operation?
+    A) filter()
+    B) map()
+    C) sorted()
+    D) collect()
+    Answer: D
+
+    The course explains the Multithreading topic. According to the course, what is
+     the correct way to start a thread?
+    A) Call run() directly on the Thread object
+    B) Call start() on the Thread object
+    C) Call execute() on the Thread object
+    D) Call launch() on the Thread object
+    Answer: B
+
+    According to the Multithreading topic, what is the exam point about start()
+     vs run()?
+    A) Always call run(), not start()
+    B) Always call start(), not run()
+    C) Both start() and run() create a new thread
+    D) run() must be called before start()
+    Answer: B
+
+    The course covers the synchronized keyword. According to the Multithreading
+     topic, what does synchronized prevent?
+    A) Thread creation
+    B) Method overriding in threads
+    C) Race conditions by allowing only one thread at a time to execute the block
+    D) Deadlocks automatically
+    Answer: C
+
+    According to the JDBC topic, what does JDBC stand for and what is its purpose?
+    A) Java Data Binary Connection — for binary file operations
+    B) Java Database Connectivity — Java's standard API for connecting to relational databases
+    C) Java Distributed Base Configuration — for cloud setup
+    D) Java Debug and Build Control — for testing
+    Answer: B
+
+    The course explains PreparedStatement in the JDBC topic. Why is PreparedStatement
+     preferred over Statement according to the course?
+    A) PreparedStatement is faster at closing connections
+    B) PreparedStatement prevents SQL injection and is precompiled for efficiency
+    C) PreparedStatement can only run SELECT queries
+    D) PreparedStatement is required for all databases except MySQL
+    Answer: B
+
+    According to the JDBC topic, what is the correct flow for JDBC?
+    A) Java Program → Database → JDBC Driver → JDBC API
+    B) Java Program → JDBC API → JDBC Driver → Database
+    C) JDBC Driver → Java Program → Database → JDBC API
+    D) Database → JDBC API → JDBC Driver → Java Program
+    Answer: B
+
+    The course covers Serialization. According to the Serialization topic, what
+     does serialization do?
+    A) Converts Java source code into bytecode
+    B) Converts a Java object into a byte stream for saving or network transfer
+    C) Converts a database record into a Java object
+    D) Compresses Java class files
+    Answer: B
+
+    According to the Serialization topic, which interface must a class implement
+     to be serializable?
+    A) Cloneable
+    B) Runnable
+    C) Serializable
+    D) Externalizable (only)
+    Answer: C
+
+    The course explains the transient keyword in the Serialization topic.
+     What does transient do?
+    A) Makes a field thread-safe
+    B) Marks a field to be excluded from serialization
+    C) Makes a field final
+    D) Converts a field to a static variable
+    Answer: B
+
+    According to the Generics topic, what is the primary benefit of using Generics
+     in Java?
+    A) Faster execution at runtime
+    B) Compile-time type safety — errors are caught before the program runs
+    C) Allows arrays to store multiple types
+    D) Replaces the need for interfaces
+    Answer: B
+
+    The course covers the Collections topic. According to the course, which Map
+     implementation maintains keys in sorted (natural) order?
+    A) HashMap
+    B) LinkedHashMap
+    C) Hashtable
+    D) TreeMap
+    Answer: D
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION B : MSQ (Multiple Select Questions) — 20 Questions
+  [Each question may have MORE THAN ONE correct answer]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    According to the Packages topic, which of the following are benefits of using
+     packages in Java? (Select all that apply)
+    A) Namespaces — prevent class name clashes across libraries
+    B) Encapsulation — hide helper classes within a package boundary
+    C) Structure — mirror project's domain in a clean hierarchy
+    D) Speed — packages make Java programs run faster
+    Answer: A, B, C
+
+    The course covers built-in Java packages. According to the Packages topic,
+     which of the following are built-in Java packages mentioned in the course?
+     (Select all that apply)
+    A) java.lang — core language classes
+    B) java.util — data structures and utilities
+    C) java.io — file input/output
+    D) java.gui — graphical interfaces
+    Answer: A, B, C
+
+    According to the Collections topic, which of the following are the three main
+     interfaces of the Java Collections Framework? (Select all that apply)
+    A) List
+    B) Set
+    C) Map
+    D) Array
+    Answer: A, B, C
+
+    The course explains List implementations. According to the Collections topic,
+     which of the following are TRUE about List? (Select all that apply)
+    A) List is ordered and index-based
+    B) List allows duplicate elements
+    C) ArrayList backs a resizable array with O(1) random access
+    D) LinkedList uses a doubly linked list internally
+    Answer: A, B, C, D
+
+    According to the Collections topic, which of the following are TRUE about
+     Set implementations? (Select all that apply)
+    A) HashSet does not guarantee element order
+    B) LinkedHashSet maintains insertion order
+    C) TreeSet maintains sorted (natural) order
+    D) All Set implementations allow duplicate elements
+    Answer: A, B, C
+
+    The course covers HashMap. According to the Collections topic, which of the
+     following are TRUE about HashMap? (Select all that apply)
+    A) HashMap stores key-value pairs
+    B) HashMap does not maintain insertion order
+    C) HashMap allows one null key
+    D) HashMap is synchronized by default
+    Answer: A, B, C
+
+    According to the Lambda topic, which of the following are TRUE about lambda
+     expressions? (Select all that apply)
+    A) Lambdas are short, anonymous functions written inline
+    B) Lambdas can only be used with the Runnable interface
+    C) Lambdas treat behavior as data, passing logic to methods like values
+    D) Lambdas are the foundation for the Streams API
+    Answer: A, C, D
+
+    The course covers lambda syntax. According to the Lambda topic, which of the
+     following are valid lambda expression forms? (Select all that apply)
+    A) () -> System.out.println("Hello!")
+    B) name -> System.out.println("Hi " + name)
+    C) (a, b) -> a + b
+    D) new Lambda() { public void run() {} }
+    Answer: A, B, C
+
+    According to the Streams topic, which of the following are TRUE about the
+     Stream API? (Select all that apply)
+    A) Streams do not modify the original collection
+    B) Streams are lazy — intermediate operations wait for a terminal operation
+    C) A stream is single-use and cannot be reused
+    D) parallelStream() can be used for parallel processing
+    Answer: A, B, C, D
+
+    The course lists intermediate vs terminal operations. According to the Streams
+     topic, which of the following are intermediate operations? (Select all)
+    A) filter()
+    B) map()
+    C) collect()
+    D) sorted()
+    E) forEach()
+    Answer: A, B, D
+
+    According to the Multithreading topic, which of the following are ways to
+     create a thread in Java covered by the course? (Select all that apply)
+    A) Extend the Thread class and override run()
+    B) Implement the Runnable interface
+    C) Use a lambda expression with Runnable
+    D) Extend the Runnable class
+    Answer: A, B, C
+
+    The course covers thread lifecycle. According to the Multithreading topic,
+     which of the following thread methods are covered in the course?
+     (Select all that apply)
+    A) start() — begins thread execution
+    B) join() — waits for a thread to finish
+    C) sleep() — pauses a thread for a given time
+    D) compile() — compiles the thread
+    Answer: A, B, C
+
+    According to the Multithreading topic, which of the following are tools for
+     thread safety covered in the course? (Select all that apply)
+    A) synchronized keyword
+    B) volatile keyword
+    C) AtomicInteger
+    D) ExecutorService
+    Answer: A, B, C, D
+
+    The course covers JDBC steps. According to the JDBC topic, which of the
+     following are steps in using JDBC? (Select all that apply)
+    A) Load the database driver
+    B) Establish a Connection using DriverManager.getConnection()
+    C) Create a Statement or PreparedStatement
+    D) Process the ResultSet for SELECT queries
+    Answer: A, B, C, D
+
+    According to the JDBC topic, which of the following are TRUE about
+     PreparedStatement? (Select all that apply)
+    A) PreparedStatement is precompiled for better performance on repeated queries
+    B) PreparedStatement prevents SQL injection attacks
+    C) PreparedStatement uses setter methods (setString, setInt) to bind parameters
+    D) PreparedStatement cannot execute INSERT or UPDATE statements
+    Answer: A, B, C
+
+    The course covers Serialization. According to the Serialization topic, which
+     of the following are TRUE? (Select all that apply)
+    A) A class must implement Serializable to be serialized
+    B) transient fields are excluded from serialization
+    C) ObjectOutputStream is used to write (serialize) an object to a file
+    D) ObjectInputStream is used to read (deserialize) an object from a file
+    Answer: A, B, C, D
+
+    According to the Serialization topic, which of the following are TRUE about
+     serialVersionUID? (Select all that apply)
+    A) serialVersionUID is used for version control during deserialization
+    B) If serialVersionUID changes, reading old files throws InvalidClassException
+    C) Defining serialVersionUID explicitly maintains backward compatibility
+    D) serialVersionUID is automatically generated and cannot be set manually
+    Answer: A, B, C
+
+    The course covers Generics. According to the Generics topic, which of the
+     following are TRUE about Generics in Java? (Select all that apply)
+    A) Generics provide compile-time type safety
+    B) Generic type information is erased at runtime (Type Erasure)
+    C) Wildcards (?) allow flexible type parameters
+    D) Generic types can be used directly with primitive types (e.g., List<int>)
+    Answer: A, B, C
+
+    According to the Collections topic, which of the following are TRUE about
+     the Collections Framework? (Select all that apply)
+    A) Arrays are fixed-size; Collections provide dynamic structures
+    B) The framework provides a unified set of interfaces and classes
+    C) Using the framework lets you swap implementations without changing logic
+    D) The framework is in the java.util package
+    Answer: A, B, C, D
+
+    The course covers deadlock in Multithreading. According to the Multithreading
+     topic, which of the following are TRUE about deadlock? (Select all that apply)
+    A) Deadlock occurs when two threads each hold a lock the other needs
+    B) Deadlock causes both threads to wait forever
+    C) Deadlock can occur if synchronized is not used carefully
+    D) Deadlock is automatically resolved by the JVM garbage collector
+    Answer: A, B, C
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION C : CODING Questions — 10 Questions
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+----------------------------------------------------------------------------------------------------------------------------
+Contact Book                                                                                  
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Build a console contact book that stores contacts in a HashMap<String, String>
+mapping names to phone numbers. Support the following operations via a menu:
+  ✦  Add contact (name → phone)
+  ✦  View all contacts sorted alphabetically by name
+  ✦  Search contact by name
+  ✦  Delete contact by name
+
+Use a do-while loop for the menu so it displays at least once. When viewing all
+contacts, dump the keySet into a TreeMap or sort the keys before printing.
+
+Concepts Covered
+  •  HashMap / TreeMap
+  •  do-while Loop & Switch-Case
+  •  Collections Iteration
+  •  User Input (Scanner)
+
+Output Sample
+=== Contact Book ===
+1. Add   2. View All   3. Search   4. Delete   5. Exit
+> 1
+Name: Bob   Phone: 9876543210   → Contact saved.
+> 3
+Search: Bob   → Bob → 9876543210
+
+----------------------------------------------------------------------------------------------------------------------------
+Student Management System                                                                     
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Build a console app that stores student records (name, roll number, marks) in an
+ArrayList. Drive it through a menu with the following features:
+  ✦  Add a new student (name, roll, marks)
+  ✦  View all students in a formatted table
+  ✦  Search by roll number
+  ✦  Display total count of students
+
+Create a Student class with appropriate fields and a toString() method. Use a
+do-while + switch for the menu.
+
+Concepts Covered
+  •  OOP — Class & Object
+  •  ArrayList
+  •  do-while / switch
+  •  String Formatting
+
+Output Sample
+=== Student Management System ===
+1. Add   2. View All   3. Search   4. Exit
+> 1  Name: Alice   Roll: 101   Marks: 87  → Student added.
+> 2  Roll  Name    Marks
+     101   Alice   87
+
+----------------------------------------------------------------------------------------------------------------------------
+Expense Tracker                                                                               
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Track personal expenses stored in an ArrayList of Expense objects. Each expense
+has a category (e.g. Food, Travel), a description, and an amount. Support:
+  ✦  Add expense (category, description, amount)
+  ✦  View all expenses
+  ✦  Filter expenses by category
+  ✦  Show grand total and category-wise subtotals
+
+Concepts Covered
+  •  OOP — Class & Object
+  •  ArrayList
+  •  String Comparison (category filter)
+  •  Accumulator Logic
+
+Output Sample
+=== Expense Tracker ===
+1. Add   2. View All   3. By Category   4. Total   5. Exit
+> 1  Category: Food   Desc: Lunch   Amount: 120  → Added.
+> 4  Food: ₹120   Total Spent: ₹120
+
+----------------------------------------------------------------------------------------------------------------------------
+ATM Simulator                                                                                 
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Simulate a PIN-protected ATM backed by a BankAccount class. The class must
+encapsulate balance and PIN — never let main() access them directly. Support:
+  ✦  PIN verification at startup (3 attempts max; lock on failure)
+  ✦  Check balance
+  ✦  Deposit any positive amount
+  ✦  Withdraw with an insufficient-funds check
+  ✦  Exit session
+
+Concepts Covered
+  •  OOP — Encapsulation, Access Modifiers
+  •  Class Design (private fields, public methods)
+  •  do-while / switch
+  •  Input Validation
+
+Output Sample
+=== ATM ===
+Enter PIN: ****   → PIN correct. Welcome!
+1. Balance   2. Deposit   3. Withdraw   4. Exit
+> 2  Amount: 5000  → Deposited. New Balance: ₹15,000
+> 3  Amount: 20000 → Insufficient funds.
+
+----------------------------------------------------------------------------------------------------------------------------
+Inventory System                                                                              
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Track product inventory using a HashMap<String, Product> keyed on product ID.
+Each Product has an ID, name, quantity, and price. Support:
+  ✦  Add product
+  ✦  Restock (increase quantity)
+  ✦  Sell units (decrease quantity with stock check)
+  ✦  View all products
+  ✦  After every sale, automatically print a LOW STOCK warning if qty < 5
+
+Concepts Covered
+  •  OOP — Class & Object
+  •  HashMap
+  •  Conditional Validation
+  •  Menu-Driven Design
+
+Output Sample
+=== Inventory ===
+> Sell  Product ID: P001   Qty: 6
+Sold 6 units. Remaining: 2
+⚠ LOW STOCK: Laptop (2 left)
+
+----------------------------------------------------------------------------------------------------------------------------
+Employee Management + Sort by Salary                                                          
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Manage employee records (ID, name, department, salary) stored in an ArrayList.
+Support standard CRUD plus:
+  ✦  Sort employees by salary ascending or descending — implement selection sort
+     manually on the ArrayList; do not use Collections.sort() with a lambda
+  ✦  Search employees by department
+  ✦  Find the highest and lowest earner
+
+Implement the Comparable interface on Employee (natural order = salary ascending).
+
+Concepts Covered
+  •  OOP — Comparable
+  •  ArrayList
+  •  Manual Sorting (selection sort)
+  •  Interface Implementation
+
+Output Sample
+Sort by salary: 1=Asc  2=Desc  → (sorted list printed)
+Highest earner: Alice  IT  ₹72,000
+
+----------------------------------------------------------------------------------------------------------------------------
+Mini Banking Transaction History                                                              
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Extend a BankAccount to maintain a full transaction log. Every deposit and
+withdrawal is stored as a Transaction object (type, amount, balance-after,
+timestamp). Support:
+  ✦  Deposit (logged)
+  ✦  Withdraw with balance check (logged)
+  ✦  View full transaction history with running balance
+  ✦  Filter: deposits only / withdrawals only
+
+Concepts Covered
+  •  OOP — Class Design
+  •  ArrayList
+  •  Enum (DEPOSIT / WITHDRAWAL)
+  •  String Formatting
+
+Output Sample
+Date/Time   Type        Amount    Balance
+10:00       DEPOSIT     +₹10,000  ₹10,000
+10:05       WITHDRAWAL  -₹3,000   ₹7,000
+
+----------------------------------------------------------------------------------------------------------------------------
+Hotel Room Booking System                                                                     
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Build a hotel management console app. Rooms have types (Single/Double/Suite) and
+nightly rates stored in a HashMap<Integer, Booking>. A null value means the room
+is free. Support:
+  ✦  Display available rooms by type
+  ✦  Book a room (guest name, number of nights)
+  ✦  Check out by room number — print an invoice with 10% tax
+  ✦  View all current bookings
+  ✦  Prevent double-booking
+
+Concepts Covered
+  •  OOP — Class Design (Room, Booking)
+  •  HashMap
+  •  Invoice Calculation (tax)
+  •  Menu-Driven Design
+
+Output Sample
+> Book  Room: 101   Guest: Rahul   Nights: 3
+Room 101 booked. Rate: ₹2000/night
+> Checkout  Room: 101
+Room 101 (Single) x3 nights = ₹6,000   Tax (10%): ₹600   Total: ₹6,600
+Checked out. Room now available.
+
+----------------------------------------------------------------------------------------------------------------------------
+Stack Implementation + Balanced Brackets                                                      
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Implement a Stack from scratch using a plain array (not Java's built-in Stack or
+Deque). Fixed capacity set at construction time. Required operations:
+  ✦  push(value)  — with Stack Overflow check
+  ✦  pop()        — with Stack Underflow check
+  ✦  peek()       — view top element without removing
+  ✦  isEmpty() / isFull()
+
+Application: Use your stack to check whether the bracket sequence in an expression
+is balanced. Push on '(' / '{' / '['. On ')' / '}' / ']', pop and verify the match.
+
+Concepts Covered
+  •  Array-Based Data Structure
+  •  Stack (push / pop / peek)
+  •  Exception Handling (overflow / underflow)
+  •  Application: Bracket Matching
+
+Output Sample
+Stack capacity: 5
+> Push 10  → Stack: [10]
+> Push 20  → Stack: [10, 20]
+> Pop      → Popped: 20   Stack: [10]
+> Check Brackets: {(a+b)*[c-d]}   → BALANCED
+
+----------------------------------------------------------------------------------------------------------------------------
+Multi-User Scoreboard System                                                                  
+----------------------------------------------------------------------------------------------------------------------------
+
+Problem Statement
+Build a real-time scoreboard for a multiplayer game. All state lives in an
+ArrayList<Player> (name, score). Support:
+  ✦  Add player (name, initial score)
+  ✦  Update a player's score (add points by name)
+  ✦  Display ranked leaderboard (implement selection sort manually — no Collections.sort())
+  ✦  Show top-N players only
+  ✦  Award a bonus (fixed points) to every player whose score exceeds a given threshold
+
+After every update re-sort the list so the leaderboard is always current.
+
+Concepts Covered
+  •  OOP — Class Design (Player)
+  •  ArrayList
+  •  Manual Sorting (selection sort on score)
+  •  Threshold-Based Filtering
+
+Output Sample
+=== Scoreboard ===
+Rank  Player    Score
+1.    Priya     4500
+2.    Raj       3200
+3.    Sam       1800
+> Top 2:  1. Priya 4500   2. Raj 3200
+

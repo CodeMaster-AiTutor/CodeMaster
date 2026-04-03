@@ -31,6 +31,19 @@ type DashboardStatsResponse = {
   weekly_goal?: number;
   weekly_progress?: number;
   total_points?: number;
+  problems_solved?: number;
+  user?: {
+    skill_level?: string;
+    total_points?: number;
+  };
+  stats?: {
+    streak?: number;
+    successful_submissions?: number;
+    problems_solved?: number;
+    total_submissions?: number;
+    weekly_goal?: number;
+    weekly_progress?: number;
+  };
 };
 
 type ActivityItem = {
@@ -38,6 +51,7 @@ type ActivityItem = {
   title?: string;
   status?: string;
   timestamp?: string;
+  time?: string;
   points?: number;
 };
 
@@ -62,50 +76,66 @@ const Dashboard = () => {
   }>>([]);
   
   useEffect(() => {
+    let isMounted = true;
     const fetchDashboardData = async () => {
-      try {
-        const [statsResponseRaw, activityResponseRaw] = await Promise.all([
-          dashboardAPI.getStats(),
-          dashboardAPI.getRecentActivity()
-        ]);
-        const statsResponse = statsResponseRaw as DashboardStatsResponse;
-        const activityResponse = Array.isArray(activityResponseRaw)
-          ? (activityResponseRaw as ActivityItem[])
-          : [];
+      const [statsResult, activityResult] = await Promise.allSettled([
+        dashboardAPI.getStats(),
+        dashboardAPI.getRecentActivity()
+      ]);
 
-        // Update user stats from API response
+      if (isMounted && statsResult.status === 'fulfilled') {
+        const statsResponse = statsResult.value as DashboardStatsResponse;
+        const nestedStats = statsResponse.stats || {};
+        const nestedUser = statsResponse.user || {};
         setUserStats({
-          level: statsResponse.current_level || 'beginner',
-          streak: statsResponse.streak || 0,
-          problemsSolved: statsResponse.successful_compilations || 0,
-          totalProblems: statsResponse.total_submissions || 0,
-          weeklyGoal: statsResponse.weekly_goal || 10,
-          weeklyProgress: statsResponse.weekly_progress || 0,
-          skillPoints: statsResponse.total_points || 0,
-          nextLevelPoints: 1000 // Could be dynamic based on level
+          level: statsResponse.current_level || nestedUser.skill_level || 'beginner',
+          streak: statsResponse.streak ?? nestedStats.streak ?? 0,
+          problemsSolved: statsResponse.problems_solved ?? nestedStats.problems_solved ?? statsResponse.successful_compilations ?? nestedStats.successful_submissions ?? 0,
+          totalProblems: statsResponse.total_submissions ?? nestedStats.total_submissions ?? 0,
+          weeklyGoal: statsResponse.weekly_goal ?? nestedStats.weekly_goal ?? 10,
+          weeklyProgress: statsResponse.weekly_progress ?? nestedStats.weekly_progress ?? 0,
+          skillPoints: statsResponse.total_points ?? nestedUser.total_points ?? 0,
+          nextLevelPoints: 1000
         });
+      }
 
-        // Format recent activity from API response
+      if (isMounted && activityResult.status === 'fulfilled') {
+        const activityResponseRaw = activityResult.value as { activities?: ActivityItem[] } | ActivityItem[];
+        const activityResponse = Array.isArray(activityResponseRaw)
+          ? activityResponseRaw
+          : (activityResponseRaw?.activities || []);
         const formattedActivity = activityResponse.map((activity) => ({
           type: activity.type || 'challenge',
           title: activity.title || 'Activity',
           status: activity.status || 'completed',
-          time: formatTimeAgo(activity.timestamp || new Date().toISOString()),
+          time: formatTimeAgo(activity.timestamp || activity.time || new Date().toISOString()),
           points: activity.points || 0
         }));
-
         setRecentActivity(formattedActivity);
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
+      }
+
+      if (isMounted && statsResult.status === 'rejected' && activityResult.status === 'rejected') {
+        const error = statsResult.reason;
+        const message = error instanceof Error ? error.message : '';
+        if (message.toLowerCase().includes('authentication required')) {
+          return;
+        }
         toast({
           title: "Failed to load dashboard",
-          description: error instanceof Error ? error.message : 'Please try again later.',
+          description: message || 'Please try again later.',
           variant: "destructive"
         });
       }
     };
 
-    fetchDashboardData();
+    void fetchDashboardData();
+    const interval = window.setInterval(() => {
+      void fetchDashboardData();
+    }, 15000);
+    return () => {
+      isMounted = false;
+      window.clearInterval(interval);
+    };
   }, []);
 
   const formatTimeAgo = (timestamp: string): string => {

@@ -66,18 +66,13 @@ class JavaExecutor:
         """
         java_code = self._normalize_newlines(java_code)
         validation_errors = self._validate_structure(java_code)
-        if validation_errors:
-            return {
-                "success": False,
-                "output": "",
-                "errors": validation_errors,
-                "execution_time": 0,
-                "compilation_time": 0
-            }
         if self.use_docker:
-            return self._execute_with_docker(java_code, input_data=input_data)
+            result = self._execute_with_docker(java_code, input_data=input_data)
         else:
-            return self._execute_with_subprocess(java_code, input_data=input_data)
+            result = self._execute_with_subprocess(java_code, input_data=input_data)
+        if (not result.get("success")) and (not result.get("errors")) and validation_errors:
+            result["errors"] = validation_errors
+        return result
     
     def _extract_class_name(self, java_code: str) -> str:
         """Extract class name from Java code"""
@@ -313,59 +308,6 @@ class JavaExecutor:
             index += 1
         return errors
 
-    def _extract_root_error_lines(self, errors: List[Dict], java_code: Optional[str] = None) -> List[int]:
-        entries = []
-        for err in errors or []:
-            line = err.get("line")
-            message = str(err.get("message") or "").strip().lower()
-            if isinstance(line, int) and line > 0 and message:
-                entries.append((line, message))
-        if not entries:
-            return []
-        all_lines = sorted({line for line, _ in entries})
-        class_expected_pattern = "class, interface, enum, or record expected"
-        non_class_lines = [line for line, message in entries if class_expected_pattern not in message]
-        if not non_class_lines:
-            return all_lines
-        earliest_non_class = min(non_class_lines)
-        root_lines = []
-        for line in all_lines:
-            line_messages = [m for ln, m in entries if ln == line]
-            only_class_expected = all(class_expected_pattern in m for m in line_messages)
-            if only_class_expected and line > earliest_non_class:
-                continue
-            root_lines.append(line)
-        return sorted(set(root_lines))
-
-    def _prefer_error_message(self, message: str) -> int:
-        normalized = (message or "").lower()
-        if "class, interface, enum, or record expected" in normalized:
-            return 2
-        if "';' expected" in normalized:
-            return 1
-        return 0
-
-    def _filter_errors_to_roots(self, errors: List[Dict], java_code: Optional[str] = None) -> (List[Dict], List[int]):
-        if not errors:
-            return [], []
-        root_lines = self._extract_root_error_lines(errors, java_code)
-        root_line_set = set(root_lines)
-        unknown_line_errors = [err for err in errors if not isinstance(err.get("line"), int) or (err.get("line") or 0) <= 0]
-        grouped = {}
-        for err in errors:
-            line = err.get("line")
-            if not isinstance(line, int) or line <= 0:
-                continue
-            if line not in root_line_set:
-                continue
-            grouped.setdefault(line, []).append(err)
-        selected = []
-        for line in sorted(grouped.keys()):
-            candidates = grouped[line]
-            chosen = sorted(candidates, key=lambda item: self._prefer_error_message(str(item.get("message") or "")))[0]
-            selected.append(chosen)
-        return selected + unknown_line_errors, root_lines
-
     def _parse_runtime_error(self, error_output: str, class_name: Optional[str] = None) -> Dict:
         message_lines = [line for line in error_output.split('\n') if line.strip()]
         message = message_lines[0].strip() if message_lines else "Runtime error"
@@ -567,12 +509,10 @@ class JavaExecutor:
             errors = self._parse_compiler_errors(logs, java_code) if exit_code != 0 else []
             if exit_code != 0 and not errors:
                 errors = [{"type": "compilation_error", "line": 0, "column": 0, "message": logs.strip() or "Compilation failed"}]
-            filtered_errors, root_lines = self._filter_errors_to_roots(errors, java_code)
             
             return {
                 "success": exit_code == 0,
-                "errors": filtered_errors,
-                "root_error_lines": root_lines,
+                "errors": errors,
                 "compilation_time": time.time() - start_time
             }
         except docker.errors.ImageNotFound:
@@ -721,12 +661,10 @@ class JavaExecutor:
             errors = self._parse_compiler_errors(error_text, java_code) if exit_code != 0 else []
             if exit_code != 0 and not errors:
                 errors = [{"type": "compilation_error", "line": 0, "column": 0, "message": error_text.strip() or "Compilation failed"}]
-            filtered_errors, root_lines = self._filter_errors_to_roots(errors, java_code)
             
             return {
                 "success": exit_code == 0,
-                "errors": filtered_errors,
-                "root_error_lines": root_lines,
+                "errors": errors,
                 "compilation_time": time.time() - start_time
             }
         except subprocess.TimeoutExpired:

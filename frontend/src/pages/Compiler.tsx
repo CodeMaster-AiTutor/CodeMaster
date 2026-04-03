@@ -627,6 +627,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
   const lastSavedStateRef = useRef<Omit<CompilerState, 'version' | 'compressed' | 'updatedAt'> | null>(null);
   const [isClearing, setIsClearing] = useState(false);
   const sessionIdRef = useRef<string | null>(null);
+  const enableInlineErrorHelper = withLayout;
 
   useEffect(() => {
     onCodeChange?.(code);
@@ -767,21 +768,27 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
   };
 
   const actionableErrors = useMemo(() => {
-    const seen = new Set<number>();
+    if (!enableInlineErrorHelper) {
+      return [];
+    }
+    const seen = new Set<string>();
     const rows = (compilerErrors || [])
       .filter((err) => typeof err.line === 'number' && (err.line ?? 0) > 0 && !!err.message)
       .sort((a, b) => (a.line ?? 0) - (b.line ?? 0));
     const unique: CompilerError[] = [];
     for (const err of rows) {
-      const line = err.line as number;
-      if (seen.has(line)) continue;
-      seen.add(line);
+      const key = `${err.line}:${(err.message || '').trim().toLowerCase()}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
       unique.push(err);
     }
     return unique;
-  }, [compilerErrors]);
+  }, [compilerErrors, enableInlineErrorHelper]);
 
   const handleErrorLineAction = useCallback(async (error: CompilerError) => {
+    if (!enableInlineErrorHelper) {
+      return;
+    }
     setSelectedError(error);
     setIsErrorPanelOpen(true);
     setErrorExplainMessage('');
@@ -817,7 +824,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
     } finally {
       setIsExplainingError(false);
     }
-  }, []);
+  }, [enableInlineErrorHelper]);
 
   const clearErrorWidgets = useCallback(() => {
     const editor = editorRef.current;
@@ -830,6 +837,9 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
 
   const renderErrorWidgets = useCallback(() => {
     clearErrorWidgets();
+    if (!enableInlineErrorHelper) {
+      return;
+    }
     const editor = editorRef.current;
     const monaco = monacoRef.current;
     const model = editor?.getModel();
@@ -866,7 +876,14 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
       widgets.push(widget);
     });
     errorWidgetsRef.current = widgets;
-  }, [actionableErrors, clearErrorWidgets, handleErrorLineAction]);
+  }, [actionableErrors, clearErrorWidgets, handleErrorLineAction, enableInlineErrorHelper]);
+
+  useEffect(() => {
+    if (!enableInlineErrorHelper) {
+      setIsErrorPanelOpen(false);
+      setSelectedError(null);
+    }
+  }, [enableInlineErrorHelper]);
 
   useEffect(() => {
     renderErrorWidgets();
@@ -1611,6 +1628,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
                           </div>
                         )}
                         <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-primary/5 via-transparent to-accent/5 opacity-30"></div> 
+                        {enableInlineErrorHelper ? (
                         <div
                           className={`absolute top-0 right-0 h-full w-[360px] max-w-[92%] bg-card/95 border-l border-primary/20 shadow-2xl transition-transform duration-300 z-40 ${
                             isErrorPanelOpen ? 'translate-x-0' : 'translate-x-full'
@@ -1656,6 +1674,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
                             )}
                           </div>
                         </div>
+                        ) : null}
                       </div> 
                     </div> 
                   </div> 

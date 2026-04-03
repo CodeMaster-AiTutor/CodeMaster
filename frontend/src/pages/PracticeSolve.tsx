@@ -74,6 +74,9 @@ const PracticeSolve = () => {
   const [testResults, setTestResults] = useState<TestRunResult[]>([]);
   const [testSummary, setTestSummary] = useState<{ solved: boolean; passed: number; total: number } | null>(null);
   const [testError, setTestError] = useState<string>('');
+  const [earnablePoints, setEarnablePoints] = useState<number>(catalogLevel === 'advanced' ? 15 : catalogLevel === 'intermediate' ? 10 : 5);
+  const [pointsEarnedAlready, setPointsEarnedAlready] = useState<boolean>(false);
+  const [lastPointsAwarded, setLastPointsAwarded] = useState<number>(0);
 
   useEffect(() => {
     let active = true;
@@ -97,6 +100,8 @@ const PracticeSolve = () => {
         );
         setProblemDescription(found?.description || '');
         setProblemId(found?.id ?? null);
+        setEarnablePoints(found?.earnable_points ?? (catalogLevel === 'advanced' ? 15 : catalogLevel === 'intermediate' ? 10 : 5));
+        setPointsEarnedAlready(Boolean(found?.points_earned));
       } catch {
         setProblemDescription(cached || '');
         setProblemId(null);
@@ -236,6 +241,22 @@ const PracticeSolve = () => {
       const result = await practiceAPI.validateSolution(problemId, currentCode);
       setTestResults(result.results || []);
       setTestSummary({ solved: result.solved, passed: result.passed, total: result.total });
+      setLastPointsAwarded(result.points_awarded || 0);
+      if ((result.points_awarded || 0) > 0) {
+        setPointsEarnedAlready(true);
+      }
+      if (typeof result.current_points === 'number') {
+        try {
+          const raw = localStorage.getItem('user');
+          if (raw) {
+            const user = JSON.parse(raw) as Record<string, unknown>;
+            user.total_points = result.current_points;
+            localStorage.setItem('user', JSON.stringify(user));
+          }
+        } catch {
+          void 0;
+        }
+      }
       try {
         await practiceAPI.saveDraft(problemId, currentCode);
       } catch {
@@ -276,6 +297,12 @@ const PracticeSolve = () => {
               <div>
                 <div className="text-2xl md:text-3xl font-semibold text-white">{decodedTitle}</div>
                 <div className="text-sm text-muted-foreground">{levelLabel} Practice</div>
+                <div className="text-xs text-primary mt-1">
+                  Earnable skill points: +{earnablePoints} {pointsEarnedAlready ? '(already earned)' : ''}
+                </div>
+                {lastPointsAwarded > 0 ? (
+                  <div className="text-xs text-emerald-400 mt-1">Last run reward: +{lastPointsAwarded} points</div>
+                ) : null}
               </div>
             </div>
             <Button variant="outline" asChild className="gap-2">

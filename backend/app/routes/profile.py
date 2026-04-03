@@ -88,20 +88,7 @@ def _compute_streak(user: User) -> dict:
     }
 
 def update_streak_on_submit(user: User):
-    if not user:
-        return
-
-    today = date.today()
-    if user.last_active_date == today:
-        return
-
-    if user.last_active_date == today - timedelta(days=1):
-        user.streak_days = (user.streak_days or 0) + 1
-    else:
-        user.streak_days = 1
-
-    user.last_active_date = today
-    db.session.commit()
+    return
 
 @profile_bp.route('', methods=['GET'])
 @token_required
@@ -134,6 +121,7 @@ def get_profile(current_user):
         'profile_image_url': current_user.profile_image_url,
         'bio': current_user.bio,
         'skill_level': current_user.skill_level,
+        'total_points': int(current_user.total_points or 0),
         'created_at': current_user.created_at.isoformat() if current_user.created_at else None,
         'streak_days': streak['streak_days'],
         'active_today': streak['active_today'],

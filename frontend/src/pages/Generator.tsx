@@ -17,7 +17,7 @@ import {
   Pencil,
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { generatorAPI } from '@/lib/api';
+import { generatorAPI, profileAPI } from '@/lib/api';
 import AppLayout from '@/components/layout/AppLayout';
 import { useNavigate } from 'react-router-dom';
 
@@ -179,6 +179,16 @@ const Generator = () => {
   const [workingChatId, setWorkingChatId] = useState<number | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [skillPoints, setSkillPoints] = useState<number>(() => {
+    try {
+      const raw = localStorage.getItem('user');
+      if (!raw) return 0;
+      const parsed = JSON.parse(raw) as { total_points?: number };
+      return Number(parsed.total_points || 0);
+    } catch {
+      return 0;
+    }
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<{
     start: () => void;
@@ -224,6 +234,38 @@ const Generator = () => {
       void 0;
     }
   }, [messages, chatHistories, activeChatId]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const syncPoints = async () => {
+      try {
+        const profile = await profileAPI.getProfile();
+        if (!isMounted) return;
+        const points = Number(profile.total_points || 0);
+        setSkillPoints(points);
+        try {
+          const raw = localStorage.getItem('user');
+          if (raw) {
+            const user = JSON.parse(raw) as Record<string, unknown>;
+            user.total_points = points;
+            localStorage.setItem('user', JSON.stringify(user));
+          }
+        } catch {
+          void 0;
+        }
+      } catch {
+        void 0;
+      }
+    };
+    void syncPoints();
+    const interval = window.setInterval(() => {
+      void syncPoints();
+    }, 15000);
+    return () => {
+      isMounted = false;
+      window.clearInterval(interval);
+    };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -443,6 +485,19 @@ const Generator = () => {
       const response = await generatorAPI.generateCode(prompt, 'java', activeChatId);
       const cleanedCode = extractCleanCode(response.code || '');
       const codeName = getGeneratedCodeName(prompt, cleanedCode);
+      if (typeof response.remaining_points === 'number') {
+        setSkillPoints(response.remaining_points);
+        try {
+          const raw = localStorage.getItem('user');
+          if (raw) {
+            const user = JSON.parse(raw) as Record<string, unknown>;
+            user.total_points = response.remaining_points;
+            localStorage.setItem('user', JSON.stringify(user));
+          }
+        } catch {
+          void 0;
+        }
+      }
       
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
@@ -611,6 +666,9 @@ const Generator = () => {
             </div>
             
             <div className="flex items-center space-x-3">
+              <div className="px-3 py-1.5 rounded-md border border-primary/30 bg-primary/10 text-sm font-medium">
+                Skill Points: {skillPoints}
+              </div>
               <Button 
                 variant="outline" 
                 size="sm"

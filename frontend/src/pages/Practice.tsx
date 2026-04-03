@@ -780,10 +780,14 @@ const Practice = () => {
         setProblems(normalized);
       } catch (error) {
         if (!isActive) return;
+        const message = error instanceof Error ? error.message : '';
+        if (message.toLowerCase().includes('authentication required')) {
+          return;
+        }
         setProblems([]);
         toast({
           title: 'Failed to load practice problems',
-          description: error instanceof Error ? error.message : 'Please try again later.',
+          description: message || 'Please try again later.',
           variant: 'destructive',
         });
       }
@@ -846,6 +850,7 @@ const Practice = () => {
     index: number,
     keyPrefix: string
   ) => {
+    const earnablePoints = level === 'basic' ? 5 : level === 'intermediate' ? 10 : 15;
     const solved = isProblemSolved(level, problem.title) || problem.status === 'solved';
     const touched = solved || problem.status === 'attempted' || problem.hasDraft || isProblemTouched(level, problem.title);
     return (
@@ -861,6 +866,9 @@ const Practice = () => {
                 <div className="mt-1">
                   <Badge variant="outline" className="text-xs">
                     {problem.difficulty}
+                  </Badge>
+                  <Badge variant="secondary" className="text-xs ml-2">
+                    +{earnablePoints} pts
                   </Badge>
                 </div>
               </div>
@@ -990,6 +998,7 @@ const Practice = () => {
                         <div className="space-y-4">
                           {concepts.map((concept, index) => {
                             const locked = isConceptLocked(concept.level);
+                            const earnableVideoPoints = concept.level === 'basic' ? 10 : concept.level === 'intermediate' ? 15 : 20;
                             return (
                               <Card key={concept.id} className="border-border/20 bg-background/40 hover:border-primary/30 transition-colors">
                                 <CardContent className="p-6">
@@ -1002,6 +1011,7 @@ const Practice = () => {
                                         <div className="flex items-center gap-1 mb-1">
                                           <h3 className="text-lg font-semibold">{concept.title}</h3>
                                           <Badge variant="outline" className="capitalize">{concept.level}</Badge>
+                                          <Badge variant="secondary">+{earnableVideoPoints} pts</Badge>
                                         </div>
                                         <p className="text-muted-foreground">{concept.description}</p>
                                       </div>

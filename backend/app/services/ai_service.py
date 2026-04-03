@@ -51,7 +51,10 @@ Task: {task}
             Generated Java code
         """
         if self.service_type == 'openrouter':
-            return self._generate_with_openrouter(prompt, context)
+            try:
+                return self._generate_with_openrouter(prompt, context)
+            except Exception:
+                return self._generate_with_local_llm(prompt, context)
         elif self.service_type == 'ollama':
             return self._generate_with_ollama(prompt, context)
         elif self.service_type == 'huggingface':
@@ -75,7 +78,10 @@ Task: {task}
         context = "Focus on Java syntax, OOP concepts, and best practices."
         
         if self.service_type == 'openrouter':
-            return self._explain_with_openrouter(java_code)
+            try:
+                return self._explain_with_openrouter(java_code)
+            except Exception:
+                return self._explain_with_local_llm(java_code)
         elif self.service_type == 'ollama':
             full_prompt = self._build_ollama_prompt(task, context, java_code)
             return self._generate_with_ollama(full_prompt)

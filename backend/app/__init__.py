@@ -88,5 +88,9 @@ def create_app(config_name=None):
     @app.route('/api/health')
     def health_check():
         return {'status': 'healthy', 'service': 'CodeMaster Backend'}
+
+    with app.app_context():
+        from app.models.skill_points import SkillPointTransaction
+        SkillPointTransaction.__table__.create(bind=db.engine, checkfirst=True)
     
     return app

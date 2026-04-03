@@ -63,7 +63,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
           name: username,
           level: level.charAt(0).toUpperCase() + level.slice(1), // Capitalize first letter
           initials: initials,
-          streak: 0,
+          streak: Number(user.streak_days || 0),
           notifications: 0,
           profileImageUrl: profileImageUrl,
         };
@@ -126,6 +126,8 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
               skill_level: profile.skill_level,
               username: profile.username,
               email: profile.email,
+              streak_days: profile.streak_days,
+              total_points: profile.total_points,
             }
           : null;
         if (updatedUser) {

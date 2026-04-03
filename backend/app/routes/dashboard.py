@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from app import db
 from app.models.code_submission import CodeSubmission
 from app.models.assessment import Assessment
+from app.models.practice import PracticeAttempt
 from app.middleware.auth import token_required
 from datetime import datetime, timedelta
 from sqlalchemy import func
@@ -23,18 +24,23 @@ def get_stats(current_user):
             status='success'
         ).count()
         success_rate = int((successful_submissions / total_submissions * 100)) if total_submissions > 0 else 0
+        problems_solved = db.session.query(func.count(func.distinct(PracticeAttempt.problem_id))).filter(
+            PracticeAttempt.user_id == current_user.id,
+            PracticeAttempt.status == 'passed'
+        ).scalar() or 0
         
-        # Weekly goal progress
-        week_start = datetime.utcnow() - timedelta(days=datetime.utcnow().weekday())
-        weekly_submissions = CodeSubmission.query.filter(
-            CodeSubmission.user_id == current_user.id,
-            CodeSubmission.created_at >= week_start
-        ).count()
-        weekly_goal = 10
-        weekly_progress = min(weekly_submissions, weekly_goal)
+        # Weekly goal progress (solved practice problems)
+        week_start_date = datetime.utcnow().date() - timedelta(days=datetime.utcnow().date().weekday())
+        week_start = datetime.combine(week_start_date, datetime.min.time())
+        weekly_solved = db.session.query(func.count(func.distinct(PracticeAttempt.problem_id))).filter(
+            PracticeAttempt.user_id == current_user.id,
+            PracticeAttempt.status == 'passed',
+            PracticeAttempt.submitted_at >= week_start
+        ).scalar() or 0
+        weekly_goal = 5
+        weekly_progress = min(int(weekly_solved), weekly_goal)
         
-        # Calculate streak
-        streak = _calculate_streak(current_user.id)
+        streak = int(current_user.streak_days or 0)
         
         return jsonify({
             'user': {
@@ -46,6 +52,7 @@ def get_stats(current_user):
             'stats': {
                 'total_submissions': total_submissions,
                 'successful_submissions': successful_submissions,
+                'problems_solved': int(problems_solved),
                 'success_rate': success_rate,
                 'total_assessments': total_assessments,
                 'streak': streak,

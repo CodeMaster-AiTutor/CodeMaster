@@ -17,9 +17,14 @@ import { analyticsAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
 type AnalyticsOverviewResponse = {
-  total_compilations?: number;
+  total_submissions?: number;
   success_rate?: number;
-  average_execution_time?: number;
+  average_time?: number;
+  streak?: number;
+  total_points?: number;
+  problems_solved?: number;
+  weekly_goal?: number;
+  weekly_progress?: number;
 };
 
 type AnalyticsProgressResponse = {
@@ -32,6 +37,7 @@ const Analytics = () => {
     totalProblems: 0,
     solvedProblems: 0,
     successRate: 0,
+    skillPoints: 0,
     averageTime: 0,
     streak: 0,
     weeklyGoal: 10,
@@ -53,25 +59,30 @@ const Analytics = () => {
   }>>([]);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchAnalyticsData = async () => {
       try {
         const [overviewResponse, progressResponse] = await Promise.all([
           analyticsAPI.getOverview(),
           analyticsAPI.getProgress()
         ]);
+        if (!isMounted) {
+          return;
+        }
 
         const overview = overviewResponse as AnalyticsOverviewResponse;
         const progress = progressResponse as AnalyticsProgressResponse;
 
         // Update stats from API response
         setStats({
-          totalProblems: overview.total_compilations || 0,
-          solvedProblems: Math.round(((overview.success_rate || 0) / 100) * (overview.total_compilations || 0)),
+          totalProblems: overview.total_submissions || 0,
+          solvedProblems: overview.problems_solved || 0,
           successRate: overview.success_rate || 0,
-          averageTime: Math.round(overview.average_execution_time || 0),
-          streak: 0, // Could be calculated from activity
-          weeklyGoal: 10,
-          weeklyProgress: 0 // Could be calculated from weekly activity
+          skillPoints: overview.total_points || 0,
+          averageTime: Math.round(overview.average_time || 0),
+          streak: overview.streak || 0,
+          weeklyGoal: overview.weekly_goal || 5,
+          weeklyProgress: overview.weekly_progress || 0
         });
 
         // Format weekly activity from progress response
@@ -96,16 +107,30 @@ const Analytics = () => {
           setSkillProgress(formattedProgress);
         }
       } catch (error) {
+        if (!isMounted) {
+          return;
+        }
         console.error('Failed to fetch analytics data:', error);
+        const message = error instanceof Error ? error.message : '';
+        if (message.toLowerCase().includes('authentication required')) {
+          return;
+        }
         toast({
           title: "Failed to load analytics",
-          description: error instanceof Error ? error.message : 'Please try again later.',
+          description: message || 'Please try again later.',
           variant: "destructive"
         });
       }
     };
 
-    fetchAnalyticsData();
+    void fetchAnalyticsData();
+    const interval = window.setInterval(() => {
+      void fetchAnalyticsData();
+    }, 15000);
+    return () => {
+      isMounted = false;
+      window.clearInterval(interval);
+    };
   }, []);
 
   const formatDate = (dateString: string): string => {
@@ -143,8 +168,8 @@ const Analytics = () => {
               <div className="flex items-center space-x-2">
                 <TrendingUp className="h-8 w-8 text-green-500" />
                 <div>
-                  <div className="text-2xl font-bold">{stats.successRate}%</div>
-                  <div className="text-sm text-muted-foreground">Success Rate</div>
+                  <div className="text-2xl font-bold">{stats.skillPoints}</div>
+                  <div className="text-sm text-muted-foreground">Skill Points</div>
                 </div>
               </div>
             </CardContent>
