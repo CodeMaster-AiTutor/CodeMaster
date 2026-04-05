@@ -28,6 +28,7 @@ const EDITOR_FONT_SIZE_KEY = 'settings:editor-font-size';
 const EDITOR_THEME_KEY = 'settings:editor-theme';
 const EDITOR_UPDATED_AT_KEY = 'settings:editor-updated-at';
 const SETTINGS_SUPPORTS_EDITOR_THEME_KEY = 'settings:supports-editor-theme';
+const STREAK_REMINDERS_KEY = 'settings:streak-reminders';
 const EDITOR_THEMES = [
   { value: 'vs-dark', label: 'VS Code Dark' },
   { value: 'vs', label: 'VS Code Light' },
@@ -79,8 +80,42 @@ const getStoredEditorThemeSupport = () => {
   }
 };
 
+const getCurrentAppThemeIsDark = () => {
+  try {
+    const rootHasDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+    if (rootHasDark) {
+      return true;
+    }
+    const storedTheme = localStorage.getItem('theme');
+    if (storedTheme === 'light') {
+      return false;
+    }
+    if (storedTheme === 'dark') {
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+};
+
+const getStoredStreakReminders = () => {
+  try {
+    const stored = localStorage.getItem(STREAK_REMINDERS_KEY);
+    if (stored === 'false') {
+      return false;
+    }
+    if (stored === 'true') {
+      return true;
+    }
+    return true;
+  } catch {
+    return true;
+  }
+};
+
 const Settings = () => {
-  const { setTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -98,8 +133,7 @@ const Settings = () => {
     editorTheme: getStoredEditorTheme(),
     darkMode: true,
     emailNotifications: true,
-    pushNotifications: false,
-    streakReminders: true
+    streakReminders: getStoredStreakReminders()
   }));
 
   const updateSettings = <K extends keyof typeof settings>(key: K, value: (typeof settings)[K]) => {
@@ -120,6 +154,13 @@ const Settings = () => {
         void 0;
       }
     }
+    if (key === 'streakReminders') {
+      try {
+        localStorage.setItem(STREAK_REMINDERS_KEY, String(Boolean(value)));
+      } catch {
+        void 0;
+      }
+    }
   };
 
   useEffect(() => {
@@ -127,7 +168,7 @@ const Settings = () => {
       setIsLoading(true);
       try {
         const data = await settingsAPI.getSettings();
-        const darkMode = data.theme !== 'light';
+        const darkMode = getCurrentAppThemeIsDark();
         const themeValues = new Set(EDITOR_THEMES.map((theme) => theme.value));
         const localUpdatedAt = getStoredEditorUpdatedAt();
         const apiUpdatedAt = data.updated_at ? Date.parse(data.updated_at) : 0;
@@ -152,7 +193,6 @@ const Settings = () => {
             editorTheme: localEditorTheme,
             darkMode,
           }));
-          setTheme(darkMode ? 'dark' : 'light');
           try {
             const payload: { font_size: number; editor_theme?: string } = {
               font_size: Number(localFontSize),
@@ -188,7 +228,6 @@ const Settings = () => {
             editorTheme: nextEditorTheme,
             darkMode,
           }));
-          setTheme(darkMode ? 'dark' : 'light');
           try {
             localStorage.setItem(EDITOR_FONT_SIZE_KEY, String(data.font_size ?? 14));
             localStorage.setItem(EDITOR_THEME_KEY, nextEditorTheme);
@@ -211,7 +250,15 @@ const Settings = () => {
       }
     };
     loadSettings();
-  }, [setTheme]);
+  }, []);
+
+  useEffect(() => {
+    if (!resolvedTheme) {
+      return;
+    }
+    const isDark = resolvedTheme === 'dark';
+    setSettings((prev) => (prev.darkMode === isDark ? prev : { ...prev, darkMode: isDark }));
+  }, [resolvedTheme]);
 
   const persistEditorSettings = useCallback(async () => {
     setIsSaving(true);
@@ -516,21 +563,48 @@ const Settings = () => {
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="darkMode">Dark Mode</Label>
+                    <Label htmlFor="darkMode">Change Theme</Label>
                     <p className="text-sm text-muted-foreground">Switch between light and dark themes</p>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Sun className="w-4 h-4" />
-                    <Switch 
+                  <div className="flex items-center">
+                    <button
+                      type="button"
                       id="darkMode"
-                      checked={settings.darkMode}
-                      onCheckedChange={(checked) => {
+                      role="switch"
+                      aria-checked={settings.darkMode}
+                      aria-label="Toggle theme"
+                      disabled={isLoading}
+                      onClick={() => {
+                        const checked = !settings.darkMode;
                         updateSettings('darkMode', checked);
                         setTheme(checked ? 'dark' : 'light');
                       }}
-                      disabled={isLoading}
-                    />
-                    <Moon className="w-4 h-4" />
+                      className={`relative h-8 w-16 rounded-full border transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${
+                        settings.darkMode
+                          ? 'bg-gradient-to-r from-slate-700 via-slate-800 to-slate-900 border-slate-500/60'
+                          : 'bg-gradient-to-r from-sky-200 via-sky-100 to-amber-100 border-sky-300/80'
+                      }`}
+                    >
+                      <span className={`absolute left-2 top-1.5 transition-opacity duration-300 ${settings.darkMode ? 'opacity-30' : 'opacity-100'}`}>
+                        <Sun className="w-3.5 h-3.5 text-amber-500" />
+                      </span>
+                      <span className={`absolute right-2 top-1.5 transition-opacity duration-300 ${settings.darkMode ? 'opacity-100' : 'opacity-30'}`}>
+                        <Moon className="w-3.5 h-3.5 text-indigo-200" />
+                      </span>
+                      <span
+                        className={`absolute top-0.5 h-6 w-6 rounded-full border border-white/80 shadow-md transition-all duration-300 flex items-center justify-center ${
+                          settings.darkMode
+                            ? 'left-[2.1rem] bg-slate-950'
+                            : 'left-0.5 bg-white'
+                        }`}
+                      >
+                        {settings.darkMode ? (
+                          <Moon className="w-3.5 h-3.5 text-indigo-200" />
+                        ) : (
+                          <Sun className="w-3.5 h-3.5 text-amber-500" />
+                        )}
+                      </span>
+                    </button>
                   </div>
                 </div>
 
@@ -556,19 +630,6 @@ const Settings = () => {
                     id="emailNotifications"
                     checked={settings.emailNotifications}
                     onCheckedChange={(checked) => updateSettings('emailNotifications', checked)}
-                    disabled={isLoading}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="pushNotifications">Push Notifications</Label>
-                    <p className="text-sm text-muted-foreground">Get browser notifications</p>
-                  </div>
-                  <Switch 
-                    id="pushNotifications"
-                    checked={settings.pushNotifications}
-                    onCheckedChange={(checked) => updateSettings('pushNotifications', checked)}
                     disabled={isLoading}
                   />
                 </div>

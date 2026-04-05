@@ -295,14 +295,29 @@ def upload_avatar(current_user):
 @profile_bp.route('/submissions', methods=['GET'])
 @token_required
 def get_submission_history(current_user):
-    limit = min(int(request.args.get('limit', 20)), 50)
-
-    attempts = (
+    limit = min(int(request.args.get('limit', 200)), 500)
+    solved_only = str(request.args.get('solved_only', 'true')).strip().lower() in ('1', 'true', 'yes', 'on')
+    current_level_only = str(request.args.get('current_level_only', 'true')).strip().lower() in ('1', 'true', 'yes', 'on')
+    query = (
         PracticeAttempt.query
-        .filter_by(user_id=current_user.id)
-        .order_by(PracticeAttempt.submitted_at.desc())
-        .limit(limit)
-        .all()
+        .join(PracticeProblem, PracticeProblem.id == PracticeAttempt.problem_id)
+        .filter(PracticeAttempt.user_id == current_user.id)
     )
-
-    return jsonify([a.to_dict() for a in attempts])
+    if solved_only:
+        query = query.filter(PracticeAttempt.status == 'passed')
+    if current_level_only:
+        query = query.filter(PracticeProblem.level == (current_user.skill_level or 'beginner'))
+    attempts = query.order_by(
+        PracticeAttempt.submitted_at.desc(),
+        PracticeAttempt.id.desc()
+    ).all()
+    seen_problem_ids = set()
+    unique_attempts = []
+    for attempt in attempts:
+        if attempt.problem_id in seen_problem_ids:
+            continue
+        seen_problem_ids.add(attempt.problem_id)
+        unique_attempts.append(attempt)
+        if len(unique_attempts) >= limit:
+            break
+    return jsonify([a.to_dict() for a in unique_attempts])

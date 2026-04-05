@@ -17,9 +17,11 @@ import {
 import Editor from '@monaco-editor/react';
 import type { OnMount } from '@monaco-editor/react';
 import type { editor as MonacoEditor } from 'monaco-editor';
+import { useTheme } from 'next-themes';
 import { toast } from '@/hooks/use-toast';
 import AppLayout from '@/components/layout/AppLayout';
 import { authAPI, compilerAPI, settingsAPI } from '@/lib/api';
+import { installPanelScrollLock } from '@/lib/panelScrollLock';
 import Terminal from '@/components/Terminal';
 import {
   AlertDialog,
@@ -43,6 +45,7 @@ const EDITOR_FONT_SIZE_KEY = 'settings:editor-font-size';
 const EDITOR_THEME_KEY = 'settings:editor-theme';
 const EDITOR_UPDATED_AT_KEY = 'settings:editor-updated-at';
 const SETTINGS_SUPPORTS_EDITOR_THEME_KEY = 'settings:supports-editor-theme';
+const EDITOR_THEME_APP_THEME_KEY = 'settings:editor-theme-app-theme';
 const EDITOR_THEME_VALUES = ['vs-dark', 'vs', 'hc-black', 'hc-light', 'github-dark', 'github-light', 'jellyfish'];
 
 type PersistenceKeys = {
@@ -581,6 +584,18 @@ const getStoredEditorThemeSupport = () => {
   }
 };
 
+const getCurrentAppThemeMode = (): 'dark' | 'light' => {
+  try {
+    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+  } catch {
+    return 'dark';
+  }
+};
+
+const getDefaultEditorThemeForAppTheme = (themeMode: 'dark' | 'light') => {
+  return themeMode === 'light' ? 'vs' : 'vs-dark';
+};
+
 type CompilerProps = {
   withLayout?: boolean;
   onExecutionSuccess?: () => void;
@@ -591,6 +606,7 @@ type CompilerProps = {
 
 const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persistenceScope, initialCode = '' }: CompilerProps) => {
   const navigate = useNavigate();
+  const { resolvedTheme } = useTheme();
   const persistenceKeys = useMemo(
     () => getPersistenceKeys(withLayout ? undefined : persistenceScope),
     [persistenceScope, withLayout]
@@ -617,6 +633,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
   const [editorFontSize, setEditorFontSize] = useState(getStoredFontSize());
   const [editorTheme, setEditorTheme] = useState(getStoredEditorTheme());
   const compilerRef = useRef<HTMLDivElement>(null);
+  const editorPanelRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Parameters<OnMount>[1] | null>(null);
   const errorDetectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -627,6 +644,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
   const lastSavedStateRef = useRef<Omit<CompilerState, 'version' | 'compressed' | 'updatedAt'> | null>(null);
   const [isClearing, setIsClearing] = useState(false);
   const sessionIdRef = useRef<string | null>(null);
+  const appThemeRef = useRef<'dark' | 'light'>(getCurrentAppThemeMode());
   const enableInlineErrorHelper = withLayout;
 
   useEffect(() => {
@@ -703,6 +721,40 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
       isMounted = false;
     };
   }, []);
+
+  const syncEditorThemeWithAppTheme = useCallback((themeMode: 'dark' | 'light', forceDefault = false) => {
+    const defaultTheme = getDefaultEditorThemeForAppTheme(themeMode);
+    const storedTheme = getStoredEditorTheme();
+    const normalizedStoredTheme = EDITOR_THEME_VALUES.includes(storedTheme) ? storedTheme : defaultTheme;
+    let lastThemeMode: string | null = null;
+    try {
+      lastThemeMode = localStorage.getItem(EDITOR_THEME_APP_THEME_KEY);
+    } catch {
+      lastThemeMode = null;
+    }
+    const shouldResetToDefault = forceDefault || lastThemeMode !== themeMode;
+    const nextTheme = shouldResetToDefault ? defaultTheme : normalizedStoredTheme;
+    setEditorTheme(nextTheme);
+    try {
+      localStorage.setItem(EDITOR_THEME_KEY, nextTheme);
+      localStorage.setItem(EDITOR_THEME_APP_THEME_KEY, themeMode);
+      localStorage.setItem(EDITOR_UPDATED_AT_KEY, new Date().toISOString());
+    } catch {
+      void 0;
+    }
+  }, []);
+
+  useEffect(() => {
+    const themeMode: 'dark' | 'light' =
+      resolvedTheme === 'light' ? 'light' : resolvedTheme === 'dark' ? 'dark' : getCurrentAppThemeMode();
+    const previousThemeMode = appThemeRef.current;
+    appThemeRef.current = themeMode;
+    if (previousThemeMode !== themeMode) {
+      syncEditorThemeWithAppTheme(themeMode, true);
+      return;
+    }
+    syncEditorThemeWithAppTheme(themeMode, false);
+  }, [resolvedTheme, syncEditorThemeWithAppTheme]);
 
   useEffect(() => {
     const editor = editorRef.current;
@@ -1224,6 +1276,19 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
   }, []);
 
   useEffect(() => {
+    const panel = editorPanelRef.current;
+    if (!panel) {
+      return;
+    }
+    return installPanelScrollLock(panel, {
+      getScrollableTarget: (root) => {
+        const monacoScrollable = root.querySelector('.monaco-scrollable-element');
+        return monacoScrollable instanceof HTMLElement ? monacoScrollable : null;
+      },
+    });
+  }, []);
+
+  useEffect(() => {
     const handleBeforeUnload = () => {
       const currentCode = editorRef.current?.getValue() ?? codeRef.current;
       try {
@@ -1263,6 +1328,11 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
       }
       if (event.key === EDITOR_THEME_KEY && event.newValue) {
         setEditorTheme(event.newValue);
+        try {
+          localStorage.setItem(EDITOR_THEME_APP_THEME_KEY, appThemeRef.current);
+        } catch {
+          void 0;
+        }
       }
       if (event.key === EDITOR_UPDATED_AT_KEY) {
         const nextFontSize = getStoredFontSize();
@@ -1522,7 +1592,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
                 {/* Code Editor Panel with Header and Buttons */} 
                 <div className="flex flex-col space-y-3"> 
                   {/* Header */} 
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-1.5 sm:p-1.5 md:p-2 bg-gradient-to-r from-card/50 to-card/30 backdrop-blur-sm border border-primary/10 rounded-t-xl gap-2 sm:gap-0"> 
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-1.5 sm:p-1.5 md:p-2 bg-gradient-to-r from-card/92 to-card/80 backdrop-blur-sm border border-border/65 dark:border-border/80 rounded-t-xl gap-2 sm:gap-0 shadow-[0_6px_20px_hsl(0_0%_0%_/_0.08)] dark:shadow-[0_10px_24px_hsl(0_0%_0%_/_0.45)]"> 
                     <div className="flex items-center space-x-2 sm:space-x-3"> 
                       <div className="p-1.5 sm:p-2 bg-primary/20 rounded-lg"> 
                         <Code2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" /> 
@@ -1596,7 +1666,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
                   </div> 
       
                   {/* Editor */} 
-                  <div className={`relative bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm border border-primary/10 rounded-b-xl overflow-hidden shadow-2xl ${isFullscreen ? 'h-[90vh]' : 'h-[65vh] sm:h-[70vh] md:h-[75vh] lg:h-[80vh]'}`}> 
+                  <div ref={editorPanelRef} className={`relative bg-gradient-to-br from-card/95 to-card/88 backdrop-blur-sm border border-border/65 dark:border-border/80 rounded-b-xl overflow-hidden shadow-2xl ${isFullscreen ? 'h-[90vh]' : 'h-[65vh] sm:h-[70vh] md:h-[75vh] lg:h-[80vh]'}`}> 
                     <div className="flex h-full"> 
                       <div className="flex-1 relative overflow-hidden"> 
                         <div data-testid="compiler-editor" className="absolute inset-0">
@@ -1618,7 +1688,11 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
                               insertSpaces: true,
                               wordWrap: 'on',
                               padding: { top: 12, bottom: 12 },
-                              scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
+                              scrollbar: {
+                                verticalScrollbarSize: 8,
+                                horizontalScrollbarSize: 8,
+                                alwaysConsumeMouseWheel: false
+                              }
                             }}
                           />
                         </div>

@@ -33,6 +33,18 @@ type ProfileData = {
   };
 };
 
+type SubmissionItem = {
+  id: number;
+  problem_id: number;
+  problem_title: string | null;
+  level?: string | null;
+  difficulty: string | null;
+  status: string;
+  submitted_at: string | null;
+  score?: number | null;
+  time_ms?: number | null;
+};
+
 const getCachedProfile = (): ProfileData | null => {
   try {
     const cached = localStorage.getItem('profile:cache');
@@ -67,6 +79,7 @@ const initialProfile = getCachedProfile();
 
 const Profile = () => {
   const [profile, setProfile] = useState<ProfileData | null>(initialProfile);
+  const [submissions, setSubmissions] = useState<SubmissionItem[]>([]);
   const hasCachedProfileRef = useRef(Boolean(initialProfile));
   const [isUploading, setIsUploading] = useState(false);
 
@@ -144,6 +157,22 @@ const Profile = () => {
     };
     loadProfile();
   }, []);
+
+  useEffect(() => {
+    const loadSubmissions = async () => {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        return;
+      }
+      try {
+        const data = await profileAPI.getSubmissions(200, { solvedOnly: true, currentLevelOnly: true });
+        setSubmissions(Array.isArray(data) ? data : []);
+      } catch {
+        setSubmissions([]);
+      }
+    };
+    loadSubmissions();
+  }, [profile?.skill_level]);
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -374,14 +403,28 @@ const Profile = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="text-center py-8">
-                      <BookOpen className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                      <h3 className="text-lg font-medium mb-2">No submissions yet</h3>
-                      <p className="text-muted-foreground">
-                        Start solving problems to see your submission history here.
-                      </p>
-                    </div>
+                  <div className="space-y-3 max-h-[12rem] overflow-y-hidden hover:overflow-y-auto pr-1">
+                    {submissions.length === 0 ? (
+                      <div className="text-center py-8">
+                        <BookOpen className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                        <h3 className="text-lg font-medium mb-2">No solved submissions yet</h3>
+                        <p className="text-muted-foreground">
+                          Solve problems in your current level to build submission history.
+                        </p>
+                      </div>
+                    ) : (
+                      submissions.map((item) => (
+                        <div key={item.id} className="rounded-lg border border-border/60 p-3 bg-muted/30">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="font-medium truncate">{item.problem_title || `Problem #${item.problem_id}`}</div>
+                            <Badge variant="secondary">{item.difficulty || 'N/A'}</Badge>
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {item.level || profile?.skill_level || 'beginner'}
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </CardContent>
               </Card>

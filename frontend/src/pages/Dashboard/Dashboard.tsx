@@ -8,11 +8,13 @@ import {
   Brain, 
   Zap, 
   Trophy,
+  BookOpen,
   Target,
   TrendingUp,
   Play,
   Clock,
   CheckCircle,
+  Lock,
   ArrowRight,
   Flame,
   Users,
@@ -30,6 +32,8 @@ type DashboardStatsResponse = {
   total_submissions?: number;
   weekly_goal?: number;
   weekly_progress?: number;
+  monthly_goal?: number;
+  monthly_progress?: number;
   total_points?: number;
   problems_solved?: number;
   user?: {
@@ -43,7 +47,28 @@ type DashboardStatsResponse = {
     total_submissions?: number;
     weekly_goal?: number;
     weekly_progress?: number;
+    monthly_goal?: number;
+    monthly_progress?: number;
   };
+  achievements?: Array<{
+    key: string;
+    name: string;
+    description: string;
+    earned: boolean;
+    locked?: boolean;
+    level?: 'beginner' | 'intermediate' | 'advanced';
+    reward_points?: number;
+    progress?: { completed: number; total: number };
+  }>;
+  trending_challenges?: Array<{
+    id: number;
+    title: string;
+    level: 'beginner' | 'intermediate' | 'advanced';
+    difficulty: string;
+    participants: number;
+    attempts: number;
+    path?: string;
+  }>;
 };
 
 type ActivityItem = {
@@ -63,6 +88,8 @@ const Dashboard = () => {
     totalProblems: 0,
     weeklyGoal: 10,
     weeklyProgress: 0,
+    monthlyGoal: 15,
+    monthlyProgress: 0,
     skillPoints: 0,
     nextLevelPoints: 1000
   });
@@ -74,13 +101,15 @@ const Dashboard = () => {
     time: string;
     points: number;
   }>>([]);
+  const [achievements, setAchievements] = useState<Array<{ name: string; description: string; earned: boolean; locked: boolean; level: string; rewardPoints: number }>>([]);
+  const [upcomingChallenges, setUpcomingChallenges] = useState<Array<{ title: string; difficulty: string; estimatedTime: string; participants: number; path: string }>>([]);
   
   useEffect(() => {
     let isMounted = true;
     const fetchDashboardData = async () => {
       const [statsResult, activityResult] = await Promise.allSettled([
         dashboardAPI.getStats(),
-        dashboardAPI.getRecentActivity()
+        dashboardAPI.getRecentActivity(5)
       ]);
 
       if (isMounted && statsResult.status === 'fulfilled') {
@@ -94,9 +123,30 @@ const Dashboard = () => {
           totalProblems: statsResponse.total_submissions ?? nestedStats.total_submissions ?? 0,
           weeklyGoal: statsResponse.weekly_goal ?? nestedStats.weekly_goal ?? 10,
           weeklyProgress: statsResponse.weekly_progress ?? nestedStats.weekly_progress ?? 0,
+          monthlyGoal: statsResponse.monthly_goal ?? nestedStats.monthly_goal ?? 15,
+          monthlyProgress: statsResponse.monthly_progress ?? nestedStats.monthly_progress ?? 0,
           skillPoints: statsResponse.total_points ?? nestedUser.total_points ?? 0,
           nextLevelPoints: 1000
         });
+        const incomingAchievements = Array.isArray(statsResponse.achievements) ? statsResponse.achievements : [];
+        setAchievements(incomingAchievements.map((item) => ({
+          name: item.name,
+          description: item.progress
+            ? `${item.description} (${item.progress.completed}/${item.progress.total})`
+            : item.description,
+          earned: Boolean(item.earned),
+          locked: Boolean(item.locked),
+          level: item.level || 'beginner',
+          rewardPoints: Number(item.reward_points || 0),
+        })));
+        const incomingChallenges = Array.isArray(statsResponse.trending_challenges) ? statsResponse.trending_challenges : [];
+        setUpcomingChallenges(incomingChallenges.map((item) => ({
+          title: item.title,
+          difficulty: item.difficulty || 'Easy',
+          estimatedTime: item.difficulty === 'Hard' ? '25 min' : item.difficulty === 'Medium' ? '18 min' : '12 min',
+          participants: Number(item.participants || 0),
+          path: `/practice/solve/${item.level}/${encodeURIComponent(item.title)}`,
+        })));
       }
 
       if (isMounted && activityResult.status === 'fulfilled') {
@@ -108,10 +158,10 @@ const Dashboard = () => {
           type: activity.type || 'challenge',
           title: activity.title || 'Activity',
           status: activity.status || 'completed',
-          time: formatTimeAgo(activity.timestamp || activity.time || new Date().toISOString()),
+          time: activity.timestamp || activity.time ? formatTimeAgo(activity.timestamp || activity.time) : 'Unknown',
           points: activity.points || 0
         }));
-        setRecentActivity(formattedActivity);
+        setRecentActivity(formattedActivity.slice(0, 5));
       }
 
       if (isMounted && statsResult.status === 'rejected' && activityResult.status === 'rejected') {
@@ -141,6 +191,9 @@ const Dashboard = () => {
   const formatTimeAgo = (timestamp: string): string => {
     const now = new Date();
     const time = new Date(timestamp);
+    if (Number.isNaN(time.getTime())) {
+      return 'Unknown';
+    }
     const diffInSeconds = Math.floor((now.getTime() - time.getTime()) / 1000);
     
     if (diffInSeconds < 60) return 'Just now';
@@ -180,9 +233,8 @@ const Dashboard = () => {
     }
   ];
 
-  const achievements: Array<{ name: string; description: string; earned: boolean }> = [];
-
-  const upcomingChallenges: Array<{ title: string; difficulty: string; estimatedTime: string; participants: number }> = [];
+  const visibleRecentActivity = recentActivity;
+  const visibleAchievements = achievements;
 
   return (
     <AppLayout>
@@ -196,54 +248,63 @@ const Dashboard = () => {
             <>
 
             {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 slide-up">
-              <Card className="card-feature">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <Trophy className="w-6 h-6 text-primary" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 slide-up">
+              <Card className="card-feature !p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <Trophy className="w-5 h-5 text-primary" />
                   </div>
                   <Badge variant="secondary" className="capitalize">{userStats.level}</Badge>
                 </div>
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-bold">{userStats.skillPoints}</h3>
+                <div className="space-y-1">
+                  <h3 className="text-xl font-bold">{userStats.skillPoints}</h3>
                   <p className="text-sm text-muted-foreground">Skill Points</p>
                   <Progress value={(userStats.skillPoints / userStats.nextLevelPoints) * 100} className="h-2" />
                 </div>
               </Card>
 
-              <Card className="card-feature">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-orange-500/10 rounded-lg flex items-center justify-center">
-                    <Flame className="w-6 h-6 text-orange-500" />
+              <Card className="card-feature !p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-9 h-9 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                    <Flame className="w-5 h-5 text-orange-500" />
                   </div>
-                  <div className="text-2xl font-bold text-orange-500">{userStats.streak}</div>
+                  <div className="text-xl font-bold text-orange-500">{userStats.streak}</div>
                 </div>
                 <h3 className="font-semibold mb-1">Day Streak</h3>
                 <p className="text-sm text-muted-foreground">Keep it going!</p>
               </Card>
 
-              <Card className="card-feature">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-success/10 rounded-lg flex items-center justify-center">
-                    <CheckCircle className="w-6 h-6 text-success" />
+              <Card className="card-feature !p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-9 h-9 bg-success/10 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-success" />
                   </div>
-                  <TrendingUp className="w-5 h-5 text-success" />
+                  <TrendingUp className="w-4 h-4 text-success" />
                 </div>
-                <h3 className="text-2xl font-bold">{userStats.problemsSolved}</h3>
+                <h3 className="text-xl font-bold">{userStats.problemsSolved}</h3>
                 <p className="text-sm text-muted-foreground">Problems Solved</p>
               </Card>
 
-              <Card className="card-feature">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-info/10 rounded-lg flex items-center justify-center">
-                    <Target className="w-6 h-6 text-info" />
+              <Card className="card-feature !p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-9 h-9 bg-info/10 rounded-lg flex items-center justify-center">
+                    <Target className="w-5 h-5 text-info" />
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-muted-foreground">Weekly Goal</div>
-                    <div className="text-lg font-semibold">{userStats.weeklyProgress}/{userStats.weeklyGoal}</div>
+                    <div className="text-xs font-medium text-muted-foreground">Weekly Goal</div>
+                    <div className="text-sm font-semibold">{userStats.weeklyProgress}/{userStats.weeklyGoal}</div>
                   </div>
                 </div>
                 <Progress value={(userStats.weeklyProgress / userStats.weeklyGoal) * 100} className="h-2" />
+                <div className="flex items-center justify-between mt-2">
+                  <div className="w-9 h-9 bg-info/10 rounded-lg flex items-center justify-center">
+                    <Target className="w-5 h-5 text-info" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-semibold text-muted-foreground">Monthly Goal</div>
+                    <div className="text-base font-semibold">{userStats.monthlyProgress}/{userStats.monthlyGoal}</div>
+                  </div>
+                </div>
               </Card>
             </div>
 
@@ -269,11 +330,13 @@ const Dashboard = () => {
             </div>
 
             <div className="grid lg:grid-cols-2 gap-8">
-              {/* Recent Activity */}
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold">Recent Activity</h2>
                 <Card className="card-feature">
-                  <div className="space-y-4">
+                  <div
+                    className="space-y-4 max-h-[17rem] overflow-y-auto [&::-webkit-scrollbar]:hidden"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                  >
                     {recentActivity.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground">
                         <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
@@ -281,45 +344,51 @@ const Dashboard = () => {
                         <p className="text-sm mt-1">Start coding to see your activity here!</p>
                       </div>
                     ) : (
-                      recentActivity.map((activity, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                            activity.type === 'challenge' ? 'bg-success/10' :
-                            activity.type === 'explanation' ? 'bg-info/10' : 'bg-warning/10'
-                          }`}>
-                            {activity.type === 'challenge' && <Target className="w-5 h-5 text-success" />}
-                            {activity.type === 'explanation' && <Brain className="w-5 h-5 text-info" />}
-                            {activity.type === 'generation' && <Zap className="w-5 h-5 text-warning" />}
+                      visibleRecentActivity.map((activity, index) => (
+                        <div key={index} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                              activity.type === 'practice_problem' ? 'bg-success/10' :
+                              activity.type === 'assessment' ? 'bg-info/10' :
+                              activity.type === 'video' ? 'bg-warning/10' :
+                              activity.type === 'course' ? 'bg-primary/10' :
+                              activity.type === 'generation' ? 'bg-warning/10' : 'bg-muted'
+                            }`}>
+                              {activity.type === 'practice_problem' && <Target className="w-5 h-5 text-success" />}
+                              {activity.type === 'assessment' && <Brain className="w-5 h-5 text-info" />}
+                              {activity.type === 'video' && <Play className="w-5 h-5 text-warning" />}
+                              {activity.type === 'course' && <BookOpen className="w-5 h-5 text-primary" />}
+                              {activity.type === 'generation' && <Zap className="w-5 h-5 text-warning" />}
+                            </div>
+                            <div>
+                              <h4 className="font-medium">{activity.title}</h4>
+                              <p className="text-sm text-muted-foreground flex items-center">
+                                <Clock className="w-3 h-3 mr-1" />
+                                {activity.time}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="font-medium">{activity.title}</h4>
-                            <p className="text-sm text-muted-foreground flex items-center">
-                              <Clock className="w-3 h-3 mr-1" />
-                              {activity.time}
-                            </p>
+                          <div className="text-right">
+                            <Badge variant={activity.status === 'solved' || activity.status === 'taken' || activity.status === 'watched' || activity.status === 'opened' ? 'default' : 'secondary'}>
+                              {activity.status}
+                            </Badge>
+                            {activity.points > 0 && (
+                              <p className="text-sm text-success mt-1">+{activity.points} pts</p>
+                            )}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <Badge variant={activity.status === 'completed' ? 'default' : 'secondary'}>
-                            {activity.status}
-                          </Badge>
-                          {activity.points > 0 && (
-                            <p className="text-sm text-success mt-1">+{activity.points} pts</p>
-                          )}
-                        </div>
-                      </div>
                       ))
                     )}
                   </div>
                 </Card>
               </div>
 
-              {/* Achievements */}
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold">Achievements</h2>
                 <Card className="card-feature">
-                  <div className="space-y-4">
+                  <div
+                    className="space-y-4 max-h-[17rem] overflow-y-auto pr-1"
+                  >
                     {achievements.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground">
                         <Trophy className="w-12 h-12 mx-auto mb-3 opacity-50" />
@@ -327,22 +396,22 @@ const Dashboard = () => {
                         <p className="text-sm mt-1">Complete challenges to earn achievements.</p>
                       </div>
                     ) : (
-                      achievements.map((achievement, index) => (
+                      visibleAchievements.map((achievement, index) => (
                         <div key={index} className={`flex items-center space-x-3 p-4 rounded-lg ${
-                          achievement.earned ? 'bg-success/10' : 'bg-muted/50'
+                          achievement.locked ? 'bg-muted/40' : achievement.earned ? 'bg-success/10' : 'bg-muted/50'
                         }`}>
                           <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                            achievement.earned ? 'bg-success text-white' : 'bg-muted'
+                            achievement.locked ? 'bg-muted text-muted-foreground' : achievement.earned ? 'bg-success text-white' : 'bg-muted'
                           }`}>
-                            <Trophy className="w-5 h-5" />
+                            {achievement.locked ? <Lock className="w-5 h-5" /> : <Trophy className="w-5 h-5" />}
                           </div>
                           <div className="flex-1">
-                            <h4 className={`font-medium ${achievement.earned ? 'text-success' : 'text-muted-foreground'}`}>
+                            <h4 className={`font-medium ${achievement.locked ? 'text-muted-foreground' : achievement.earned ? 'text-success' : 'text-muted-foreground'}`}>
                               {achievement.name}
                             </h4>
-                            <p className="text-sm text-muted-foreground">{achievement.description}</p>
+                            <p className="text-sm text-muted-foreground">{achievement.description} (+{achievement.rewardPoints} pts)</p>
                           </div>
-                          {achievement.earned && <CheckCircle className="w-5 h-5 text-success" />}
+                          {achievement.locked ? <Badge variant="secondary">Locked</Badge> : achievement.earned ? <CheckCircle className="w-5 h-5 text-success" /> : null}
                         </div>
                       ))
                     )}
@@ -374,10 +443,16 @@ const Dashboard = () => {
                       <div className="space-y-4">
                         <div className="flex items-start justify-between">
                           <h3 className="font-semibold">{challenge.title}</h3>
-                          <Badge variant={
-                            challenge.difficulty === 'Easy' ? 'default' :
-                            challenge.difficulty === 'Medium' ? 'secondary' : 'destructive'
-                          }>
+                          <Badge
+                            variant={challenge.difficulty === 'Hard' ? 'destructive' : 'secondary'}
+                            className={
+                              challenge.difficulty === 'Easy'
+                                ? 'bg-green-600 text-white hover:bg-green-600'
+                                : challenge.difficulty === 'Medium'
+                                  ? 'bg-yellow-500 text-black hover:bg-yellow-500'
+                                  : undefined
+                            }
+                          >
                             {challenge.difficulty}
                           </Badge>
                         </div>
@@ -391,9 +466,11 @@ const Dashboard = () => {
                             {challenge.participants} participants
                           </div>
                         </div>
-                        <Button className="w-full btn-primary text-white">
-                          <Play className="w-4 h-4 mr-2" />
-                          Start Challenge
+                        <Button className="w-full btn-primary text-white" asChild>
+                          <Link to={challenge.path}>
+                            <Play className="w-4 h-4 mr-2" />
+                            Go to Challenge
+                          </Link>
                         </Button>
                       </div>
                     </Card>

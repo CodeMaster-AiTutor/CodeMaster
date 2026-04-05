@@ -496,6 +496,11 @@ const LearningPathTutorial = () => {
     const markVideoComplete = async () => {
       if (!concept || locked) return;
       try {
+        await contentAPI.trackCourseOpen(`learning-path:${concept.id}`, concept.level, concept.title, 'learning_path_tutorial');
+      } catch {
+        void 0;
+      }
+      try {
         const response = await contentAPI.completeVideo(concept.id, concept.level);
         if (response.awarded) {
           setVideoPointsAwarded(response.points_awarded || 0);

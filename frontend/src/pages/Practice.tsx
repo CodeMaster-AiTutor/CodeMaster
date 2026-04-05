@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Trophy, BookOpen, Target, Play, ArrowRight, Lock, ExternalLink, CheckCheck } from 'lucide-react';
+import { Trophy, BookOpen, Target, Play, ArrowRight, Lock, CheckCheck } from 'lucide-react';
 import AppLayout from '@/components/layout/AppLayout';
 import { contentAPI, practiceAPI } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
@@ -688,7 +688,33 @@ const Practice = () => {
     advanced: learningPathConcepts.filter((concept) => concept.level === 'advanced'),
   };
   
-  const [featuredCourses, setFeaturedCourses] = useState<FeaturedCourse[]>([]);
+  const [featuredCourses, setFeaturedCourses] = useState<FeaturedCourse[]>(() => {
+    try {
+      const raw = localStorage.getItem('featured_courses');
+      if (!raw) {
+        return [];
+      }
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+      return parsed
+        .map((course) => ({
+          id: String(course.id ?? ''),
+          title: String(course.title ?? ''),
+          description: '',
+          modules: Number(course.modules ?? 0),
+          completed: Number(course.completed ?? 0),
+          topics: Array.isArray(course.topics) ? course.topics.map((topic) => String(topic)) : [],
+          language: course.language ? String(course.language) : undefined,
+          routePath: course.routePath ? String(course.routePath) : undefined,
+          externalUrl: course.externalUrl ? String(course.externalUrl) : undefined,
+        }))
+        .filter((course) => course.id && course.title && (!course.language || course.language.toLowerCase() === 'java'));
+    } catch {
+      return [];
+    }
+  });
 
   const readFeaturedCourses = (): FeaturedCourse[] => {
     try {
@@ -704,7 +730,7 @@ const Practice = () => {
         .map((course) => ({
           id: String(course.id ?? ''),
           title: String(course.title ?? ''),
-          description: String(course.description ?? ''),
+          description: '',
           modules: Number(course.modules ?? 0),
           completed: Number(course.completed ?? 0),
           topics: Array.isArray(course.topics) ? course.topics.map((topic) => String(topic)) : [],
@@ -755,8 +781,21 @@ const Practice = () => {
       }
     };
     loadFeaturedCourses();
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === 'featured_courses') {
+        const nextCourses = readFeaturedCourses().filter((course) => {
+          if (!course.language) {
+            return true;
+          }
+          return course.language.toLowerCase() === 'java';
+        });
+        setFeaturedCourses(nextCourses);
+      }
+    };
+    window.addEventListener('storage', handleStorage);
     return () => {
       isMounted = false;
+      window.removeEventListener('storage', handleStorage);
     };
   }, []);
 
@@ -848,13 +887,24 @@ const Practice = () => {
     level: LearningConcept['level'],
     problem: PracticeProblem,
     index: number,
-    keyPrefix: string
+    keyPrefix: string,
+    emphasize = false
   ) => {
+    const progressEntry = problems.find(
+      (item) => item.title.trim().toLowerCase() === problem.title.trim().toLowerCase()
+    );
     const earnablePoints = level === 'basic' ? 5 : level === 'intermediate' ? 10 : 15;
-    const solved = isProblemSolved(level, problem.title) || problem.status === 'solved';
-    const touched = solved || problem.status === 'attempted' || problem.hasDraft || isProblemTouched(level, problem.title);
+    const solved = isProblemSolved(level, problem.title) || progressEntry?.status === 'solved';
+    const touched =
+      solved ||
+      progressEntry?.status === 'attempted' ||
+      Boolean(progressEntry?.hasDraft) ||
+      isProblemTouched(level, problem.title);
     return (
-      <Card key={`${keyPrefix}-${problem.title}`} className="border-border/20 bg-background/40">
+      <Card
+        key={`${keyPrefix}-${problem.title}`}
+        className={`border-border/20 bg-background/40 ${emphasize ? 'shadow-[0_-8px_20px_hsl(0_0%_0%_/_0.08),0_12px_30px_hsl(0_0%_0%_/_0.14)] dark:shadow-[0_-8px_20px_hsl(0_0%_0%_/_0.28),0_12px_30px_hsl(0_0%_0%_/_0.5)]' : ''}`}
+      >
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -898,28 +948,6 @@ const Practice = () => {
       </Card>
     );
   };
-
-  useEffect(() => {
-    const loadCourses = () => {
-      const nextCourses = readFeaturedCourses().filter((course) => {
-        if (!course.language) {
-          return true;
-        }
-        return course.language.toLowerCase() === 'java';
-      });
-      setFeaturedCourses(nextCourses);
-    };
-    loadCourses();
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === 'featured_courses') {
-        loadCourses();
-      }
-    };
-    window.addEventListener('storage', handleStorage);
-    return () => {
-      window.removeEventListener('storage', handleStorage);
-    };
-  }, []);
 
   const statusCounts = useMemo(() => {
     return problems.reduce(
@@ -994,13 +1022,16 @@ const Practice = () => {
                           </div>
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="px-6 pb-6">
+                      <AccordionContent className="px-6 pt-3 pb-6">
                         <div className="space-y-4">
                           {concepts.map((concept, index) => {
                             const locked = isConceptLocked(concept.level);
                             const earnableVideoPoints = concept.level === 'basic' ? 10 : concept.level === 'intermediate' ? 15 : 20;
                             return (
-                              <Card key={concept.id} className="border-border/20 bg-background/40 hover:border-primary/30 transition-colors">
+                              <Card
+                                key={concept.id}
+                                className={`border-border/20 bg-background/40 hover:border-primary/30 transition-colors ${index === 0 ? 'shadow-[0_-8px_20px_hsl(0_0%_0%_/_0.08),0_12px_30px_hsl(0_0%_0%_/_0.14)] dark:shadow-[0_-8px_20px_hsl(0_0%_0%_/_0.28),0_12px_30px_hsl(0_0%_0%_/_0.5)]' : ''}`}
+                              >
                                 <CardContent className="p-6">
                                   <div className="flex items-center justify-between gap-6">
                                     <div className="flex items-start gap-4">
@@ -1028,6 +1059,7 @@ const Practice = () => {
                                           });
                                           return;
                                         }
+                                        void contentAPI.trackCourseOpen(`learning-path:${concept.id}`, concept.level, concept.title, 'learning_path');
                                         navigate(`/learning-path/java/${concept.id}`);
                                       }}
                                     >
@@ -1060,16 +1092,19 @@ const Practice = () => {
                               <Badge variant="outline">Java</Badge>
                             </div>
                             <p className="text-muted-foreground text-sm mb-4">
-                              A theory-first Java course that takes learners from beginner fundamentals through advanced
-                              concepts like OOP, collections, concurrency, JVM internals, and best practices.
+                              A theory-first Java course from beginner to advanced with structured chapters.
                             </p>
-                            <Button variant="link" className="h-auto px-0 text-primary" asChild>
-                              <Link to="/theory-course" className="inline-flex items-center gap-2">
-                                Open course
-                                <ExternalLink className="h-4 w-4" />
-                              </Link>
-                            </Button>
                           </div>
+                          <Button
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground ml-4 shrink-0"
+                            onClick={() => {
+                              void contentAPI.trackCourseOpen('theory-course', 'beginner', 'Java Course', 'featured_course');
+                              navigate('/theory-course');
+                            }}
+                          >
+                            <Play className="w-4 h-4 mr-2" />
+                            Open course
+                          </Button>
                         </div>
                       </CardHeader>
                     </Card>
@@ -1083,7 +1118,9 @@ const Practice = () => {
                                 <CardTitle className="text-xl">{course.title}</CardTitle>
                                 <Badge variant="outline">Java</Badge>
                               </div>
-                              <p className="text-muted-foreground text-sm mb-4">{course.description}</p>
+                              <p className="text-muted-foreground text-sm mb-4">
+                                {course.description || 'A theory-first Java course from beginner to advanced with structured chapters.'}
+                              </p>
                               {course.modules > 0 ? (
                                 <>
                                   <div className="flex items-center space-x-4 mb-4">
@@ -1106,6 +1143,12 @@ const Practice = () => {
                             <Button
                               className="bg-primary hover:bg-primary/90 text-primary-foreground ml-4"
                               onClick={() => {
+                                void contentAPI.trackCourseOpen(
+                                  `featured:${course.id}`,
+                                  'beginner',
+                                  course.title,
+                                  course.externalUrl ? 'external_course' : 'featured_course'
+                                );
                                 if (course.externalUrl) {
                                   window.open(course.externalUrl, '_blank', 'noopener,noreferrer');
                                   return;
@@ -1190,7 +1233,7 @@ const Practice = () => {
                               </div>
                             </div>
                           </AccordionTrigger>
-                          <AccordionContent className="px-6 pb-6">
+                          <AccordionContent className="px-6 pt-3 pb-6">
                             {sectionLocked ? (
                               <Card className="border-muted">
                                 <CardContent className="p-6 text-center">
@@ -1206,19 +1249,25 @@ const Practice = () => {
                             ) : problemsForLevel.type === 'flat' ? (
                               <div className="grid gap-3">
                                 {problemsForLevel.problems.map((problem, index) =>
-                                  renderProblemCard(level, problem, index, `empty-${level}`)
+                                  renderProblemCard(level, problem, index, `empty-${level}`, index === 0)
                                 )}
                               </div>
                             ) : (
                               <div className="space-y-5">
-                                {problemsForLevel.sections.map((section) => (
+                                {problemsForLevel.sections.map((section, sectionIndex) => (
                                   <div key={`${level}-${section.title}`} className="space-y-3">
                                     <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                                       {section.title}
                                     </div>
                                     <div className="grid gap-3">
                                       {section.problems.map((problem, index) =>
-                                        renderProblemCard(level, problem, index, `empty-${level}-${section.title}`)
+                                        renderProblemCard(
+                                          level,
+                                          problem,
+                                          index,
+                                          `empty-${level}-${section.title}`,
+                                          sectionIndex === 0 && index === 0
+                                        )
                                       )}
                                     </div>
                                   </div>

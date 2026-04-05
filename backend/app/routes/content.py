@@ -6,7 +6,7 @@ from app.models.featured_course import FeaturedCourse
 from app.models.learning_path import LearningPathConcept
 from app.models.skill_points import SkillPointTransaction
 from app.models.theory_course import TheoryCoursePage
-from app.services.skill_points_service import award_video_points, get_video_points
+from app.services.skill_points_service import award_video_points, get_video_points, track_course_opened
 
 
 content_bp = Blueprint("content", __name__)
@@ -78,4 +78,24 @@ def complete_video(current_user):
         "points_awarded": points if awarded else 0,
         "current_points": int(current_user.total_points or 0),
         "earnable_points": get_video_points(normalized_level),
+    }), 200
+
+
+@content_bp.route("/courses/open", methods=["POST"])
+@token_required
+def track_course_open(current_user):
+    data = request.get_json(silent=True) or {}
+    course_key = str(data.get("course_key", "")).strip()
+    level = str(data.get("level", "beginner")).strip().lower()
+    course_title = str(data.get("course_title", "")).strip()
+    source = str(data.get("source", "")).strip()
+    if not course_key:
+        return jsonify({"error": "course_key is required"}), 400
+    normalized_level = "beginner" if level == "basic" else level
+    tracked, _ = track_course_opened(current_user, course_key, normalized_level, course_title, source)
+    db.session.commit()
+    return jsonify({
+        "tracked": tracked,
+        "course_key": course_key,
+        "level": normalized_level
     }), 200

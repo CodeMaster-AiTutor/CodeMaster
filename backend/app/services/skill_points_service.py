@@ -19,6 +19,8 @@ VIDEO_POINTS = {
 GENERATION_COST = 5
 WEEKLY_GOAL_TARGET = 5
 WEEKLY_GOAL_REWARD = 10
+MONTHLY_GOAL_TARGET = 15
+MONTHLY_GOAL_REWARD = 20
 
 
 def _normalize_level(level: Optional[str]) -> str:
@@ -58,6 +60,8 @@ def apply_daily_login_streak(user, now: Optional[datetime] = None):
     today = now.date()
     yesterday = today - timedelta(days=1)
     previous_active = user.last_active_date
+    if previous_active is None and getattr(user, "last_login", None):
+        previous_active = user.last_login.date()
 
     if previous_active == today:
         return {"streak_days": int(user.streak_days or 0), "bonus_points": 0, "updated": False}
@@ -109,6 +113,34 @@ def award_video_points(user, video_key: str, level: str) -> Tuple[bool, int]:
     )
 
 
+def track_course_opened(user, course_key: str, level: str, course_title: Optional[str] = None, source: Optional[str] = None) -> Tuple[bool, int]:
+    normalized = _normalize_level(level)
+    return _award_one_time(
+        user,
+        "course_opened",
+        f"course:{course_key}",
+        0,
+        {"course_key": course_key, "course_title": course_title or course_key, "level": normalized, "source": source or ""}
+    )
+
+
+def award_achievement_completion(user, achievement_key: str, level: str, achievement_name: str) -> Tuple[bool, int]:
+    normalized = _normalize_level(level)
+    points_map = {
+        "beginner": 10,
+        "intermediate": 20,
+        "advanced": 30,
+    }
+    points = points_map.get(normalized, 10)
+    return _award_one_time(
+        user,
+        "achievement_bonus",
+        f"achievement:{achievement_key}",
+        points,
+        {"achievement_key": achievement_key, "achievement_name": achievement_name, "level": normalized}
+    )
+
+
 def get_video_points(level: str) -> int:
     return VIDEO_POINTS.get(_normalize_level(level), VIDEO_POINTS["beginner"])
 
@@ -153,5 +185,31 @@ def award_weekly_goal_completion(user, now: Optional[datetime] = None) -> Tuple[
         f"week:{week_start_date.isoformat()}",
         WEEKLY_GOAL_REWARD,
         {"goal": WEEKLY_GOAL_TARGET, "solved": solved_count}
+    )
+    return awarded, points if awarded else 0, solved_count
+
+
+def award_monthly_goal_completion(user, now: Optional[datetime] = None) -> Tuple[bool, int, int]:
+    from app.models.practice import PracticeAttempt
+
+    now = now or datetime.utcnow()
+    month_start_date = now.date().replace(day=1)
+    month_start_dt = datetime.combine(month_start_date, datetime.min.time())
+    solved_count = db.session.query(func.count(func.distinct(PracticeAttempt.problem_id))).filter(
+        PracticeAttempt.user_id == user.id,
+        PracticeAttempt.status == 'passed',
+        PracticeAttempt.submitted_at >= month_start_dt
+    ).scalar() or 0
+
+    solved_count = int(solved_count)
+    if solved_count < MONTHLY_GOAL_TARGET:
+        return False, 0, solved_count
+
+    awarded, points = _award_one_time(
+        user,
+        "monthly_goal_bonus",
+        f"month:{month_start_date.strftime('%Y-%m')}",
+        MONTHLY_GOAL_REWARD,
+        {"goal": MONTHLY_GOAL_TARGET, "solved": solved_count}
     )
     return awarded, points if awarded else 0, solved_count

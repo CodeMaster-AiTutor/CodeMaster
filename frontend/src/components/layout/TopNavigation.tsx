@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -10,7 +10,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Switch } from '@/components/ui/switch';
 import { 
   Menu,
   Code2,
@@ -24,23 +23,22 @@ import {
   Search
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from 'next-themes';
-import { API_BASE_URL, profileAPI } from '@/lib/api';
+import { API_BASE_URL, contentAPI, practiceAPI, profileAPI } from '@/lib/api';
 
 interface TopNavigationProps {
   onMenuClick: () => void;
 }
 
+const STREAK_REMINDERS_KEY = 'settings:streak-reminders';
+const STREAK_REMINDER_DISMISSED_KEY = 'notifications:streak-reminder-dismissed-date';
+
 const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
-  const isSettingsRoute = location.pathname === '/settings';
-  const searchAutoComplete = isSettingsRoute ? 'new-password' : 'off';
-  const searchName = isSettingsRoute ? 'settings-search' : 'nav-search';
   
   // Get user info from localStorage
   const apiOrigin = API_BASE_URL.replace(/\/api\/?$/, '');
@@ -83,6 +81,57 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
   };
 
   const [userInfo, setUserInfo] = useState(getUserInfo());
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchItems, setSearchItems] = useState<Array<{
+    id: string;
+    title: string;
+    subtitle: string;
+    path: string;
+    type: 'page' | 'challenge' | 'video' | 'assessment';
+  }>>([]);
+  const searchContainerRef = useRef<HTMLDivElement | null>(null);
+  const getTodayKey = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  };
+  const isStreakReminderEnabled = () => {
+    try {
+      return localStorage.getItem(STREAK_REMINDERS_KEY) !== 'false';
+    } catch {
+      return true;
+    }
+  };
+  const isStreakReminderUnread = () => {
+    if (!isStreakReminderEnabled()) {
+      return false;
+    }
+    try {
+      return localStorage.getItem(STREAK_REMINDER_DISMISSED_KEY) !== getTodayKey();
+    } catch {
+      return true;
+    }
+  };
+  const refreshNotifications = () => {
+    const unreadCount = isStreakReminderUnread() ? 1 : 0;
+    setUserInfo((prev) => ({ ...prev, notifications: unreadCount }));
+  };
+  const getCurrentSkillLevel = (): 'beginner' | 'intermediate' | 'advanced' => {
+    try {
+      const raw = localStorage.getItem('user');
+      if (!raw) {
+        return 'beginner';
+      }
+      const user = JSON.parse(raw) as { skill_level?: string };
+      const level = (user.skill_level || '').toLowerCase();
+      if (level === 'intermediate' || level === 'advanced') {
+        return level;
+      }
+      return 'beginner';
+    } catch {
+      return 'beginner';
+    }
+  };
 
   // Update user info when localStorage changes
   useEffect(() => {
@@ -148,6 +197,111 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
     loadProfile();
   }, [apiOrigin]);
 
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    const skillLevel = getCurrentSkillLevel();
+    const assessmentTitle = `${skillLevel.charAt(0).toUpperCase()}${skillLevel.slice(1)} Assessment`;
+    const staticPages: Array<{
+      id: string;
+      title: string;
+      subtitle: string;
+      path: string;
+      type: 'page' | 'assessment';
+    }> = [
+      { id: 'page-dashboard', title: 'Dashboard', subtitle: 'Page', path: '/dashboard', type: 'page' },
+      { id: 'page-practice', title: 'Practice Arena', subtitle: 'Page', path: '/practice', type: 'page' },
+      { id: 'page-analytics', title: 'Analytics', subtitle: 'Page', path: '/analytics', type: 'page' },
+      { id: 'page-compiler', title: 'Compiler', subtitle: 'Page', path: '/compiler', type: 'page' },
+      { id: 'page-generator', title: 'Generator', subtitle: 'Page', path: '/generator', type: 'page' },
+      { id: 'page-explainer', title: 'Explainer', subtitle: 'Page', path: '/explainer', type: 'page' },
+      { id: 'page-help', title: 'Help', subtitle: 'Page', path: '/help', type: 'page' },
+      { id: 'page-profile', title: 'Profile', subtitle: 'Page', path: '/profile', type: 'page' },
+      { id: 'page-settings', title: 'Settings', subtitle: 'Page', path: '/settings', type: 'page' },
+      { id: `assessment-${skillLevel}`, title: assessmentTitle, subtitle: 'Assessment', path: `/assessment?level=${skillLevel}`, type: 'assessment' },
+    ];
+    setSearchItems(staticPages);
+    if (!token) {
+      return;
+    }
+    let mounted = true;
+    const loadDynamic = async () => {
+      try {
+        const [catalog, learningPaths] = await Promise.all([
+          practiceAPI.getCatalog(),
+          contentAPI.getLearningPaths(),
+        ]);
+        if (!mounted) {
+          return;
+        }
+        const challenges = (catalog || []).map((item) => ({
+          id: `challenge-${item.id}`,
+          title: item.title,
+          subtitle: `Challenge • ${(item.level || 'beginner').toString()}`,
+          path: `/practice/solve/${item.level}/${encodeURIComponent(item.title)}`,
+          type: 'challenge' as const,
+        }));
+        const videos = (learningPaths || []).map((item) => ({
+          id: `video-${item.id}`,
+          title: item.title,
+          subtitle: `Video • ${item.level}`,
+          path: `/learning-path/java/${encodeURIComponent(item.slug)}`,
+          type: 'video' as const,
+        }));
+        setSearchItems([...staticPages, ...challenges, ...videos]);
+      } catch {
+        if (!mounted) {
+          return;
+        }
+        setSearchItems(staticPages);
+      }
+    };
+    void loadDynamic();
+    return () => {
+      mounted = false;
+    };
+  }, [userInfo.level]);
+
+  useEffect(() => {
+    refreshNotifications();
+    const interval = window.setInterval(() => {
+      refreshNotifications();
+    }, 60_000);
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === STREAK_REMINDERS_KEY || event.key === STREAK_REMINDER_DISMISSED_KEY) {
+        refreshNotifications();
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
+
+  useEffect(() => {
+    const onMouseDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (!searchContainerRef.current || searchContainerRef.current.contains(target)) {
+        return;
+      }
+      setSearchOpen(false);
+    };
+    document.addEventListener('mousedown', onMouseDown);
+    return () => {
+      document.removeEventListener('mousedown', onMouseDown);
+    };
+  }, []);
+
+  const filteredSearchItems = useMemo(() => {
+    const normalized = searchQuery.trim().toLowerCase();
+    if (!normalized) {
+      return [];
+    }
+    return searchItems
+      .filter((item) => `${item.title} ${item.subtitle}`.toLowerCase().includes(normalized))
+      .slice(0, 20);
+  }, [searchItems, searchQuery]);
+
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
@@ -182,8 +336,17 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
     navigate('/');
   };
 
+  const markReminderAsRead = () => {
+    try {
+      localStorage.setItem(STREAK_REMINDER_DISMISSED_KEY, getTodayKey());
+    } catch {
+      void 0;
+    }
+    refreshNotifications();
+  };
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/20">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-0 shadow-none">
       <div className="flex items-center justify-between h-16 px-6">
         {/* Left Side */}
         <div className="flex items-center -space-x-4">
@@ -208,36 +371,68 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
 
         {/* Center - Search */}
         <div className="hidden md:flex flex-1 max-w-md mx-8">
-          <div className="relative w-full">
+          <div ref={searchContainerRef} className="relative w-full">
+            <input type="text" name="username" autoComplete="username" tabIndex={-1} className="hidden" />
+            <input type="password" name="password" autoComplete="current-password" tabIndex={-1} className="hidden" />
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input 
-              placeholder="Search challenges, tutorials..." 
-              type="search"
-              name={searchName}
-              autoComplete={searchAutoComplete}
+              placeholder="Search pages, challenges, videos, assessments..." 
+              id="cm-global-search"
+              type="text"
+              name="cm-global-search"
+              autoComplete="off"
               autoCapitalize="off"
               autoCorrect="off"
               spellCheck={false}
               inputMode="search"
               aria-autocomplete="none"
+              data-form-type="other"
               data-lpignore="true"
               data-1p-ignore="true"
               data-bwignore="true"
-              readOnly={isSettingsRoute}
-              onFocus={(event) => {
-                if (isSettingsRoute) {
-                  event.currentTarget.readOnly = false;
+              value={searchQuery}
+              onFocus={() => setSearchOpen(true)}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && filteredSearchItems.length > 0) {
+                  const first = filteredSearchItems[0];
+                  navigate(first.path);
+                  setSearchOpen(false);
+                  setSearchQuery('');
                 }
               }}
-              className="pl-10 bg-muted/50 border-0 focus:bg-background"
+              className="pl-10 bg-background/85 dark:bg-muted/40 border border-border/65 dark:border-border/75 focus:bg-background dark:focus:bg-background/95 focus:border-primary/50"
             />
+            {searchOpen && searchQuery.trim().length > 0 && (
+              <div className="absolute top-[calc(100%+0.5rem)] left-0 right-0 bg-background border border-border rounded-md shadow-lg max-h-80 overflow-y-auto z-50">
+                {filteredSearchItems.length === 0 ? (
+                  <div className="px-3 py-2 text-sm text-muted-foreground">No results found</div>
+                ) : (
+                  filteredSearchItems.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className="w-full text-left px-3 py-2 hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
+                      onClick={() => {
+                        navigate(item.path);
+                        setSearchOpen(false);
+                        setSearchQuery('');
+                      }}
+                    >
+                      <div className="text-sm font-medium">{item.title}</div>
+                      <div className="text-xs text-muted-foreground">{item.subtitle}</div>
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Right Side */}
         <div className="flex items-center space-x-4">
           {/* Streak */}
-          <div className="hidden sm:flex items-center space-x-2 px-3 py-1 bg-orange-500/10 rounded-full">
+          <div className="hidden sm:flex items-center space-x-2 px-3 py-1 bg-orange-500/12 border border-orange-500/35 rounded-full">
             <Flame className="w-4 h-4 text-orange-500" />
             <span className="text-sm font-medium text-orange-500">{userInfo.streak}</span>
           </div>
@@ -248,24 +443,77 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
           </Badge>
 
           {/* Theme Toggle */}
-          <div className="flex items-center space-x-2">
-            <Sun className="w-4 h-4" />
-            <Switch 
-              checked={theme === 'dark'}
-              onCheckedChange={toggleTheme}
-            />
-            <Moon className="w-4 h-4" />
+          <div className="flex items-center">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={theme === 'dark'}
+              aria-label="Toggle theme"
+              onClick={toggleTheme}
+              className={`relative h-8 w-16 rounded-full border transition-all duration-300 ${
+                theme === 'dark'
+                  ? 'bg-gradient-to-r from-slate-700 via-slate-800 to-slate-900 border-slate-500/60'
+                  : 'bg-gradient-to-r from-sky-200 via-sky-100 to-amber-100 border-sky-300/80'
+              }`}
+            >
+              <span className={`absolute left-2 top-1.5 transition-opacity duration-300 ${theme === 'dark' ? 'opacity-30' : 'opacity-100'}`}>
+                <Sun className="w-3.5 h-3.5 text-amber-500" />
+              </span>
+              <span className={`absolute right-2 top-1.5 transition-opacity duration-300 ${theme === 'dark' ? 'opacity-100' : 'opacity-30'}`}>
+                <Moon className="w-3.5 h-3.5 text-indigo-200" />
+              </span>
+              <span
+                className={`absolute top-0.5 h-6 w-6 rounded-full border border-white/80 shadow-md transition-all duration-300 flex items-center justify-center ${
+                  theme === 'dark'
+                    ? 'left-[2.1rem] bg-slate-950'
+                    : 'left-0.5 bg-white'
+                }`}
+              >
+                {theme === 'dark' ? (
+                  <Moon className="w-3.5 h-3.5 text-indigo-200" />
+                ) : (
+                  <Sun className="w-3.5 h-3.5 text-amber-500" />
+                )}
+              </span>
+            </button>
           </div>
 
           {/* Notifications */}
-          <Button variant="ghost" size="sm" className="relative">
-            <Bell className="w-5 h-5" />
-            {userInfo.notifications > 0 && (
-              <Badge className="absolute -top-1 -right-1 w-5 h-5 text-xs p-0 flex items-center justify-center bg-destructive text-destructive-foreground">
-                {userInfo.notifications}
-              </Badge>
-            )}
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="relative">
+                <Bell className="w-5 h-5" />
+                {userInfo.notifications > 0 && (
+                  <Badge className="absolute -top-1 -right-1 w-5 h-5 text-xs p-0 flex items-center justify-center bg-destructive text-destructive-foreground">
+                    {userInfo.notifications}
+                  </Badge>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-80" align="end">
+              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {!isStreakReminderEnabled() ? (
+                <div className="px-3 py-2 text-sm text-muted-foreground">
+                  Streak reminders are turned off in Settings.
+                </div>
+              ) : isStreakReminderUnread() ? (
+                <div className="px-3 py-3 space-y-2">
+                  <div className="text-sm font-medium">Daily Streak Reminder</div>
+                  <div className="text-xs text-muted-foreground">
+                    Your current streak is {userInfo.streak} day{userInfo.streak === 1 ? '' : 's'}. Log in and practice every day to maintain and grow your streak.
+                  </div>
+                  <Button size="sm" variant="secondary" onClick={markReminderAsRead}>
+                    Mark as read
+                  </Button>
+                </div>
+              ) : (
+                <div className="px-3 py-2 text-sm text-muted-foreground">
+                  You are all caught up for today.
+                </div>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* User Menu */}
           <DropdownMenu>

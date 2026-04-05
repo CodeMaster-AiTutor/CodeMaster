@@ -8,7 +8,7 @@ from app.models.practice import PracticeProblem, PracticeAttempt, PracticeDraft
 from app.models.skill_points import SkillPointTransaction
 from app.routes.profile import update_streak_on_submit
 from app.services.java_executor import get_java_executor
-from app.services.skill_points_service import award_practice_problem_points, award_weekly_goal_completion, get_practice_points
+from app.services.skill_points_service import award_monthly_goal_completion, award_practice_problem_points, award_weekly_goal_completion, get_practice_points
 
 practice_bp = Blueprint('practice', __name__)
 
@@ -1008,6 +1008,7 @@ def create_attempt(current_user):
         update_streak_on_submit(current_user)
         award_practice_problem_points(current_user, problem_id, problem.level)
         award_weekly_goal_completion(current_user)
+        award_monthly_goal_completion(current_user)
     db.session.commit()
     return jsonify(attempt.to_dict()), 201
 
@@ -1026,6 +1027,7 @@ def update_attempt(current_user, attempt_id):
         if problem:
             award_practice_problem_points(current_user, attempt.problem_id, problem.level)
             award_weekly_goal_completion(current_user)
+            award_monthly_goal_completion(current_user)
     db.session.commit()
     return jsonify(attempt.to_dict())
 
@@ -1182,6 +1184,7 @@ def validate_solution(current_user):
     solved = passed_count == len(test_cases)
     points_awarded = 0
     weekly_bonus_awarded = 0
+    monthly_bonus_awarded = 0
     persist_attempt(solved, passed_count, len(test_cases))
     if solved:
         awarded, points_awarded = award_practice_problem_points(current_user, problem.id, problem.level)
@@ -1190,6 +1193,9 @@ def validate_solution(current_user):
         weekly_awarded, weekly_bonus_awarded, _ = award_weekly_goal_completion(current_user)
         if not weekly_awarded:
             weekly_bonus_awarded = 0
+        monthly_awarded, monthly_bonus_awarded, _ = award_monthly_goal_completion(current_user)
+        if not monthly_awarded:
+            monthly_bonus_awarded = 0
         db.session.commit()
     return jsonify({
         'problem_id': problem.id,
@@ -1200,5 +1206,6 @@ def validate_solution(current_user):
         'results': results,
         'points_awarded': points_awarded,
         'weekly_bonus_awarded': weekly_bonus_awarded,
+        'monthly_bonus_awarded': monthly_bonus_awarded,
         'current_points': int(current_user.total_points or 0),
     })

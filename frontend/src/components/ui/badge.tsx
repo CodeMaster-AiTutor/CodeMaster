@@ -22,8 +22,40 @@ const badgeVariants = cva(
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {}
 
-function Badge({ className, variant, ...props }: BadgeProps) {
-  return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
+const readText = (node: React.ReactNode): string => {
+  if (typeof node === "string" || typeof node === "number") {
+    return String(node);
+  }
+  if (Array.isArray(node)) {
+    return node.map(readText).join(" ");
+  }
+  if (React.isValidElement(node)) {
+    return readText(node.props.children);
+  }
+  return "";
+};
+
+const getLevelBadgeClass = (children: React.ReactNode) => {
+  const label = readText(children).toLowerCase();
+  if (label.includes("beginner")) {
+    return "border-emerald-500/50 bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/20";
+  }
+  if (label.includes("intermediate")) {
+    return "border-amber-500/50 bg-amber-500/15 text-amber-400 hover:bg-amber-500/20";
+  }
+  if (label.includes("advanced") || label.includes("advance")) {
+    return "border-rose-500/50 bg-rose-500/15 text-rose-400 hover:bg-rose-500/20";
+  }
+  return "";
+};
+
+function Badge({ className, variant, children, ...props }: BadgeProps) {
+  const levelClass = getLevelBadgeClass(children);
+  return (
+    <div className={cn(badgeVariants({ variant }), levelClass, className)} {...props}>
+      {children}
+    </div>
+  );
 }
 
 export { Badge, badgeVariants };

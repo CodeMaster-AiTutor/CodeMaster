@@ -93,33 +93,123 @@ const Help = () => {
   const faqs = [
     {
       id: 1,
-      question: 'How do I submit my code solution?',
-      answer: 'After writing your code in the editor, click the "Run" button to test it, then click "Submit" to submit your final solution. Make sure all test cases pass before submitting.'
+      question: 'How are streaks calculated?',
+      answer: 'Your streak is date-based. If you are active on consecutive days, your streak increases by 1. If you miss a day, the streak resets based on the next active day.'
     },
     {
       id: 2,
-      question: 'What programming languages are supported?',
-      answer: 'CodeMaster currently supports Java, Python, C++, JavaScript, and C. We are continuously adding support for more languages based on user feedback.'
+      question: 'What counts as streak activity?',
+      answer: 'Completing learning actions like solving practice problems, finishing videos, and other tracked platform activities count toward daily streak continuity.'
     },
     {
       id: 3,
-      question: 'How is my code evaluated?',
-      answer: 'Your code is tested against multiple test cases including edge cases. The system checks for correctness, efficiency, and handles both visible and hidden test cases.'
+      question: 'Does logging in multiple times in one day increase streak?',
+      answer: 'No. Logging in multiple times on the same date does not increase streak multiple times. The streak updates once per date.'
     },
     {
       id: 4,
-      question: 'Can I save my progress?',
-      answer: 'Yes! Your progress is automatically saved. You can access your saved solutions, practice history, and achievements from your profile page.'
+      question: 'How do streak bonus points work?',
+      answer: 'You receive milestone streak bonuses at configured intervals. Milestone rewards are recorded in your skill point history so they are not duplicated.'
     },
     {
       id: 5,
-      question: 'How do I upgrade to Pro?',
-      answer: 'Click the "Upgrade to Pro" button in the sidebar or go to Settings > Billing. Pro gives you unlimited challenges, priority support, and advanced AI features.'
+      question: 'What are skill points used for?',
+      answer: 'Skill points represent your learning progress and are also used for specific features like AI generation requests where a points cost is applied.'
     },
     {
       id: 6,
-      question: 'What if I encounter a bug?',
-      answer: 'Please report bugs using the contact form below or email us at support@CodeMaster.com. Include as much detail as possible about the issue you encountered.'
+      question: 'How do I earn skill points?',
+      answer: 'You earn points by solving practice problems, completing videos, passing achievements, weekly goal completion, and streak bonuses.'
+    },
+    {
+      id: 7,
+      question: 'Why do points decrease sometimes?',
+      answer: 'Some actions consume points, such as AI code generation requests. These appear as “used” entries in your skill points progress history.'
+    },
+    {
+      id: 8,
+      question: 'Where can I see point source history?',
+      answer: 'Go to Analytics → Skill Points Progress to view record-by-record entries showing source, points delta, and timestamp.'
+    },
+    {
+      id: 9,
+      question: 'How are challenge difficulty tags shown?',
+      answer: 'Trending challenge tags are color-coded by difficulty: Easy, Medium, and Hard, so you can quickly identify expected difficulty level.'
+    },
+    {
+      id: 10,
+      question: 'How are trending challenges selected?',
+      answer: 'Trending challenges are selected from your current level only, grouped by difficulty buckets so you get balanced challenge recommendations.'
+    },
+    {
+      id: 11,
+      question: 'Can I directly open a challenge from Dashboard?',
+      answer: 'Yes. Use the “Go to Challenge” button in Trending Challenges to open the exact problem solve page directly.'
+    },
+    {
+      id: 12,
+      question: 'How do achievements unlock?',
+      answer: 'Achievements unlock when their specific completion conditions are met, such as passing assessments, solving all level problems, or completing all level videos.'
+    },
+    {
+      id: 13,
+      question: 'Are achievements locked by level?',
+      answer: 'Yes. Future-level achievements remain locked until your current skill level reaches that stage.'
+    },
+    {
+      id: 14,
+      question: 'Do achievements give skill points?',
+      answer: 'Yes. Achievement rewards are level-based and awarded once per achievement. Reward transactions are stored to avoid duplicate grants.'
+    },
+    {
+      id: 15,
+      question: 'How many videos are required per level for video achievements?',
+      answer: 'Video completion achievement totals are configured per level: Beginner 8, Intermediate 8, and Advanced 11.'
+    },
+    {
+      id: 16,
+      question: 'What is Learning Path?',
+      answer: 'Learning Path is a structured topic roadmap. It guides you through Java concepts level by level with focused concept modules and tutorials.'
+    },
+    {
+      id: 17,
+      question: 'How are Learning Path levels enforced?',
+      answer: 'Access is level-aware: beginner sees beginner, intermediate gets beginner+intermediate concepts, and advanced can access all levels.'
+    },
+    {
+      id: 18,
+      question: 'Do watched Learning Path videos give points only once?',
+      answer: 'Yes. Video completion points are one-time per unique video key for each user.'
+    },
+    {
+      id: 19,
+      question: 'What is Practice Arena?',
+      answer: 'Practice Arena is where you solve coding problems by level and track solved/unsolved progress with real submissions and attempt history.'
+    },
+    {
+      id: 20,
+      question: 'How are Practice Arena points awarded?',
+      answer: 'Practice problem points are awarded once per solved problem per user. Re-solving the same problem does not duplicate the same one-time reward.'
+    },
+    {
+      id: 21,
+      question: 'What is weekly goal in Practice and Dashboard?',
+      answer: 'Weekly goal tracks solved practice problems for the current week and grants a weekly bonus when the configured target is reached.'
+    },
+    {
+      id: 22,
+      question: 'Why is some data marked as real-time?',
+      answer: 'Core stats are synced periodically and after major actions. This keeps streak, points, and progress fresh across Dashboard, Analytics, and navigation.'
+    },
+    {
+      id: 23,
+      question: 'What if my displayed points or streak look outdated?',
+      answer: 'Try navigating once or waiting for the sync interval. If it still looks wrong, report it via Contact Support and include screenshots and timestamp.'
+    },
+    {
+      id: 24,
+      question: 'How do I report a bug related to streak, points, or achievements?',
+      answer: 'Use the Contact Support form below with steps to reproduce, expected result, actual result, and your account email so we can investigate quickly.'
     }
   ];
 
@@ -181,7 +271,7 @@ const Help = () => {
                   <span>Frequently Asked Questions</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-2 max-h-[19rem] overflow-y-hidden hover:overflow-y-auto pr-1">
                 {filteredFAQs.map((faq) => (
                   <Collapsible key={faq.id}>
                     <CollapsibleTrigger

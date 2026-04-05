@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { assessmentAPI } from '@/lib/api';
+import { useLocation } from 'react-router-dom';
 
 interface Question {
   id: number;
@@ -64,6 +65,7 @@ const readStoredSnapshot = (): ActiveAssessmentSnapshot | null => {
 };
 
 const Assessment = () => {
+  const location = useLocation();
   const initialSnapshotRef = useRef<ActiveAssessmentSnapshot | null>(readStoredSnapshot());
   const initialSnapshot = initialSnapshotRef.current;
   const [currentLevel, setCurrentLevel] = useState<'beginner' | 'intermediate' | 'advanced'>(initialSnapshot?.level || 'beginner');
@@ -128,6 +130,14 @@ const Assessment = () => {
     });
     return grouped;
   }, [questions]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const requestedLevel = (params.get('level') || '').toLowerCase();
+    if (requestedLevel === 'beginner' || requestedLevel === 'intermediate' || requestedLevel === 'advanced') {
+      setCurrentLevel(requestedLevel);
+    }
+  }, [location.search]);
   const isQuestionAnswered = useCallback((question: Question): boolean => {
     const answer = answers[question.id];
     if (question.type === 'mcq') {
@@ -1141,7 +1151,6 @@ const Assessment = () => {
             </h1>
           </div>
 
-          {/* Current Level */}
           <Card className="border-border/20 bg-gradient-card">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -1149,7 +1158,7 @@ const Assessment = () => {
                 <span>Current Level</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-8">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-2xl font-bold capitalize">{currentLevel}</h3>
@@ -1165,57 +1174,49 @@ const Assessment = () => {
                   {currentLevel === 'advanced' && '⭐'}
                 </Badge>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Assessment Info */}
-          <div className="grid md:grid-cols-1 gap-6">
-            <Card className="border-border/20">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+              <div className="border-t border-border/40 pt-6">
+                <div className="flex items-center space-x-2 mb-4">
                   <Brain className="w-5 h-5" />
-                  <span>Assessment Details</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between">
-                  <span>Questions:</span>
-                  <span className="font-medium">25 questions</span>
+                  <h3 className="text-xl font-semibold">Assessment Details</h3>
                 </div>
-                <div className="flex justify-between">
-                  <span>Time Limit:</span>
-                  <span className="font-medium">30 minutes</span>
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span>Questions:</span>
+                    <span className="font-medium">25 questions</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Time Limit:</span>
+                    <span className="font-medium">30 minutes</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Passing Score:</span>
+                    <span className="font-medium">80%</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>Passing Score:</span>
-                  <span className="font-medium">80%</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
 
-          {/* Start Assessment */}
-          <Card className="border-border/20 bg-gradient-card">
-            <CardContent className="p-8 text-center">
-              <h3 className="text-xl font-bold mb-4">Ready to Test Your Skills?</h3>
-              <Button 
-                onClick={startAssessment} 
-                size="lg" 
-                className="bg-gradient-primary"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Loading Questions...
-                  </>
-                ) : (
-                  <>
-                    <Trophy className="w-5 h-5 mr-2" />
-                    Start {currentLevel.charAt(0).toUpperCase() + currentLevel.slice(1)} Assessment
-                  </>
-                )}
-              </Button>
+              <div className="border-t border-border/40 pt-6 text-center">
+                <h3 className="text-xl font-bold mb-4">Ready to Test Your Skills?</h3>
+                <Button
+                  onClick={startAssessment}
+                  size="lg"
+                  className="bg-gradient-primary"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Loading Questions...
+                    </>
+                  ) : (
+                    <>
+                      <Trophy className="w-5 h-5 mr-2" />
+                      Start {currentLevel.charAt(0).toUpperCase() + currentLevel.slice(1)} Assessment
+                    </>
+                  )}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

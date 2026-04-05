@@ -702,7 +702,7 @@ const Generator = () => {
                     className={`max-w-[80%] rounded-2xl p-4 shadow-sm ${
                       message.role === 'user'
                         ? 'bg-gradient-to-br from-primary to-accent text-white'
-                        : 'bg-card border border-border/50 backdrop-blur-sm'
+                        : 'bg-card/95 border border-border/80 ring-1 ring-border/40 backdrop-blur-sm shadow-[0_10px_24px_hsl(0_0%_0%_/_0.16)] dark:bg-zinc-900/95 dark:border-border/90 dark:ring-white/10 dark:shadow-[0_12px_30px_hsl(0_0%_0%_/_0.6)]'
                     }`}
                   >
                     <div className="whitespace-pre-wrap text-sm leading-relaxed">
@@ -726,7 +726,7 @@ const Generator = () => {
               
               {isGenerating && (
                 <div className="flex justify-start animate-in slide-in-from-bottom-2 duration-300">
-                  <div className="bg-card border border-border/50 backdrop-blur-sm rounded-2xl p-4 max-w-[80%] shadow-sm">
+                  <div className="bg-card/95 border border-border/80 ring-1 ring-border/40 backdrop-blur-sm rounded-2xl p-4 max-w-[80%] shadow-[0_10px_24px_hsl(0_0%_0%_/_0.16)] dark:bg-zinc-900/95 dark:border-border/90 dark:ring-white/10 dark:shadow-[0_12px_30px_hsl(0_0%_0%_/_0.6)]">
                     <div className="flex items-center space-x-3">
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>

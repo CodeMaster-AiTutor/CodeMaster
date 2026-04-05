@@ -3,33 +3,50 @@ import AppLayout from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Clock, 
-  Target, 
-  Code, 
-  CheckCircle,
-  XCircle,
-  Calendar
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  BarChart3,
+  TrendingUp,
+  Clock,
+  Target,
+  Code,
+  Calendar,
+  PlayCircle,
+  Wallet,
+  Info
 } from 'lucide-react';
-import { analyticsAPI } from '@/lib/api';
+import { analyticsAPI, dashboardAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
 type AnalyticsOverviewResponse = {
   total_submissions?: number;
   success_rate?: number;
-  average_time?: number;
+  total_time_spent_seconds?: number;
   streak?: number;
   total_points?: number;
   problems_solved?: number;
   weekly_goal?: number;
   weekly_progress?: number;
+  monthly_goal?: number;
+  monthly_progress?: number;
 };
 
 type AnalyticsProgressResponse = {
-  weekly_activity?: Array<{ date: string; count: number }>;
-  skill_progress?: Array<{ skill: string; level: number; max_level: number }>;
+  point_history?: Array<{
+    id?: number;
+    source?: string;
+    points_delta?: number;
+    time?: string;
+  }>;
+  point_sources?: Array<{
+    event_type?: string;
+    source?: string;
+    earned_points?: number;
+    used_points?: number;
+    net_points?: number;
+    events?: number;
+  }>;
 };
 
 const Analytics = () => {
@@ -38,33 +55,37 @@ const Analytics = () => {
     solvedProblems: 0,
     successRate: 0,
     skillPoints: 0,
-    averageTime: 0,
+    totalTimeSeconds: 0,
     streak: 0,
-    weeklyGoal: 10,
-    weeklyProgress: 0
+    weeklyGoal: 5,
+    weeklyProgress: 0,
+    monthlyGoal: 15,
+    monthlyProgress: 0
   });
 
   const [recentActivity, setRecentActivity] = useState<Array<{
-    date: string;
-    problems: number;
-    time: number;
-    success: boolean;
+    type: string;
+    title: string;
+    status: string;
+    time: string;
+    points: number;
   }>>([]);
 
   const [skillProgress, setSkillProgress] = useState<Array<{
-    skill: string;
-    completed: number;
-    total: number;
-    percentage: number;
+    id: number;
+    source: string;
+    delta: number;
+    time: string;
   }>>([]);
 
   useEffect(() => {
     let isMounted = true;
     const fetchAnalyticsData = async () => {
       try {
-        const [overviewResponse, progressResponse] = await Promise.all([
+        const [overviewResponse, progressResponse, activityResponse] = await Promise.all([
           analyticsAPI.getOverview(),
-          analyticsAPI.getProgress()
+          analyticsAPI.getProgress(),
+          dashboardAPI.getRecentActivity(8)
         ]);
         if (!isMounted) {
           return;
@@ -79,33 +100,35 @@ const Analytics = () => {
           solvedProblems: overview.problems_solved || 0,
           successRate: overview.success_rate || 0,
           skillPoints: overview.total_points || 0,
-          averageTime: Math.round(overview.average_time || 0),
+          totalTimeSeconds: Math.round(overview.total_time_spent_seconds || 0),
           streak: overview.streak || 0,
           weeklyGoal: overview.weekly_goal || 5,
-          weeklyProgress: overview.weekly_progress || 0
+          weeklyProgress: overview.weekly_progress || 0,
+          monthlyGoal: overview.monthly_goal || 15,
+          monthlyProgress: overview.monthly_progress || 0
         });
 
-        // Format weekly activity from progress response
-        if (progress.weekly_activity) {
-          const formattedActivity = progress.weekly_activity.map(activity => ({
-            date: formatDate(activity.date),
-            problems: activity.count,
-            time: activity.count * 10, // Estimated time
-            success: true
-          }));
-          setRecentActivity(formattedActivity);
-        }
+        const activityPayload = activityResponse as { activities?: Array<{ type?: string; title?: string; status?: string; time?: string; points?: number }> };
+        const formattedActivity = Array.isArray(activityPayload.activities)
+          ? activityPayload.activities.map((activity) => ({
+              type: activity.type || 'activity',
+              title: activity.title || 'Activity',
+              status: activity.status || 'completed',
+              time: activity.time ? formatDate(activity.time) : 'Unknown',
+              points: Number(activity.points || 0)
+            }))
+          : [];
+        setRecentActivity(formattedActivity);
 
-        // Format skill progress from progress response
-        if (progress.skill_progress) {
-          const formattedProgress = progress.skill_progress.map(skill => ({
-            skill: skill.skill,
-            completed: skill.level,
-            total: skill.max_level,
-            percentage: Math.round((skill.level / skill.max_level) * 100)
-          }));
-          setSkillProgress(formattedProgress);
-        }
+        const formattedProgress = Array.isArray(progress.point_history)
+          ? progress.point_history.map((item, idx) => ({
+              id: Number(item.id || idx),
+              source: item.source || 'Other',
+              delta: Number(item.points_delta || 0),
+              time: item.time ? formatDate(item.time) : 'Unknown',
+            }))
+          : [];
+        setSkillProgress(formattedProgress);
       } catch (error) {
         if (!isMounted) {
           return;
@@ -126,7 +149,7 @@ const Analytics = () => {
     void fetchAnalyticsData();
     const interval = window.setInterval(() => {
       void fetchAnalyticsData();
-    }, 15000);
+    }, 5000);
     return () => {
       isMounted = false;
       window.clearInterval(interval);
@@ -140,6 +163,18 @@ const Analytics = () => {
       month: '2-digit', 
       day: '2-digit' 
     });
+  };
+
+  const formatDuration = (seconds: number): string => {
+    if (!seconds || seconds <= 0) {
+      return '0m';
+    }
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    if (hrs <= 0) {
+      return `${mins}m`;
+    }
+    return `${hrs}h ${mins}m`;
   };
 
   return (
@@ -180,8 +215,8 @@ const Analytics = () => {
               <div className="flex items-center space-x-2">
                 <Clock className="h-8 w-8 text-blue-500" />
                 <div>
-                  <div className="text-2xl font-bold">{stats.averageTime}m</div>
-                  <div className="text-sm text-muted-foreground">Avg. Solve Time</div>
+                  <div className="text-2xl font-bold">{formatDuration(stats.totalTimeSeconds)}</div>
+                  <div className="text-sm text-muted-foreground">Total Time Spent</div>
                 </div>
               </div>
             </CardContent>
@@ -218,6 +253,20 @@ const Analytics = () => {
               <div className="text-sm text-muted-foreground">
                 {stats.weeklyGoal - stats.weeklyProgress} more problems to reach your weekly goal
               </div>
+              <div className="pt-2 border-t border-border/50 space-y-3">
+                <div className="flex items-center space-x-2">
+                  <BarChart3 className="h-5 w-5" />
+                  <span className="text-2xl font-semibold leading-none tracking-tight">Monthly Goal</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Problems solved this month</span>
+                  <span>{stats.monthlyProgress}/{stats.monthlyGoal}</span>
+                </div>
+                <Progress value={(stats.monthlyProgress / stats.monthlyGoal) * 100} className="h-3 mt-2" />
+                <div className="text-sm text-muted-foreground mt-2">
+                  {stats.monthlyGoal - stats.monthlyProgress} more problems to reach your monthly goal
+                </div>
+              </div>
             </CardContent>
           </Card>
 
@@ -227,7 +276,7 @@ const Analytics = () => {
               <CardTitle>Recent Activity</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="space-y-3 max-h-[14rem] overflow-y-hidden hover:overflow-y-auto pr-1">
                 {recentActivity.length === 0 ? (
                   <div className="text-center py-6 text-muted-foreground">
                     <Calendar className="w-10 h-10 mx-auto mb-2 opacity-50" />
@@ -237,18 +286,21 @@ const Analytics = () => {
                   recentActivity.map((activity, index) => (
                   <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                     <div className="flex items-center space-x-3">
-                      {activity.success ? (
-                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      {activity.type === 'assessment' ? (
+                        <Target className="h-5 w-5 text-blue-500" />
+                      ) : activity.type === 'code_submission' ? (
+                        <Code className="h-5 w-5 text-green-500" />
                       ) : (
-                        <XCircle className="h-5 w-5 text-red-500" />
+                        <PlayCircle className="h-5 w-5 text-primary" />
                       )}
                       <div>
-                        <div className="font-medium">{activity.date}</div>
+                        <div className="font-medium">{activity.title}</div>
                         <div className="text-sm text-muted-foreground">
-                          {activity.problems} problems, {activity.time}min
+                          {activity.status} • {activity.time}
                         </div>
                       </div>
                     </div>
+                    {activity.points > 0 ? <Badge variant="secondary">+{activity.points} pts</Badge> : null}
                   </div>
                   ))
                 )}
@@ -261,33 +313,50 @@ const Analytics = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Code className="h-5 w-5" />
-              <span>Skill Progress</span>
+                <Wallet className="h-5 w-5" />
+                <span>Skill Points Progress</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-96 max-h-96 overflow-y-auto">
+                    <div className="space-y-3 text-sm">
+                      <div className="font-semibold">How to earn points</div>
+                      <div className="text-muted-foreground">Practice solved: Beginner +5, Intermediate +10, Advanced +15</div>
+                      <div className="text-muted-foreground">Video watched: Beginner +10, Intermediate +15, Advanced +20</div>
+                      <div className="text-muted-foreground">Achievement completion: Beginner +10, Intermediate +20, Advanced +30</div>
+                      <div className="text-muted-foreground">Weekly goal completion: +10</div>
+                      <div className="text-muted-foreground">Monthly goal completion: +20</div>
+                      <div className="text-muted-foreground">Login streak milestone bonus: every 5th day milestone</div>
+                      <div className="pt-2 border-t border-border/50 font-semibold">Where to spend points</div>
+                      <div className="text-muted-foreground">AI code generation request: -5 per request</div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
+            <div className="space-y-4 max-h-[23rem] overflow-y-hidden hover:overflow-y-auto pr-1">
               {skillProgress.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  <Code className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p className="font-medium">No skill progress data available</p>
-                  <p className="text-sm mt-1">Complete challenges to track your progress!</p>
+                  <Wallet className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p className="font-medium">No points history yet</p>
+                  <p className="text-sm mt-1">Earn or use points to see source-wise progress.</p>
                 </div>
               ) : (
-                skillProgress.map((skill, index) => (
-                <div key={index} className="space-y-2">
+                skillProgress.map((skill) => (
+                <div key={skill.id} className="space-y-2 p-3 rounded-lg bg-muted/40">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium">{skill.skill}</span>
+                    <span className="font-medium">{skill.source}</span>
                     <div className="flex items-center space-x-2">
-                      <span className="text-sm text-muted-foreground">
-                        {skill.completed}/{skill.total}
-                      </span>
-                      <Badge variant={skill.percentage === 100 ? "default" : "secondary"}>
-                        {skill.percentage}%
+                      <Badge variant={skill.delta >= 0 ? 'secondary' : 'destructive'}>
+                        {skill.delta >= 0 ? `+${skill.delta}` : `${skill.delta}`}
                       </Badge>
                     </div>
                   </div>
-                  <Progress value={skill.percentage} className="h-2" />
+                  <div className="text-xs text-muted-foreground">{skill.time}</div>
                 </div>
                 ))
               )}

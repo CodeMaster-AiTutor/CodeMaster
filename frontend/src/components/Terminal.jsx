@@ -78,7 +78,37 @@ const TerminalComponent = ({ className, wsUrl, output, dataTestId }) => {
       resizeObserver.observe(containerRef.current);
     }
 
+    const handleWheel = (event) => {
+      const viewport = containerRef.current?.querySelector('.xterm-viewport');
+      if (!viewport) {
+        return;
+      }
+      const deltaY = event.deltaY;
+      const canScrollDown = viewport.scrollTop + viewport.clientHeight < viewport.scrollHeight - 1;
+      const canScrollUp = viewport.scrollTop > 0;
+      if ((deltaY > 0 && canScrollDown) || (deltaY < 0 && canScrollUp)) {
+        event.preventDefault();
+        viewport.scrollTop += deltaY;
+      }
+    };
+    containerRef.current.addEventListener('wheel', handleWheel, { passive: false });
+    if (typeof term.attachCustomKeyEventHandler === 'function') {
+      term.attachCustomKeyEventHandler((event) => {
+        const isCopy = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'c';
+        if (!isCopy || !term.hasSelection()) {
+          return true;
+        }
+        const selected = term.getSelection();
+        if (selected && navigator?.clipboard?.writeText) {
+          navigator.clipboard.writeText(selected).catch(() => void 0);
+        }
+        event.preventDefault();
+        return false;
+      });
+    }
+
     return () => {
+      containerRef.current?.removeEventListener('wheel', handleWheel);
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
