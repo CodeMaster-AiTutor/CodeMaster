@@ -12,7 +12,9 @@ import {
   Trash2,
   Loader2,
   Wrench,
-  X
+  X,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import Editor from '@monaco-editor/react';
 import type { OnMount } from '@monaco-editor/react';
@@ -95,7 +97,7 @@ const buildPointer = (lineText: string, column: number) => {
 const explainError = (message: string) => {
   const normalized = message.toLowerCase();
   if (normalized.includes("';' expected")) {
-    return 'Java expects a semicolon at the end of a statement. Add a semicolon after the line shown to terminate the statement.';
+    return 'The compiler found a syntax issue at this location. Check the expression and statement structure around the highlighted line.';
   }
   if (normalized.includes('cannot find symbol')) {
     return 'The compiler cannot resolve a name. This usually means a variable, method, or class is misspelled, not declared, or a required import is missing.';
@@ -122,6 +124,33 @@ const explainError = (message: string) => {
     return 'A method or constructor call does not match any available signature. Check the number and types of arguments.';
   }
   return 'The compiler reports a problem at this location. Review the highlighted line for missing symbols, wrong types, or misplaced syntax.';
+};
+
+const extractAiSummaryFromFix = (value?: string) => {
+  if (!value) {
+    return '';
+  }
+  const summaryMatch = value.match(/error summary:\s*([^\n]+)/i);
+  if (summaryMatch?.[1]) {
+    return summaryMatch[1].trim();
+  }
+  return '';
+};
+
+const deriveDisplayErrorMessage = (error: CompilerError) => {
+  const rawMessage = (error.message || 'Compilation error').trim();
+  if (!rawMessage.toLowerCase().includes("';' expected")) {
+    return rawMessage;
+  }
+  const aiSummary = extractAiSummaryFromFix(error.ai_fix_suggestion);
+  if (aiSummary && !/semicolon|';' expected/i.test(aiSummary)) {
+    return aiSummary;
+  }
+  const explanation = (error.explanation || '').trim();
+  if (explanation && !/semicolon|';' expected/i.test(explanation)) {
+    return explanation.split(/[.!?]\s+/)[0].trim();
+  }
+  return rawMessage;
 };
 
 const buildErrorBlock = (payload: {
@@ -179,7 +208,7 @@ const reduceParsedCompilerErrors = <T extends { file?: string; line: number; mes
   return reduced;
 };
 
-const parseJavacOutput = (output: string, code: string) => {
+const parseJavacEntries = (output: string, code: string) => {
   const lines = output.split(/\r?\n/);
   const sourceLines = code.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
   const parsed: Array<{
@@ -216,6 +245,11 @@ const parseJavacOutput = (output: string, code: string) => {
       codeLine
     });
   }
+  return parsed;
+};
+
+const parseJavacOutput = (output: string, code: string) => {
+  const parsed = parseJavacEntries(output, code);
   const reducedParsed = reduceParsedCompilerErrors(parsed);
   const results = reducedParsed.map((item) => buildErrorBlock(item));
   if (results.length > 0) {
@@ -250,6 +284,32 @@ const formatErrors = (errors?: CompilerError[], code?: string) => {
   });
   const reduced = reduceParsedCompilerErrors(parsed);
   return reduced.map((item) => buildErrorBlock(item)).join('\n');
+};
+
+const toPanelCompilerErrors = (errors: CompilerError[] | undefined, code: string) => {
+  if (!errors || errors.length === 0) {
+    return [] as CompilerError[];
+  }
+  const rawJavac = errors.find(
+    (err) => (err.line ?? 0) <= 0 && (err.message ?? '').includes('.java:') && (err.message ?? '').includes('error:')
+  );
+  if (rawJavac?.message) {
+    const parsed = parseJavacEntries(rawJavac.message, code);
+    if (parsed.length > 0) {
+      return reduceParsedCompilerErrors(parsed).map((item) => ({
+        file: item.file,
+        line: item.line,
+        column: item.column,
+        message: item.message,
+      }));
+    }
+  }
+  const normalized = errors.map((err) => ({
+    ...err,
+    line: typeof err.line === 'number' ? err.line : 0,
+    message: err.message?.trim() || 'Compilation failed',
+  }));
+  return reduceParsedCompilerErrors(normalized);
 };
 
 const toScopeSuffix = (scope?: string) => {
@@ -643,7 +703,9 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
   const saveTimerRef = useRef<number | null>(null);
   const lastSavedStateRef = useRef<Omit<CompilerState, 'version' | 'compressed' | 'updatedAt'> | null>(null);
   const [isClearing, setIsClearing] = useState(false);
+  const [isSpeakingExplanation, setIsSpeakingExplanation] = useState(false);
   const sessionIdRef = useRef<string | null>(null);
+  const speechUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const appThemeRef = useRef<'dark' | 'light'>(getCurrentAppThemeMode());
   const enableInlineErrorHelper = withLayout;
 
@@ -837,19 +899,37 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
     return unique;
   }, [compilerErrors, enableInlineErrorHelper]);
 
+  const stopSpeakingExplanation = useCallback(() => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) {
+      return;
+    }
+    window.speechSynthesis.cancel();
+    speechUtteranceRef.current = null;
+    setIsSpeakingExplanation(false);
+  }, []);
+
   const handleErrorLineAction = useCallback(async (error: CompilerError) => {
     if (!enableInlineErrorHelper) {
       return;
     }
-    setSelectedError(error);
+    stopSpeakingExplanation();
     setIsErrorPanelOpen(true);
     setErrorExplainMessage('');
-    if (error.explanation && error.explanation.trim()) {
+    const hasExistingInsight = Boolean(error.explanation?.trim() || error.ai_fix_suggestion?.trim());
+    if (hasExistingInsight) {
+      setSelectedError(error);
       return;
     }
     if (!error.message || !codeRef.current.trim()) {
+      setSelectedError(error);
       return;
     }
+    setSelectedError({
+      ...error,
+      explanation: undefined,
+      ai_fix_suggestion: undefined,
+      corrected_code: undefined,
+    });
     setIsExplainingError(true);
     try {
       const ai = await compilerAPI.suggestFix(
@@ -859,11 +939,30 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
         error.line,
         error.column
       );
+      const isSemicolonMessage = (error.message || '').toLowerCase().includes("';' expected");
+      const sanitizeSuggestion = (value?: string) => {
+        if (!value) {
+          return value;
+        }
+        const hasSemicolonOnlyHint = /semicolon|';' expected/i.test(value);
+        if (!isSemicolonMessage && hasSemicolonOnlyHint) {
+          return undefined;
+        }
+        return value;
+      };
+      let normalizedExplanation = sanitizeSuggestion(ai.explanation || error.explanation);
+      const normalizedFix = sanitizeSuggestion(ai.fix_suggestion || error.ai_fix_suggestion);
+      const semicolonPattern = /semicolon|';' expected/i;
+      const hasGenericSemicolonExplanation = Boolean(normalizedExplanation && semicolonPattern.test(normalizedExplanation));
+      const hasNonSemicolonFix = Boolean(normalizedFix && !semicolonPattern.test(normalizedFix));
+      if (hasGenericSemicolonExplanation && hasNonSemicolonFix) {
+        normalizedExplanation = undefined;
+      }
       const enriched: CompilerError = {
         ...error,
-        ai_fix_suggestion: ai.fix_suggestion || error.ai_fix_suggestion,
+        ai_fix_suggestion: normalizedFix,
         corrected_code: ai.corrected_code || error.corrected_code,
-        explanation: ai.explanation || error.explanation,
+        explanation: normalizedExplanation,
       };
       setSelectedError(enriched);
       setCompilerErrors((prev) => prev.map((item) =>
@@ -876,7 +975,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
     } finally {
       setIsExplainingError(false);
     }
-  }, [enableInlineErrorHelper]);
+  }, [enableInlineErrorHelper, stopSpeakingExplanation]);
 
   const clearErrorWidgets = useCallback(() => {
     const editor = editorRef.current;
@@ -936,6 +1035,109 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
       setSelectedError(null);
     }
   }, [enableInlineErrorHelper]);
+
+  const handleSpeakExplanation = useCallback(() => {
+    if (!selectedError) {
+      return;
+    }
+    if (typeof window === 'undefined' || !window.speechSynthesis) {
+      toast({
+        title: 'Speech not supported',
+        description: 'Your browser does not support text-to-speech for this feature.',
+        variant: 'destructive'
+      });
+      return;
+    }
+    if (isSpeakingExplanation) {
+      stopSpeakingExplanation();
+      return;
+    }
+    const convertProgrammingTextForSpeech = (value: string) => {
+      return value
+        .replace(/```[\s\S]*?```/g, ' code example omitted for clarity. ')
+        .replace(/`([^`]+)`/g, '$1')
+        .replace(/Error Summary:/gi, 'Summary:')
+        .replace(/Suggested Fix:/gi, 'Suggested fix:')
+        .replace(/\r?\n+/g, '. ')
+        .replace(/!==/g, ' not equal to ')
+        .replace(/===/g, ' exactly equals ')
+        .replace(/!=/g, ' not equal to ')
+        .replace(/==/g, ' equals ')
+        .replace(/<=/g, ' less than or equal to ')
+        .replace(/>=/g, ' greater than or equal to ')
+        .replace(/&&/g, ' and ')
+        .replace(/\|\|/g, ' or ')
+        .replace(/\s\*\s/g, ' multiplied by ')
+        .replace(/\s\/\s/g, ' divided by ')
+        .replace(/\s\+\s/g, ' plus ')
+        .replace(/\s-\s/g, ' minus ')
+        .replace(/';' expected/gi, 'semicolon expected')
+        .replace(/\s+/g, ' ')
+        .trim();
+    };
+    const pickPreferredVoice = (voices: SpeechSynthesisVoice[]) => {
+      if (voices.length === 0) {
+        return null;
+      }
+      const scored = voices
+        .filter((voice) => /^en(-|_)/i.test(voice.lang))
+        .map((voice) => {
+          const id = `${voice.name} ${voice.lang}`.toLowerCase();
+          let score = 0;
+          if (voice.lang.toLowerCase().includes('en-in')) score += 6;
+          if (/female|woman|zira|hazel|aria|samantha|victoria|allison|karen|moira|google uk english female/.test(id)) score += 5;
+          if (/natural|neural|enhanced|premium/.test(id)) score += 3;
+          return { voice, score };
+        })
+        .sort((a, b) => b.score - a.score);
+      if (scored.length > 0) {
+        return scored[0].voice;
+      }
+      return voices[0];
+    };
+    const explanation = selectedError.explanation?.trim();
+    const suggestion = selectedError.ai_fix_suggestion?.trim();
+    const fallbackMessage = selectedError.message?.trim();
+    const combinedText = explanation
+      ? `${explanation}${suggestion ? `. Suggested fix: ${suggestion}` : ''}`
+      : suggestion || fallbackMessage || 'No explanation available to read.';
+    const textToSpeak = convertProgrammingTextForSpeech(combinedText);
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice = pickPreferredVoice(voices);
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+      utterance.lang = preferredVoice.lang;
+    } else {
+      utterance.lang = 'en-IN';
+    }
+    utterance.rate = 0.9;
+    utterance.pitch = 1.05;
+    utterance.onend = () => {
+      speechUtteranceRef.current = null;
+      setIsSpeakingExplanation(false);
+    };
+    utterance.onerror = () => {
+      speechUtteranceRef.current = null;
+      setIsSpeakingExplanation(false);
+    };
+    speechUtteranceRef.current = utterance;
+    setIsSpeakingExplanation(true);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  }, [isSpeakingExplanation, selectedError, stopSpeakingExplanation]);
+
+  useEffect(() => {
+    if (!isErrorPanelOpen) {
+      stopSpeakingExplanation();
+    }
+  }, [isErrorPanelOpen, stopSpeakingExplanation]);
+
+  useEffect(() => {
+    return () => {
+      stopSpeakingExplanation();
+    };
+  }, [stopSpeakingExplanation]);
 
   useEffect(() => {
     renderErrorWidgets();
@@ -1451,12 +1653,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
       } else {
         console.log('[Compiler] Session failed:', result.errors);
         const rawErrors = (result.errors || []) as CompilerError[];
-        const normalizedErrors = rawErrors.map((err) => ({
-          ...err,
-          line: typeof err.line === 'number' ? err.line : 0,
-          message: err.message?.trim() || 'Compilation failed',
-        }));
-        setCompilerErrors(reduceParsedCompilerErrors(normalizedErrors));
+        setCompilerErrors(toPanelCompilerErrors(rawErrors, currentCode));
         const errorMessage = formatErrors(result.errors, currentCode);
         setOutput(errorMessage);
         setExecutionStatus('error');
@@ -1725,18 +1922,37 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
                           <div className="p-4 space-y-4 text-sm overflow-y-auto h-[calc(100%-60px)]">
                             {selectedError ? (
                               <>
-                                <div className="text-muted-foreground">
-                                  {typeof selectedError.line === 'number' ? `Line ${selectedError.line}` : 'Line unknown'}
-                                  {typeof selectedError.column === 'number' && (selectedError.column ?? 0) > 0 ? `, Col ${selectedError.column}` : ''}
+                                <div className="flex items-center justify-between">
+                                  <div className="text-muted-foreground">
+                                    {typeof selectedError.line === 'number' ? `Line ${selectedError.line}` : 'Line unknown'}
+                                    {typeof selectedError.column === 'number' && (selectedError.column ?? 0) > 0 ? `, Col ${selectedError.column}` : ''}
+                                  </div>
+                                  {(selectedError.explanation || selectedError.ai_fix_suggestion) && !isExplainingError ? (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-8 w-8 p-0 border-primary/40 text-primary hover:bg-primary/10"
+                                      onClick={handleSpeakExplanation}
+                                      aria-label={isSpeakingExplanation ? 'Stop reading explanation' : 'Read explanation aloud'}
+                                    >
+                                      {isSpeakingExplanation ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                                    </Button>
+                                  ) : null}
                                 </div>
-                                <div className="font-medium text-foreground">{selectedError.message || 'Compilation error'}</div>
+                                <div className="font-medium text-foreground">{deriveDisplayErrorMessage(selectedError)}</div>
                                 {isExplainingError ? (
                                   <div className="text-muted-foreground">Generating detailed AI explanation...</div>
                                 ) : null}
                                 {errorExplainMessage ? (
                                   <div className="text-destructive text-xs">{errorExplainMessage}</div>
                                 ) : null}
-                                {selectedError.ai_fix_suggestion ? (
+                                {!isExplainingError && selectedError.explanation ? (
+                                  <div>
+                                    <div className="text-xs text-muted-foreground mb-1">Explanation</div>
+                                    <div className="text-foreground whitespace-pre-wrap">{selectedError.explanation}</div>
+                                  </div>
+                                ) : null}
+                                {!isExplainingError && selectedError.ai_fix_suggestion ? (
                                   <div>
                                     <div className="text-xs text-muted-foreground mb-1">Suggested Fix</div>
                                     <div className="text-foreground whitespace-pre-wrap">{selectedError.ai_fix_suggestion}</div>

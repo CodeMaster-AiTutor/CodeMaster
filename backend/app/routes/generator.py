@@ -3,6 +3,7 @@ from app import db
 from app.middleware.auth import token_required
 from app.models.generator_chat import GeneratorChat, GeneratorChatMessage
 from app.services.ai_service import get_ai_service
+from app.services.llm_proxy import call_llm_service, use_external_llm_service
 from app.services.skill_points_service import consume_generation_points, GENERATION_COST
 import re
 
@@ -91,8 +92,13 @@ def generate_code(current_user):
         ))
         
         # Generate code using AI service
-        ai_service = get_ai_service()
-        generated_code = ai_service.generate_code(prompt, merged_context)
+        if use_external_llm_service():
+            generated_code = str(
+                call_llm_service("/generate", {"prompt": prompt, "context": merged_context}).get("code", "")
+            ).strip()
+        else:
+            ai_service = get_ai_service()
+            generated_code = ai_service.generate_code(prompt, merged_context)
         spent_ok, spent_error, remaining_points = consume_generation_points(current_user, prompt)
         if not spent_ok:
             return jsonify({'error': spent_error}), 402
@@ -156,8 +162,13 @@ def chat(current_user):
         ))
         
         # Generate response
-        ai_service = get_ai_service()
-        response = ai_service.generate_code(message, context)
+        if use_external_llm_service():
+            response = str(
+                call_llm_service("/generate", {"prompt": message, "context": context}).get("code", "")
+            ).strip()
+        else:
+            ai_service = get_ai_service()
+            response = ai_service.generate_code(message, context)
         spent_ok, spent_error, remaining_points = consume_generation_points(current_user, message)
         if not spent_ok:
             return jsonify({'error': spent_error}), 402

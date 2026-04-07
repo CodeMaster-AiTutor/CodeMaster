@@ -21,6 +21,7 @@ WEEKLY_GOAL_TARGET = 5
 WEEKLY_GOAL_REWARD = 10
 MONTHLY_GOAL_TARGET = 15
 MONTHLY_GOAL_REWARD = 20
+IST_OFFSET = timedelta(hours=5, minutes=30)
 
 
 def _normalize_level(level: Optional[str]) -> str:
@@ -55,13 +56,17 @@ def _award_one_time(user, event_type: str, event_key: str, points: int, event_da
     return True, points
 
 
+def _to_ist_date(value: datetime) -> date:
+    return (value + IST_OFFSET).date()
+
+
 def apply_daily_login_streak(user, now: Optional[datetime] = None):
     now = now or datetime.utcnow()
-    today = now.date()
+    today = _to_ist_date(now)
     yesterday = today - timedelta(days=1)
     previous_active = user.last_active_date
     if previous_active is None and getattr(user, "last_login", None):
-        previous_active = user.last_login.date()
+        previous_active = _to_ist_date(user.last_login)
 
     if previous_active == today:
         return {"streak_days": int(user.streak_days or 0), "bonus_points": 0, "updated": False}

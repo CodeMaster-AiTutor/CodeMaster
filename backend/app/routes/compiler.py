@@ -4,6 +4,7 @@ from app.models.code_submission import CodeSubmission
 from app.middleware.auth import token_required
 from app.services.java_executor import get_java_executor
 from app.services.ai_service import get_ai_service
+from app.services.llm_proxy import call_llm_service, use_external_llm_service
 from app.services.terminal_sessions import get_terminal_manager
 from app.routes.profile import update_streak_on_submit
 from datetime import datetime
@@ -284,14 +285,26 @@ def suggest_fix(current_user):
         except Exception:
             pass
 
-        ai_service = get_ai_service()
-        suggestion = ai_service.suggest_error_fix(
-            resolved_error,
-            code_context,
-            error_type,
-            error_line=resolved_line,
-            error_column=resolved_column
-        )
+        if use_external_llm_service():
+            suggestion = call_llm_service(
+                "/suggest-fix",
+                {
+                    "error": resolved_error,
+                    "code_context": code_context,
+                    "error_type": error_type,
+                    "error_line": resolved_line,
+                    "error_column": resolved_column,
+                },
+            )
+        else:
+            ai_service = get_ai_service()
+            suggestion = ai_service.suggest_error_fix(
+                resolved_error,
+                code_context,
+                error_type,
+                error_line=resolved_line,
+                error_column=resolved_column
+            )
         
         return jsonify(suggestion), 200
         

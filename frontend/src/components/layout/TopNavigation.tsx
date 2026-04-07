@@ -89,11 +89,21 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
     subtitle: string;
     path: string;
     type: 'page' | 'challenge' | 'video' | 'assessment';
+    level?: 'beginner' | 'intermediate' | 'advanced';
   }>>([]);
   const searchContainerRef = useRef<HTMLDivElement | null>(null);
   const getTodayKey = () => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    try {
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date());
+    } catch {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
   };
   const isStreakReminderEnabled = () => {
     try {
@@ -131,6 +141,25 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
     } catch {
       return 'beginner';
     }
+  };
+  const getSkillRank = (level: 'beginner' | 'intermediate' | 'advanced') => {
+    if (level === 'advanced') {
+      return 3;
+    }
+    if (level === 'intermediate') {
+      return 2;
+    }
+    return 1;
+  };
+  const normalizeLevel = (value?: string): 'beginner' | 'intermediate' | 'advanced' => {
+    const normalized = (value || '').toLowerCase();
+    if (normalized === 'advanced') {
+      return 'advanced';
+    }
+    if (normalized === 'intermediate') {
+      return 'intermediate';
+    }
+    return 'beginner';
   };
 
   // Update user info when localStorage changes
@@ -236,16 +265,18 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
         const challenges = (catalog || []).map((item) => ({
           id: `challenge-${item.id}`,
           title: item.title,
-          subtitle: `Challenge • ${(item.level || 'beginner').toString()}`,
-          path: `/practice/solve/${item.level}/${encodeURIComponent(item.title)}`,
+          subtitle: `Challenge • ${normalizeLevel((item.level || 'beginner').toString())}`,
+          path: `/practice/solve/${normalizeLevel((item.level || 'beginner').toString())}/${encodeURIComponent(item.title)}`,
           type: 'challenge' as const,
+          level: normalizeLevel((item.level || 'beginner').toString()),
         }));
         const videos = (learningPaths || []).map((item) => ({
           id: `video-${item.id}`,
           title: item.title,
-          subtitle: `Video • ${item.level}`,
+          subtitle: `Video • ${normalizeLevel(item.level)}`,
           path: `/learning-path/java/${encodeURIComponent(item.slug)}`,
           type: 'video' as const,
+          level: normalizeLevel(item.level),
         }));
         setSearchItems([...staticPages, ...challenges, ...videos]);
       } catch {
@@ -297,10 +328,18 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
     if (!normalized) {
       return [];
     }
+    const currentLevel = normalizeLevel(userInfo.level);
+    const currentRank = getSkillRank(currentLevel);
     return searchItems
+      .filter((item) => {
+        if (!item.level) {
+          return true;
+        }
+        return getSkillRank(item.level) <= currentRank;
+      })
       .filter((item) => `${item.title} ${item.subtitle}`.toLowerCase().includes(normalized))
       .slice(0, 20);
-  }, [searchItems, searchQuery]);
+  }, [searchItems, searchQuery, userInfo.level]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';

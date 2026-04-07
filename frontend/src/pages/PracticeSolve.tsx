@@ -295,7 +295,7 @@ const PracticeSolve = () => {
                 <BookOpen className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <div className="text-2xl md:text-3xl font-semibold text-white">{decodedTitle}</div>
+                <div className="text-2xl md:text-3xl font-semibold text-foreground">{decodedTitle}</div>
                 <div className="text-sm text-muted-foreground">{levelLabel} Practice</div>
                 <div className="text-xs text-primary mt-1">
                   Earnable skill points: +{earnablePoints} {pointsEarnedAlready ? '(already earned)' : ''}
@@ -317,7 +317,7 @@ const PracticeSolve = () => {
             <div className="w-full lg:w-[30%]">
               <Card className="border-border/20 bg-gradient-card">
                 <CardContent className="p-6 space-y-4">
-                  <div className="text-sm text-zinc-100/90 whitespace-pre-wrap leading-6">
+                  <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-6">
                     {hasDescription ? displayDescription : 'Description unavailable'}
                   </div>
                   <div className="pt-2 space-y-3">
@@ -360,8 +360,8 @@ const PracticeSolve = () => {
                               )}
                               <span>Test Case {test.index}</span>
                             </div>
-                            <div className="text-zinc-200/90">Expected: {test.expected_output || '(empty)'}</div>
-                            <div className="text-zinc-200/90">Actual: {test.actual_output || '(empty)'}</div>
+                            <div className="text-foreground/90">Expected: {test.expected_output || '(empty)'}</div>
+                            <div className="text-foreground/90">Actual: {test.actual_output || '(empty)'}</div>
                           </div>
                         ))}
                       </div>

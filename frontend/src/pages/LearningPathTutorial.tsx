@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,7 @@ const learningPathConcepts: LearningConcept[] = [
       'main() Method Deep Concept',
     ],
     level: 'basic',
+    tutorialUrl: '/videos/v1_exp_video.mp4',
   },
   {
     id: 'jvm-architecture',
@@ -491,40 +492,144 @@ const LearningPathTutorial = () => {
   const locked = concept ? conceptRank[concept.level] > accessRank : false;
   const earnablePoints = concept ? (concept.level === 'basic' ? 10 : concept.level === 'intermediate' ? 15 : 20) : 0;
   const [videoPointsAwarded, setVideoPointsAwarded] = useState<number>(0);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const watchedSecondsRef = useRef(0);
+  const lastMediaTimeRef = useRef(0);
+  const lastWallTimeRef = useRef(0);
+  const invalidPlaybackRef = useRef(false);
+  const completionRequestRef = useRef(false);
+  const warningShownRef = useRef(false);
 
   useEffect(() => {
-    const markVideoComplete = async () => {
-      if (!concept || locked) return;
-      try {
-        await contentAPI.trackCourseOpen(`learning-path:${concept.id}`, concept.level, concept.title, 'learning_path_tutorial');
-      } catch {
-        void 0;
-      }
-      try {
-        const response = await contentAPI.completeVideo(concept.id, concept.level);
-        if (response.awarded) {
-          setVideoPointsAwarded(response.points_awarded || 0);
-          try {
-            const raw = localStorage.getItem('user');
-            if (raw) {
-              const user = JSON.parse(raw) as Record<string, unknown>;
-              user.total_points = response.current_points;
-              localStorage.setItem('user', JSON.stringify(user));
-            }
-          } catch {
-            void 0;
-          }
-          toast({
-            title: "Skill points earned",
-            description: `+${response.points_awarded} points for watching this video.`,
-          });
-        }
-      } catch {
-        void 0;
-      }
-    };
-    void markVideoComplete();
+    watchedSecondsRef.current = 0;
+    lastMediaTimeRef.current = 0;
+    lastWallTimeRef.current = 0;
+    invalidPlaybackRef.current = false;
+    completionRequestRef.current = false;
+    warningShownRef.current = false;
+    setVideoPointsAwarded(0);
   }, [concept, locked]);
+
+  const markVideoComplete = useCallback(async () => {
+    if (!concept || locked || completionRequestRef.current) {
+      return;
+    }
+    completionRequestRef.current = true;
+    try {
+      await contentAPI.trackCourseOpen(`learning-path:${concept.id}`, concept.level, concept.title, 'learning_path_tutorial');
+    } catch {
+      void 0;
+    }
+    try {
+      const response = await contentAPI.completeVideo(concept.id, concept.level);
+      if (response.awarded) {
+        setVideoPointsAwarded(response.points_awarded || 0);
+        try {
+          const raw = localStorage.getItem('user');
+          if (raw) {
+            const user = JSON.parse(raw) as Record<string, unknown>;
+            user.total_points = response.current_points;
+            localStorage.setItem('user', JSON.stringify(user));
+          }
+        } catch {
+          void 0;
+        }
+        toast({
+          title: "Skill points earned",
+          description: `+${response.points_awarded} points for watching this video.`,
+        });
+      }
+    } catch {
+      completionRequestRef.current = false;
+    }
+  }, [concept, locked]);
+
+  const handleVideoPlay = useCallback(() => {
+    lastWallTimeRef.current = performance.now() / 1000;
+    lastMediaTimeRef.current = videoRef.current?.currentTime || 0;
+  }, []);
+
+  const handleVideoRateChange = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) {
+      return;
+    }
+    if (Math.abs(video.playbackRate - 1) > 0.01) {
+      invalidPlaybackRef.current = true;
+      if (!warningShownRef.current) {
+        warningShownRef.current = true;
+        toast({
+          title: "Normal playback required",
+          description: "Watch at 1x speed without skipping to mark this video as completed.",
+          variant: "destructive",
+        });
+      }
+    }
+  }, []);
+
+  const handleVideoSeeking = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) {
+      return;
+    }
+    const forwardJump = video.currentTime - lastMediaTimeRef.current;
+    if (forwardJump > 0.25) {
+      invalidPlaybackRef.current = true;
+      if (!warningShownRef.current) {
+        warningShownRef.current = true;
+        toast({
+          title: "Skipping detected",
+          description: "Please watch the full video continuously to complete it.",
+          variant: "destructive",
+        });
+      }
+    }
+    lastMediaTimeRef.current = video.currentTime;
+    lastWallTimeRef.current = performance.now() / 1000;
+  }, []);
+
+  const handleVideoTimeUpdate = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || video.paused || video.ended) {
+      return;
+    }
+    const now = performance.now() / 1000;
+    const currentMedia = video.currentTime;
+    const prevMedia = lastMediaTimeRef.current;
+    const prevWall = lastWallTimeRef.current;
+    if (prevWall > 0) {
+      const mediaDelta = currentMedia - prevMedia;
+      const wallDelta = now - prevWall;
+      if (mediaDelta > 0) {
+        if (mediaDelta > wallDelta * 1.25 + 0.2) {
+          invalidPlaybackRef.current = true;
+        } else {
+          watchedSecondsRef.current += Math.min(mediaDelta, wallDelta + 0.2);
+        }
+      }
+    }
+    lastMediaTimeRef.current = currentMedia;
+    lastWallTimeRef.current = now;
+  }, []);
+
+  const handleVideoEnded = useCallback(async () => {
+    const video = videoRef.current;
+    if (!video || !concept || locked) {
+      return;
+    }
+    const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 0;
+    const watchedEnough = duration > 0 ? watchedSecondsRef.current >= duration * 0.98 : false;
+    const validPlayback = !invalidPlaybackRef.current && Math.abs(video.playbackRate - 1) <= 0.01;
+    if (!watchedEnough || !validPlayback) {
+      toast({
+        title: "Video not marked as completed",
+        description: "Watch the full video at 1x without skipping to complete it.",
+        variant: "destructive",
+      });
+      return;
+    }
+    await markVideoComplete();
+  }, [concept, locked, markVideoComplete]);
 
   return (
     <AppLayout>
@@ -595,11 +700,31 @@ const LearningPathTutorial = () => {
             </Card>
           ) : (
             <div className="grid items-stretch gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-10">
-              <div
-                className="aspect-[16/9] w-full max-w-3xl mx-auto overflow-hidden rounded-xl border border-dashed border-border/60 bg-muted/20 flex items-center justify-center text-sm text-muted-foreground"
-              >
-                Video player will appear here
-              </div>
+              {concept.tutorialUrl ? (
+                <div className="aspect-[16/9] w-full max-w-3xl mx-auto overflow-hidden rounded-xl border border-border/60 bg-black">
+                  <video
+                    ref={videoRef}
+                    className="h-full w-full"
+                    controls
+                    preload="metadata"
+                    playsInline
+                    src={concept.tutorialUrl}
+                    onPlay={handleVideoPlay}
+                    onRateChange={handleVideoRateChange}
+                    onSeeking={handleVideoSeeking}
+                    onTimeUpdate={handleVideoTimeUpdate}
+                    onEnded={handleVideoEnded}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              ) : (
+                <div
+                  className="aspect-[16/9] w-full max-w-3xl mx-auto overflow-hidden rounded-xl border border-dashed border-border/60 bg-muted/20 flex items-center justify-center text-sm text-muted-foreground"
+                >
+                  Video player will appear here
+                </div>
+              )}
               <Card className="border-border/20 bg-gradient-card">
                 <CardContent className="p-6 h-full flex flex-col space-y-4">
                   <h3 className="text-xl font-semibold">What is covered</h3>

@@ -1,0 +1,31 @@
+services:
+  backend-core:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: codemaster-backend-core
+    env_file:
+      - backend/.env
+    environment:
+      USE_EXTERNAL_LLM_SERVICE: "true"
+      LLM_SERVICE_URL: "http://llm-service:5002"
+      DATABASE_URL: ""
+    ports:
+      - "5001:5001"
+    depends_on:
+      - llm-service
+    restart: unless-stopped
+
+  llm-service:
+    build:
+      context: .
+      dockerfile: backend/llm_service/Dockerfile
+    container_name: codemaster-llm-service
+    env_file:
+      - backend/.env
+    environment:
+      LLM_SERVICE_HOST: "0.0.0.0"
+      LLM_SERVICE_PORT: "5002"
+    ports:
+      - "5002:5002"
+    restart: unless-stopped

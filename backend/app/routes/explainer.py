@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.middleware.auth import token_required
 from app.services.ai_service import get_ai_service
+from app.services.llm_proxy import call_llm_service, use_external_llm_service
 
 explainer_bp = Blueprint('explainer', __name__)
 
@@ -19,9 +20,11 @@ def explain_code(current_user):
         if not java_code:
             return jsonify({'error': 'Java code is required'}), 400
         
-        # Get explanation using AI service
-        ai_service = get_ai_service()
-        explanation = ai_service.explain_code(java_code)
+        if use_external_llm_service():
+            explanation = str(call_llm_service("/explain", {"code": java_code}).get("explanation", "")).strip()
+        else:
+            ai_service = get_ai_service()
+            explanation = ai_service.explain_code(java_code)
         
         return jsonify({
             'message': 'Explanation generated successfully',

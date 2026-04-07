@@ -1,0 +1,14 @@
+.git
+.github
+frontend
+Theory course
+Videos
+jdk-17.0.12
+backend/docker_env
+backend/migrations
+backend/tests
+backend/logs
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/node_modules
