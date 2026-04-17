@@ -85,7 +85,7 @@ const Analytics = () => {
         const [overviewResponse, progressResponse, activityResponse] = await Promise.all([
           analyticsAPI.getOverview(),
           analyticsAPI.getProgress(),
-          dashboardAPI.getRecentActivity(8)
+          dashboardAPI.getRecentActivity(7)
         ]);
         if (!isMounted) {
           return;
@@ -118,7 +118,7 @@ const Analytics = () => {
               points: Number(activity.points || 0)
             }))
           : [];
-        setRecentActivity(formattedActivity);
+        setRecentActivity(formattedActivity.slice(0, 7));
 
         const formattedProgress = Array.isArray(progress.point_history)
           ? progress.point_history.map((item, idx) => ({
@@ -176,6 +176,8 @@ const Analytics = () => {
     }
     return `${hrs}h ${mins}m`;
   };
+
+  const topRecentActivity = recentActivity.slice(0, 7);
 
   return (
     <AppLayout>
@@ -276,15 +278,15 @@ const Analytics = () => {
               <CardTitle>Recent Activity</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 max-h-[14rem] overflow-y-hidden hover:overflow-y-auto pr-1">
+              <div className="space-y-3 max-h-[16rem] overflow-y-hidden hover:overflow-y-auto pr-1">
                 {recentActivity.length === 0 ? (
                   <div className="text-center py-6 text-muted-foreground">
                     <Calendar className="w-10 h-10 mx-auto mb-2 opacity-50" />
                     <p className="text-sm">No recent activity data available</p>
                   </div>
                 ) : (
-                  recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  topRecentActivity.map((activity, index) => (
+                  <div key={`top-${index}`} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                     <div className="flex items-center space-x-3">
                       {activity.type === 'assessment' ? (
                         <Target className="h-5 w-5 text-blue-500" />
@@ -329,7 +331,7 @@ const Analytics = () => {
                       <div className="text-muted-foreground">Achievement completion: Beginner +10, Intermediate +20, Advanced +30</div>
                       <div className="text-muted-foreground">Weekly goal completion: +10</div>
                       <div className="text-muted-foreground">Monthly goal completion: +20</div>
-                      <div className="text-muted-foreground">Login streak milestone bonus: every 5th day milestone</div>
+                      <div className="text-muted-foreground">Login streak milestone bonus: day 5 +20, day 10 +30, day 15 +40, then +10 every next 5-day milestone</div>
                       <div className="pt-2 border-t border-border/50 font-semibold">Where to spend points</div>
                       <div className="text-muted-foreground">AI code generation request: -5 per request</div>
                     </div>

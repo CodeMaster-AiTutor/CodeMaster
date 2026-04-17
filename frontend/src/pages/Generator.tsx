@@ -63,11 +63,26 @@ type GeneratorUiCache = {
   messages: Array<{ id: string; role: 'user' | 'assistant'; content: string; timestamp: string; code?: string }>;
 };
 
-const GENERATOR_UI_CACHE_KEY = 'generator:ui-cache:v1';
+const GENERATOR_UI_CACHE_KEY_PREFIX = 'generator:ui-cache:v2';
 
-const readGeneratorUiCache = (): GeneratorUiCache | null => {
+const getGeneratorCacheOwner = () => {
   try {
-    const raw = localStorage.getItem(GENERATOR_UI_CACHE_KEY);
+    const raw = localStorage.getItem('user');
+    if (!raw) return 'anon';
+    const parsed = JSON.parse(raw) as { id?: string | number; email?: string };
+    const identity = String(parsed?.id ?? parsed?.email ?? '').trim().toLowerCase();
+    if (!identity) return 'anon';
+    return identity.replace(/[^a-z0-9@._-]+/g, '_');
+  } catch {
+    return 'anon';
+  }
+};
+
+const getGeneratorUiCacheKey = () => `${GENERATOR_UI_CACHE_KEY_PREFIX}:${getGeneratorCacheOwner()}`;
+
+const readGeneratorUiCache = (cacheKey: string): GeneratorUiCache | null => {
+  try {
+    const raw = localStorage.getItem(cacheKey);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as GeneratorUiCache;
     if (!parsed || !Array.isArray(parsed.messages) || !Array.isArray(parsed.chatHistories)) {
@@ -87,7 +102,8 @@ const createWelcomeMessage = (): Message => ({
 });
 
 const Generator = () => {
-  const cachedUi = readGeneratorUiCache();
+  const [cacheKey] = useState(() => getGeneratorUiCacheKey());
+  const [cachedUi] = useState<GeneratorUiCache | null>(() => readGeneratorUiCache(cacheKey));
   const extractCleanCode = (raw: string) => {
     const text = (raw || '').trim();
     const fencedAnywhere = text.match(/```(?:\w+)?\s*([\s\S]*?)\s*```/);
@@ -229,11 +245,11 @@ const Generator = () => {
           timestamp: item.timestamp.toISOString(),
         })),
       };
-      localStorage.setItem(GENERATOR_UI_CACHE_KEY, JSON.stringify(payload));
+      localStorage.setItem(cacheKey, JSON.stringify(payload));
     } catch {
       void 0;
     }
-  }, [messages, chatHistories, activeChatId]);
+  }, [messages, chatHistories, activeChatId, cacheKey]);
 
   useEffect(() => {
     let isMounted = true;
@@ -436,7 +452,10 @@ const Generator = () => {
         })) as ChatHistory[];
         setChatHistories(mapped);
         if (mapped.length > 0) {
-          await loadChat(mapped[0].id);
+          const preferred = activeChatId && mapped.some((item) => item.id === activeChatId)
+            ? activeChatId
+            : mapped[0].id;
+          await loadChat(preferred);
         } else {
           await startNewChat();
         }
@@ -655,12 +674,12 @@ const Generator = () => {
         {/* Main Chat Interface */}
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 mx-6 mt-4 mb-0 border-b border-border/20 bg-gradient-to-r from-background/95 to-muted/20 backdrop-blur-sm">
+          <div className="flex items-center justify-between p-3 mx-4 mt-2 mb-0 border-b border-border/20 bg-gradient-to-r from-background/95 to-muted/20 backdrop-blur-sm">
             <div className="flex items-center">
               <div className="p-2 rounded-xl bg-gradient-to-br from-primary to-accent mr-3">
                 <Code2 className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                 Code Generator
               </h1>
             </div>
@@ -691,8 +710,8 @@ const Generator = () => {
           </div>
 
           {/* Messages */}
-          <ScrollArea className="flex-1 p-6 mx-6 bg-gradient-to-b from-background to-muted/10 h-[calc(100vh-16rem)]">
-            <div className="max-w-4xl mx-auto space-y-6 min-h-full">
+          <ScrollArea className="flex-1 px-4 pt-2 pb-3 mx-4 bg-gradient-to-b from-background to-muted/10">
+            <div className="max-w-4xl mx-auto space-y-4 min-h-full">
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -782,7 +801,7 @@ const Generator = () => {
           </div> */}
 
         {/* Input Area */}
-        <div className="border-t border-border/20 px-6 py-4 bg-card/50 backdrop-blur-sm mt-auto">
+        <div className="border-t border-border/20 px-4 py-2 bg-card/50 backdrop-blur-sm mt-auto">
           <div className="max-w-4xl mx-auto flex items-end space-x-4">
             <div className="flex-1 relative">
               <Input
@@ -790,7 +809,7 @@ const Generator = () => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleInputKeyDown}
                 placeholder="Describe what code you want me to generate..."
-                className="pr-12 h-12 text-base rounded-xl border-2 focus:border-primary/50 transition-colors"
+                className="pr-12 h-11 text-base rounded-xl border-2 focus:border-primary/50 transition-colors"
               />
               <Button
                 variant="ghost"
@@ -805,7 +824,7 @@ const Generator = () => {
             <Button 
               onClick={handleSend} 
               disabled={!inputValue.trim() || isGenerating}
-              className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 h-12 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 h-11 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
             >
               <Send className="w-4 h-4" />
             </Button>

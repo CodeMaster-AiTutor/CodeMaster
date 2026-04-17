@@ -266,6 +266,50 @@
     }
   }
 
+  .auth-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(6px);
+    opacity: 0.32;
+    animation: authBlobFloat 14s ease-in-out infinite;
+  }
+
+  .auth-grid-shimmer {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(hsl(0 0% 100% / 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(0 0% 100% / 0.07) 1px, transparent 1px);
+    background-size: 34px 34px;
+    mask-image: radial-gradient(circle at center, black 28%, transparent 78%);
+    animation: authGridDrift 18s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes authBlobFloat {
+    0%, 100% {
+      transform: translateY(0) translateX(0) scale(1);
+    }
+    50% {
+      transform: translateY(-18px) translateX(10px) scale(1.08);
+    }
+  }
+
+  @keyframes authGridDrift {
+    0% {
+      transform: translateY(0);
+      opacity: 0.4;
+    }
+    50% {
+      transform: translateY(-10px);
+      opacity: 0.6;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 0.4;
+    }
+  }
+
   /* Custom Scrollbar Styling - Dark Theme */
   ::-webkit-scrollbar {
     width: 8px;

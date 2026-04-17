@@ -19,6 +19,7 @@ from app.models.analytics import AnalyticsEvent
 from app.models.settings import UserSettings
 from app.utils.validators import validate_email, validate_username, validate_password
 from app.config import Config
+from app.services.skill_points_service import apply_daily_login_streak, _to_ist_date
 
 profile_bp = Blueprint('profile', __name__)
 
@@ -71,7 +72,7 @@ def _send_deletion_email(to_email: str, username: str) -> bool:
         return False
 
 def _compute_streak(user: User) -> dict:
-    today = date.today()
+    today = _to_ist_date(datetime.utcnow())
     if not user.last_active_date:
         return {'streak_days': 0, 'active_today': False}
 
@@ -88,7 +89,11 @@ def _compute_streak(user: User) -> dict:
     }
 
 def update_streak_on_submit(user: User):
-    return
+    if not isinstance(user, User):
+        user = db.session.get(User, int(user)) if user else None
+    if not user:
+        return {'streak_days': 0, 'bonus_points': 0, 'updated': False}
+    return apply_daily_login_streak(user, datetime.utcnow())
 
 @profile_bp.route('', methods=['GET'])
 @token_required
@@ -291,6 +296,14 @@ def upload_avatar(current_user):
     db.session.commit()
 
     return jsonify({'profile_image_url': current_user.profile_image_url})
+
+
+@profile_bp.route('/avatar', methods=['DELETE'])
+@token_required
+def reset_avatar(current_user):
+    current_user.profile_image_url = None
+    db.session.commit()
+    return jsonify({'profile_image_url': None, 'message': 'Avatar reset successfully'})
 
 @profile_bp.route('/submissions', methods=['GET'])
 @token_required

@@ -1,6 +1,15 @@
 import os
+import sys
+import threading
 from flask import Flask, jsonify, request
-from app.services.ai_service import get_ai_service
+
+_SERVICE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "app"))
+if _SERVICE_ROOT not in sys.path:
+    sys.path.insert(0, _SERVICE_ROOT)
+
+from services.ai_service import get_ai_service
+
+_llm_lock = threading.Lock()
 
 
 def _get_internal_service_key() -> str:
@@ -38,7 +47,8 @@ def create_app() -> Flask:
         if not prompt:
             return jsonify({"error": "Prompt is required"}), 400
         ai_service = get_ai_service()
-        code = ai_service.generate_code(prompt, context)
+        with _llm_lock:
+            code = ai_service.generate_code(prompt, context)
         return jsonify({"code": code}), 200
 
     @app.route("/explain", methods=["POST"])
@@ -48,7 +58,8 @@ def create_app() -> Flask:
         if not java_code:
             return jsonify({"error": "Java code is required"}), 400
         ai_service = get_ai_service()
-        explanation = ai_service.explain_code(java_code)
+        with _llm_lock:
+            explanation = ai_service.explain_code(java_code)
         return jsonify({"explanation": explanation}), 200
 
     @app.route("/suggest-fix", methods=["POST"])
@@ -62,13 +73,14 @@ def create_app() -> Flask:
         if not error_message or not code_context:
             return jsonify({"error": "Error message and code context are required"}), 400
         ai_service = get_ai_service()
-        suggestion = ai_service.suggest_error_fix(
-            error_message,
-            code_context,
-            error_type,
-            error_line=error_line if isinstance(error_line, int) else None,
-            error_column=error_column if isinstance(error_column, int) else None,
-        )
+        with _llm_lock:
+            suggestion = ai_service.suggest_error_fix(
+                error_message,
+                code_context,
+                error_type,
+                error_line=error_line if isinstance(error_line, int) else None,
+                error_column=error_column if isinstance(error_column, int) else None,
+            )
         return jsonify(suggestion), 200
 
     return app
@@ -80,5 +92,5 @@ app = create_app()
 if __name__ == "__main__":
     port = int(os.getenv("LLM_SERVICE_PORT", "5002"))
     host = os.getenv("LLM_SERVICE_HOST", "0.0.0.0")
-    debug = os.getenv("FLASK_ENV") == "development"
-    app.run(host=host, port=port, debug=debug, use_reloader=debug)
+    debug = os.getenv("LLM_SERVICE_DEBUG", "0").strip() in {"1", "true", "True"}
+    app.run(host=host, port=port, debug=debug, use_reloader=False, threaded=True)

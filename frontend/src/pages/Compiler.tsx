@@ -313,11 +313,29 @@ const toPanelCompilerErrors = (errors: CompilerError[] | undefined, code: string
 };
 
 const toScopeSuffix = (scope?: string) => {
-  if (!scope) {
+  const segments: string[] = [];
+  try {
+    const raw = localStorage.getItem('user');
+    if (raw) {
+      const parsed = JSON.parse(raw) as { id?: string | number; email?: string };
+      const identity = String(parsed?.id ?? parsed?.email ?? '').trim().toLowerCase();
+      if (identity) {
+        segments.push(`u_${identity}`);
+      }
+    }
+  } catch {
+    void 0;
+  }
+  if (scope) {
+    const normalizedScope = scope.trim().toLowerCase().replace(/[^a-z0-9:_-]+/g, '_');
+    if (normalizedScope) {
+      segments.push(normalizedScope);
+    }
+  }
+  if (!segments.length) {
     return '';
   }
-  const normalized = scope.trim().toLowerCase().replace(/[^a-z0-9:_-]+/g, '_');
-  return normalized ? `:${normalized}` : '';
+  return `:${segments.join(':')}`;
 };
 
 const getPersistenceKeys = (scope?: string): PersistenceKeys => {
@@ -1251,6 +1269,11 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
     codeRef.current = nextValue;
     setCode(nextValue);
     onCodeChange?.(nextValue);
+    try {
+      localStorage.setItem(persistenceKeys.fallbackKey, nextValue);
+    } catch {
+      void 0;
+    }
     const editor = editorRef.current;
     if (editor) {
       const model = editor.getModel();
@@ -1264,7 +1287,7 @@ const Compiler = ({ withLayout = true, onExecutionSuccess, onCodeChange, persist
       scrollPositionRef.current = editor.getScrollTop();
     }
     scheduleSave(nextValue, selectionRef.current, scrollPositionRef.current);
-  }, [scheduleSave, onCodeChange]);
+  }, [scheduleSave, onCodeChange, persistenceKeys.fallbackKey]);
 
   const handleEditorMount: OnMount = useCallback((editor, monaco) => {
     editorRef.current = editor;

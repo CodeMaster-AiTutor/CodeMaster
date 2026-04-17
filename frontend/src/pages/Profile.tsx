@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { User, Mail, Calendar, Trophy, Upload, Target, BookOpen, Flame } from 'lucide-react';
+import { User, Mail, Calendar, Trophy, Upload, Target, BookOpen, Flame, RotateCcw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import AppLayout from '@/components/layout/AppLayout';
 import { API_BASE_URL, profileAPI } from '@/lib/api';
@@ -215,6 +215,44 @@ const Profile = () => {
     }
   };
 
+  const handleAvatarReset = async () => {
+    setIsUploading(true);
+    try {
+      await profileAPI.resetAvatar();
+      setProfile((prev) => {
+        if (!prev) return prev;
+        const next = { ...prev, profile_image_url: null };
+        try {
+          localStorage.setItem('profile:cache', JSON.stringify(next));
+        } catch (error) {
+          console.warn('Failed to update cached avatar', error);
+        }
+        return next;
+      });
+      try {
+        const stored = localStorage.getItem('user');
+        if (stored) {
+          const currentUser = JSON.parse(stored);
+          localStorage.setItem('user', JSON.stringify({ ...currentUser, profile_image_url: null }));
+        }
+      } catch (error) {
+        console.warn('Failed to sync avatar reset to local storage', error);
+      }
+      toast({
+        title: 'Avatar reset',
+        description: 'Your profile photo has been reset to default.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Avatar reset failed',
+        description: error instanceof Error ? error.message : 'Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleTakeAssessment = () => {
     toast({
       title: "Assessment started", 
@@ -268,6 +306,15 @@ const Profile = () => {
                       >
                         <Upload className="w-4 h-4 mr-2" />
                         {isUploading ? 'Uploading...' : 'Upload Photo'}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="ml-2"
+                        onClick={handleAvatarReset}
+                        disabled={isUploading}
+                      >
+                        <RotateCcw className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>

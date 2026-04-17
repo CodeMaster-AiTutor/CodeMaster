@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import TopNavigation from '@/components/layout/TopNavigation';
 import { Button } from '@/components/ui/button';
@@ -26,19 +26,83 @@ const getCachedProblemDescription = (title: string, level: string) => {
 
 const getCachedProblemCode = (cacheKey: string) => {
   try {
-    return localStorage.getItem(cacheKey) || '';
+    const raw = localStorage.getItem(cacheKey);
+    if (!raw) return '';
+    try {
+      const parsed = JSON.parse(raw) as { code?: string };
+      if (typeof parsed?.code === 'string') {
+        return parsed.code;
+      }
+    } catch {
+      void 0;
+    }
+    return raw;
   } catch {
     return '';
+  }
+};
+
+const getCachedProblemCodeUpdatedAt = (cacheKey: string) => {
+  try {
+    const raw = localStorage.getItem(cacheKey);
+    if (!raw) return 0;
+    try {
+      const parsed = JSON.parse(raw) as { updatedAt?: number };
+      const value = Number(parsed?.updatedAt || 0);
+      return Number.isFinite(value) ? value : 0;
+    } catch {
+      return 0;
+    }
+  } catch {
+    return 0;
+  }
+};
+
+const setCachedProblemCode = (cacheKey: string, code: string) => {
+  try {
+    localStorage.setItem(cacheKey, JSON.stringify({ code, updatedAt: Date.now() }));
+  } catch {
+    void 0;
+  }
+};
+
+const getPracticeStorageOwner = () => {
+  try {
+    const raw = localStorage.getItem('user');
+    if (!raw) return 'anon';
+    const parsed = JSON.parse(raw) as { id?: string | number; email?: string };
+    const identity = String(parsed?.id ?? parsed?.email ?? '').trim().toLowerCase();
+    if (!identity) return 'anon';
+    return identity.replace(/[^a-z0-9@._-]+/g, '_');
+  } catch {
+    return 'anon';
   }
 };
 
 type TestRunResult = {
   index: number;
   input: string;
+  used_input?: string;
+  attempted_variants?: number;
+  verifier_flow?: string;
   expected_output: string;
   actual_output: string;
   success: boolean;
-  errors: string[];
+  errors: Array<string | { type?: string; line?: number; column?: number; message?: string; file?: string }>;
+};
+
+const sanitizeActualOutput = (value: string) => {
+  const raw = (value || '').trim();
+  if (!raw) return '(empty)';
+  const lines = raw.split('\n');
+  const exceptionStart = lines.findIndex((line) =>
+    /Exception in thread|^\s*Caused by:|^\s*at\s+/.test(line)
+  );
+  if (exceptionStart >= 0) {
+    const before = lines.slice(0, exceptionStart).join('\n').trim();
+    return before || 'Runtime error occurred.';
+  }
+  return raw;
 };
 
 const PracticeSolve = () => {
@@ -59,16 +123,17 @@ const PracticeSolve = () => {
         : 'Beginner';
   const catalogLevel = levelKey === 'basic' ? 'beginner' : levelKey;
   const storageLevelKey = catalogLevel;
-  const solveKey = `practice:solved:${storageLevelKey}:${decodedTitle}`;
-  const touchedKey = `practice:touched:${storageLevelKey}:${decodedTitle}`;
-  const codeScopeKey = `practice:code:${storageLevelKey}:${decodedTitle}`;
-  const codeCacheKey = `practice:code-cache:${storageLevelKey}:${decodedTitle}`;
+  const storageOwnerKey = getPracticeStorageOwner();
+  const normalizedTitleKey = decodedTitle.trim().toLowerCase().replace(/\s+/g, ' ');
+  const solveKey = `practice:solved:${storageOwnerKey}:${storageLevelKey}:${normalizedTitleKey}`;
+  const touchedKey = `practice:touched:${storageOwnerKey}:${storageLevelKey}:${normalizedTitleKey}`;
+  const codeScopeKey = `practice:code:${storageOwnerKey}:${storageLevelKey}:${normalizedTitleKey}`;
+  const codeCacheKey = `practice:code-cache:${storageOwnerKey}:${storageLevelKey}:${normalizedTitleKey}`;
   const [problemDescription, setProblemDescription] = useState<string>(() =>
     getCachedProblemDescription(decodedTitle, catalogLevel)
   );
   const [problemId, setProblemId] = useState<number | null>(null);
   const [initialEditorCode, setInitialEditorCode] = useState<string>(() => getCachedProblemCode(codeCacheKey));
-  const [hasUserEdited, setHasUserEdited] = useState<boolean>(false);
   const [currentCode, setCurrentCode] = useState<string>('');
   const [isRunningTests, setIsRunningTests] = useState<boolean>(false);
   const [testResults, setTestResults] = useState<TestRunResult[]>([]);
@@ -77,6 +142,9 @@ const PracticeSolve = () => {
   const [earnablePoints, setEarnablePoints] = useState<number>(catalogLevel === 'advanced' ? 15 : catalogLevel === 'intermediate' ? 10 : 5);
   const [pointsEarnedAlready, setPointsEarnedAlready] = useState<boolean>(false);
   const [lastPointsAwarded, setLastPointsAwarded] = useState<number>(0);
+  const latestCodeRef = useRef<string>('');
+  const latestProblemIdRef = useRef<number | null>(null);
+  const lastDraftSyncedCodeRef = useRef<string>('');
 
   useEffect(() => {
     let active = true;
@@ -116,10 +184,8 @@ const PracticeSolve = () => {
   useEffect(() => {
     setInitialEditorCode(getCachedProblemCode(codeCacheKey));
     if (!problemId) {
-      setHasUserEdited(false);
       return;
     }
-    setHasUserEdited(false);
     let active = true;
     const loadDraft = async () => {
       try {
@@ -128,24 +194,18 @@ const PracticeSolve = () => {
           return;
         }
         const hasDraft = Boolean(draft?.has_draft);
-        const nextCode = hasDraft ? (draft.code || '') : '';
+        const remoteCode = hasDraft ? (draft.code || '') : '';
+        const remoteUpdatedAt = draft?.updated_at ? Date.parse(draft.updated_at) : 0;
+        lastDraftSyncedCodeRef.current = remoteCode;
         const localCachedCode = getCachedProblemCode(codeCacheKey);
-        if (!localCachedCode) {
-          setInitialEditorCode(nextCode);
-        }
-        if (nextCode) {
-          try {
-            localStorage.setItem(codeCacheKey, nextCode);
-          } catch {
-            void 0;
-          }
-        }
-        if (hasDraft || nextCode.trim().length > 0) {
-          try {
-            localStorage.setItem(touchedKey, 'true');
-          } catch {
-            void 0;
-          }
+        const localUpdatedAt = getCachedProblemCodeUpdatedAt(codeCacheKey);
+        const shouldPreferRemote = remoteUpdatedAt > localUpdatedAt;
+        const nextCode = shouldPreferRemote ? (remoteCode || localCachedCode) : (localCachedCode || remoteCode);
+        setInitialEditorCode(nextCode);
+        setCurrentCode(nextCode);
+        latestCodeRef.current = nextCode;
+        if (remoteCode && shouldPreferRemote) {
+          setCachedProblemCode(codeCacheKey, remoteCode);
         }
       } catch {
         if (active) {
@@ -160,17 +220,25 @@ const PracticeSolve = () => {
   }, [problemId, touchedKey, codeCacheKey]);
 
   useEffect(() => {
-    if (!problemId || !hasUserEdited) {
+    latestCodeRef.current = currentCode;
+  }, [currentCode]);
+
+  useEffect(() => {
+    latestProblemIdRef.current = problemId;
+  }, [problemId]);
+
+  useEffect(() => {
+    if (!problemId) {
       return;
     }
     const handle = window.setTimeout(async () => {
+      if (currentCode === lastDraftSyncedCodeRef.current) {
+        return;
+      }
       try {
         await practiceAPI.saveDraft(problemId, currentCode);
-        try {
-          localStorage.setItem(codeCacheKey, currentCode);
-        } catch {
-          void 0;
-        }
+        lastDraftSyncedCodeRef.current = currentCode;
+        setCachedProblemCode(codeCacheKey, currentCode);
         if (currentCode.trim().length > 0) {
           try {
             localStorage.setItem(touchedKey, 'true');
@@ -185,16 +253,66 @@ const PracticeSolve = () => {
     return () => {
       window.clearTimeout(handle);
     };
-  }, [problemId, currentCode, touchedKey, hasUserEdited, codeCacheKey]);
+  }, [problemId, currentCode, touchedKey, codeCacheKey]);
+
+  useEffect(() => {
+    const persistSnapshot = () => {
+      const pid = latestProblemIdRef.current;
+      const codeSnapshot = latestCodeRef.current || '';
+      if (!pid) {
+        return;
+      }
+      setCachedProblemCode(codeCacheKey, codeSnapshot);
+      if (codeSnapshot !== lastDraftSyncedCodeRef.current) {
+        void practiceAPI.saveDraft(pid, codeSnapshot).then(() => {
+          lastDraftSyncedCodeRef.current = codeSnapshot;
+        }).catch(() => {
+          void 0;
+        });
+      }
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        persistSnapshot();
+      }
+    };
+    const onBeforeUnload = () => {
+      persistSnapshot();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('beforeunload', onBeforeUnload);
+    };
+  }, [codeCacheKey]);
+
+  useEffect(() => {
+    return () => {
+      const pid = latestProblemIdRef.current;
+      const codeSnapshot = latestCodeRef.current || '';
+      if (!pid) {
+        return;
+      }
+      setCachedProblemCode(codeCacheKey, codeSnapshot);
+      if (codeSnapshot.trim().length > 0) {
+        try {
+          localStorage.setItem(touchedKey, 'true');
+        } catch {
+          void 0;
+        }
+      }
+      if (codeSnapshot !== lastDraftSyncedCodeRef.current) {
+        void practiceAPI.saveDraft(pid, codeSnapshot).catch(() => {
+          void 0;
+        });
+      }
+    };
+  }, [codeCacheKey, touchedKey]);
 
   const handleCodeChange = (value: string) => {
     setCurrentCode(value);
-    setHasUserEdited(true);
-    try {
-      localStorage.setItem(codeCacheKey, value);
-    } catch {
-      void 0;
-    }
+    setCachedProblemCode(codeCacheKey, value);
     if (value.trim().length > 0) {
       try {
         localStorage.setItem(touchedKey, 'true');
@@ -259,14 +377,11 @@ const PracticeSolve = () => {
       }
       try {
         await practiceAPI.saveDraft(problemId, currentCode);
+        lastDraftSyncedCodeRef.current = currentCode;
       } catch {
         void 0;
       }
-      try {
-        localStorage.setItem(codeCacheKey, currentCode);
-      } catch {
-        void 0;
-      }
+      setCachedProblemCode(codeCacheKey, currentCode);
       try {
         localStorage.setItem(touchedKey, 'true');
       } catch {
@@ -278,7 +393,12 @@ const PracticeSolve = () => {
         localStorage.removeItem(solveKey);
       }
     } catch (error) {
-      setTestError(error instanceof Error ? error.message : 'Failed to run test cases.');
+      const message = error instanceof Error ? error.message : 'Failed to run test cases.';
+      if (message.toLowerCase().includes('authentication required')) {
+        setTestError('Session issue detected while running test cases. Please refresh the page and try again.');
+        return;
+      }
+      setTestError(message);
     } finally {
       setIsRunningTests(false);
     }
@@ -361,7 +481,16 @@ const PracticeSolve = () => {
                               <span>Test Case {test.index}</span>
                             </div>
                             <div className="text-foreground/90">Expected: {test.expected_output || '(empty)'}</div>
-                            <div className="text-foreground/90">Actual: {test.actual_output || '(empty)'}</div>
+                            <div className="text-foreground/90">Actual: {sanitizeActualOutput(test.actual_output)}</div>
+                            {test.used_input ? (
+                              <div className="text-foreground/80">Used Input: {test.used_input}</div>
+                            ) : null}
+                            {typeof test.attempted_variants === 'number' ? (
+                              <div className="text-foreground/70">Input Variants Tried: {test.attempted_variants}</div>
+                            ) : null}
+                            {test.verifier_flow ? (
+                              <div className="text-foreground/70">Verifier Flow: {test.verifier_flow}</div>
+                            ) : null}
                           </div>
                         ))}
                       </div>

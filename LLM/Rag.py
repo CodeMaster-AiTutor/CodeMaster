@@ -10,27 +10,35 @@ os.environ["HF_HOME"] = LOCAL_CACHE_BASE
 os.environ["HUGGINGFACE_HUB_CACHE"] = os.path.join(LOCAL_CACHE_BASE, "hub")
 os.environ["TRANSFORMERS_CACHE"] = os.path.join(LOCAL_CACHE_BASE, "transformers")
 os.environ["SENTENCE_TRANSFORMERS_HOME"] = os.path.join(LOCAL_CACHE_BASE, "sentence_transformers")
-import torch
-import faiss
-import numpy as np
-from sentence_transformers import SentenceTransformer
+try:
+    import torch
+except Exception:
+    torch = None
+try:
+    import faiss
+    import numpy as np
+    from sentence_transformers import SentenceTransformer
+except Exception:
+    faiss = None
+    np = None
+    SentenceTransformer = None
 from llama_cpp import Llama
 
 # =========================
 # CONFIG
 # =========================
-MODEL_PATH = os.path.join(BASE_DIR, "CodeMaster.gguf")
+MODEL_PATH = os.environ.get("CODEMASTER_MODEL_PATH", os.path.join(BASE_DIR, "CodeMaster.gguf"))
 EMBED_MODEL = "all-MiniLM-L6-v2"
 EMBED_CACHE_DIR = LOCAL_CACHE_BASE
 
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
-FORCE_GPU = os.environ.get("CODEMASTER_FORCE_GPU", "1").strip().lower() in ("1", "true", "yes", "on")
+FORCE_GPU = os.environ.get("CODEMASTER_FORCE_GPU", "0").strip().lower() in ("1", "true", "yes", "on")
 GPU_STRATEGY = os.environ.get("CODEMASTER_GPU_STRATEGY", "hybrid").strip().lower()
 GPU_LAYERS_ENV = os.environ.get("CODEMASTER_GPU_LAYERS", "").strip()
-N_CTX = int(os.environ.get("CODEMASTER_N_CTX", "2048"))
-N_BATCH = int(os.environ.get("CODEMASTER_N_BATCH", "256"))
-CPU_THREADS = int(os.environ.get("CODEMASTER_CPU_THREADS", str(max(2, (os.cpu_count() or 8) // 3))))
+N_CTX = int(os.environ.get("CODEMASTER_N_CTX", "1024"))
+N_BATCH = int(os.environ.get("CODEMASTER_N_BATCH", "128"))
+CPU_THREADS = int(os.environ.get("CODEMASTER_CPU_THREADS", str(max(2, (os.cpu_count() or 8) // 2))))
 CPU_THREADS_BATCH = int(os.environ.get("CODEMASTER_CPU_THREADS_BATCH", str(max(1, CPU_THREADS // 2))))
 EMBED_DEVICE = os.environ.get("CODEMASTER_EMBED_DEVICE", "cpu").strip().lower()
 
@@ -38,7 +46,7 @@ EMBED_DEVICE = os.environ.get("CODEMASTER_EMBED_DEVICE", "cpu").strip().lower()
 # DEVICE DETECTION
 # =========================
 def get_device():
-    if torch.cuda.is_available():
+    if torch is not None and torch.cuda.is_available():
         print("GPU detected")
         return "cuda"
     if FORCE_GPU:
@@ -52,14 +60,15 @@ DEVICE = get_device()
 # LOAD LLM (AUTO CPU/GPU)
 # =========================
 def load_llm():
-    if DEVICE != "cuda":
-        raise RuntimeError("GPU mode is required but device is not CUDA.")
-    if GPU_LAYERS_ENV:
-        gpu_layers = int(GPU_LAYERS_ENV)
-    elif GPU_STRATEGY == "full":
-        gpu_layers = -1
+    if DEVICE == "cuda":
+        if GPU_LAYERS_ENV:
+            gpu_layers = int(GPU_LAYERS_ENV)
+        elif GPU_STRATEGY == "full":
+            gpu_layers = -1
+        else:
+            gpu_layers = 35
     else:
-        gpu_layers = 35
+        gpu_layers = 0
     print(
         f"LLM settings -> strategy={GPU_STRATEGY}, gpu_layers={gpu_layers}, "
         f"n_ctx={N_CTX}, n_batch={N_BATCH}, cpu_threads={CPU_THREADS}, cpu_threads_batch={CPU_THREADS_BATCH}"
@@ -74,7 +83,7 @@ def load_llm():
             n_threads_batch=CPU_THREADS_BATCH
         )
     except Exception as e:
-        raise RuntimeError(f"Failed to initialize GPU LLM. Ensure llama-cpp-python is built with CUDA. {str(e)}")
+        raise RuntimeError(f"Failed to initialize local LLM runtime. {str(e)}")
 
 llm = load_llm()
 
@@ -82,11 +91,13 @@ llm = load_llm()
 # EMBEDDING MODEL
 # =========================
 os.makedirs(EMBED_CACHE_DIR, exist_ok=True)
-embed_model = SentenceTransformer(
-    EMBED_MODEL,
-    device="cuda" if EMBED_DEVICE == "cuda" and DEVICE == "cuda" else "cpu",
-    cache_folder=EMBED_CACHE_DIR
-)
+embed_model = None
+if SentenceTransformer is not None:
+    embed_model = SentenceTransformer(
+        EMBED_MODEL,
+        device="cuda" if EMBED_DEVICE == "cuda" and DEVICE == "cuda" else "cpu",
+        cache_folder=EMBED_CACHE_DIR
+    )
 
 def split_text(text):
     normalized = " ".join(text.split())
@@ -132,6 +143,8 @@ class VectorStore:
         self.embeddings = None
 
     def build(self, chunks):
+        if embed_model is None or faiss is None:
+            raise RuntimeError("Embedding dependencies are unavailable")
         if not chunks:
             raise ValueError("No chunks to index")
         embeddings = embed_model.encode(
@@ -153,6 +166,8 @@ class VectorStore:
         ]
 
     def search(self, query, retrieve_k=8, top_k=3):
+        if embed_model is None or faiss is None:
+            raise RuntimeError("Embedding dependencies are unavailable")
         if self.index is None:
             raise ValueError("Vector index is not built")
         query_vec = embed_model.encode([query], convert_to_numpy=True).astype("float32")
@@ -270,20 +285,30 @@ Answer:
 
 def build_code_explanation_prompt(code_text):
     return f"""
-You are an expert Java code reviewer.
+You are a friendly Java tutor.
 
 Task:
-- Explain the provided code line by line
-- Follow the actual execution flow of the program
+- Explain the provided code line by line in the order the program runs
+- Use simple and easy language
+- Avoid heavy technical words
+- Do not skip any part of the given code
+- Connect each step to the previous step so the flow feels continuous
+- Clearly explain every condition and both possible branches (true path and false path)
+- Mention what values are read, changed, checked, and printed
+- Clearly mention the logic flow from start to end
 - Keep explanation strictly tied to the given code
 - Do not generate new code
-- Do not include headings like Assistant or markdown fences
-- End immediately after explaining the final line
+- Do not include markdown fences
 
 Strict Output Format:
-- <bullet explanation for first executable or structural line>
-- <bullet explanation for next line in flow>
-- Continue with bullet points until the last relevant line of the provided code.
+1) Program Goal:
+<2-3 easy sentences about what this program is trying to do>
+
+2) Line-by-Line Explanation:
+Line 1: <what this line does in simple words>
+Line 2: <what this line does, and clearly connect it to Line 1 using words like "then", "after this", or "because of that">
+Continue in exact order until the last line. Do not skip any relevant line.
+Include condition checks, true/false branch behavior, and overall flow naturally inside the line-by-line explanations.
 
 Code:
 {code_text}
@@ -339,15 +364,51 @@ Answer:
 # =========================
 # GENERATE RESPONSE
 # =========================
-def generate(prompt):
+def generate(prompt, max_tokens=None):
+    if max_tokens is None:
+        max_tokens = int(os.environ.get("CODEMASTER_MAX_TOKENS_DEFAULT", "120"))
     output = llm(
         prompt,
-        max_tokens=600,
+        max_tokens=max_tokens,
         temperature=0.1,
         top_p=0.9,
         stop=["</s>", "\nQuestion:", "Question:", "\nAssistant:", "Assistant:", "<|im_end|>"]
     )
     return output["choices"][0]["text"].strip()
+
+
+def explain_token_budget(code_text):
+    raw_lines = str(code_text or "").replace('\r\n', '\n').replace('\r', '\n').split('\n')
+    line_count = sum(1 for line in raw_lines if line.strip())
+    base_tokens = int(os.environ.get("CODEMASTER_EXPLAIN_TOKENS", "900"))
+    per_line_tokens = int(os.environ.get("CODEMASTER_EXPLAIN_TOKENS_PER_LINE", "45"))
+    max_tokens = int(os.environ.get("CODEMASTER_EXPLAIN_TOKENS_MAX", "4096"))
+    budget = max(base_tokens, line_count * per_line_tokens)
+    return max(320, min(max_tokens, budget))
+
+
+def generation_token_budget(question_text, context_text=""):
+    question_lines = str(question_text or "").replace('\r\n', '\n').replace('\r', '\n').split('\n')
+    context_lines = str(context_text or "").replace('\r\n', '\n').replace('\r', '\n').split('\n')
+    q_count = sum(1 for line in question_lines if line.strip())
+    c_count = sum(1 for line in context_lines if line.strip())
+    base_tokens = int(os.environ.get("CODEMASTER_GEN_TOKENS", "700"))
+    per_line_tokens = int(os.environ.get("CODEMASTER_GEN_TOKENS_PER_LINE", "24"))
+    max_tokens = int(os.environ.get("CODEMASTER_GEN_TOKENS_MAX", "4096"))
+    budget = max(base_tokens, (q_count + min(c_count, 80)) * per_line_tokens)
+    return max(200, min(max_tokens, budget))
+
+
+def error_token_budget(error_message, code_text):
+    error_lines = str(error_message or "").replace('\r\n', '\n').replace('\r', '\n').split('\n')
+    code_lines = str(code_text or "").replace('\r\n', '\n').replace('\r', '\n').split('\n')
+    e_count = sum(1 for line in error_lines if line.strip())
+    c_count = sum(1 for line in code_lines if line.strip())
+    base_tokens = int(os.environ.get("CODEMASTER_ERROR_TOKENS", "280"))
+    per_line_tokens = int(os.environ.get("CODEMASTER_ERROR_TOKENS_PER_LINE", "16"))
+    max_tokens = int(os.environ.get("CODEMASTER_ERROR_TOKENS_MAX", "1600"))
+    budget = max(base_tokens, (e_count + min(c_count, 120)) * per_line_tokens)
+    return max(160, min(max_tokens, budget))
 
 # =========================
 # RAG SYSTEM
@@ -380,7 +441,10 @@ class RAG:
         if should_explain_code:
             print("🤖 Generating...")
             try:
-                return generate(build_code_explanation_prompt(code_in_input))
+                    return generate(
+                        build_code_explanation_prompt(code_in_input),
+                        max_tokens=explain_token_budget(code_in_input)
+                    )
             except Exception as e:
                 return f"Error: {str(e)}"
 
@@ -388,7 +452,10 @@ class RAG:
             if generation_request:
                 print("🤖 Generating...")
                 try:
-                    return generate(build_code_generation_prompt("", question))
+                    return generate(
+                        build_code_generation_prompt("", question),
+                        max_tokens=generation_token_budget(question, "")
+                    )
                 except Exception as e:
                     return f"Error: {str(e)}"
             return "No source text loaded"
@@ -399,7 +466,10 @@ class RAG:
             if generation_request:
                 print("🤖 Generating...")
                 try:
-                    return generate(build_code_generation_prompt("", question))
+                    return generate(
+                        build_code_generation_prompt("", question),
+                        max_tokens=generation_token_budget(question, "")
+                    )
                 except Exception as inner_e:
                     return f"Error: {str(inner_e)}"
             return f"Error: {str(e)}"
@@ -407,7 +477,10 @@ class RAG:
             if generation_request:
                 print("🤖 Generating...")
                 try:
-                    return generate(build_code_generation_prompt("", question))
+                    return generate(
+                        build_code_generation_prompt("", question),
+                        max_tokens=generation_token_budget(question, "")
+                    )
                 except Exception as e:
                     return f"Error: {str(e)}"
             return "Not found in context"
@@ -419,8 +492,14 @@ class RAG:
         print("🤖 Generating...")
         try:
             if generation_request:
-                return generate(build_code_generation_prompt(context, question))
-            return generate(prompt)
+                return generate(
+                    build_code_generation_prompt(context, question),
+                    max_tokens=generation_token_budget(question, context)
+                )
+            return generate(
+                prompt,
+                max_tokens=explain_token_budget(context)
+            )
         except Exception as e:
             return f"Error: {str(e)}"
 
@@ -429,7 +508,10 @@ class RAG:
             return "Please provide the code"
         print("🤖 Generating...")
         try:
-            return generate(build_code_explanation_prompt(code_text))
+            return generate(
+                build_code_explanation_prompt(code_text),
+                max_tokens=explain_token_budget(code_text)
+            )
         except Exception as e:
             return f"Error: {str(e)}"
 
@@ -456,7 +538,8 @@ class RAG:
                     error_line=error_line,
                     error_column=error_column,
                     error_line_text=error_line_text
-                )
+                ),
+                max_tokens=error_token_budget(error_message, code_text)
             )
         except Exception as e:
             return f"Error: {str(e)}"

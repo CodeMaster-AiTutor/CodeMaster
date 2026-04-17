@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,7 +16,7 @@ import {
   ArrowLeft,
   AlertCircle
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { authAPI } from '@/lib/api';
 import { Loader2 } from 'lucide-react';
@@ -31,7 +31,46 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const email = (searchParams.get('email') || '').trim().toLowerCase();
+    const verified = (searchParams.get('verified') || '').trim() === '1';
+    const verifyPending = (searchParams.get('verify_pending') || '').trim() === '1';
+    const prefillPassword = sessionStorage.getItem('login_prefill_password') || '';
+    if (email) {
+      setFormData((prev) => ({ ...prev, email }));
+    }
+    if (prefillPassword) {
+      setFormData((prev) => ({ ...prev, password: prefillPassword }));
+      sessionStorage.removeItem('login_prefill_password');
+    } else if (email) {
+      const pendingRaw = sessionStorage.getItem('pending_signup_credentials');
+      if (pendingRaw) {
+        try {
+          const pending = JSON.parse(pendingRaw) as { email?: string; password?: string; expiresAt?: number };
+          const expiresAt = Number(pending.expiresAt || 0);
+          if (pending.email?.toLowerCase() === email && pending.password && expiresAt > Date.now()) {
+            setFormData((prev) => ({ ...prev, password: pending.password || '' }));
+          }
+        } catch {
+          void 0;
+        }
+      }
+    }
+    if (verified) {
+      toast({
+        title: "Email verified",
+        description: "You can now log in to your account.",
+      });
+    } else if (verifyPending && email) {
+      toast({
+        title: "Verify your email",
+        description: "Open your inbox and click the verification link to activate login.",
+      });
+    }
+  }, [searchParams, toast]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -68,6 +107,7 @@ const Login = () => {
         title: "Welcome back!",
         description: `Successfully logged in as ${response.user.username}.`,
       });
+      sessionStorage.removeItem('pending_signup_credentials');
       
       // Navigate to dashboard
       navigate('/dashboard');
@@ -101,6 +141,20 @@ const Login = () => {
           variant: "destructive",
         });
       }
+    } else if (provider === 'GitHub') {
+      try {
+        setIsLoading(true);
+        const response = await authAPI.getGithubAuthUrl();
+        sessionStorage.setItem('github_oauth_state', response.state);
+        window.location.href = response.auth_url;
+      } catch (error) {
+        setIsLoading(false);
+        toast({
+          title: "GitHub Login Failed",
+          description: error instanceof Error ? error.message : 'Failed to initiate GitHub login.',
+          variant: "destructive",
+        });
+      }
     } else {
       toast({
         title: `${provider} Login`,
@@ -110,10 +164,14 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="min-h-screen lg:h-screen flex flex-col lg:flex-row lg:overflow-hidden">
       {/* Left Side - Branding */}
-      <div className="lg:w-1/2 bg-gradient-to-br from-primary to-accent flex items-center justify-center p-8">
-        <div className="text-center text-white max-w-md">
+      <div className="relative overflow-hidden lg:w-1/2 lg:h-screen bg-gradient-to-br from-primary to-accent flex items-center justify-center p-8">
+        <div className="auth-grid-shimmer" />
+        <div className="auth-blob w-40 h-40 bg-white/30 top-16 left-12" />
+        <div className="auth-blob w-52 h-52 bg-accent/40 bottom-20 right-10 [animation-delay:1.8s]" />
+        <div className="auth-blob w-28 h-28 bg-white/20 top-1/2 right-1/4 [animation-delay:0.9s]" />
+        <div className="relative text-center text-white max-w-md">
           <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-6 animate-float">
             <Code2 className="w-8 h-8" />
           </div>
@@ -139,7 +197,8 @@ const Login = () => {
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="lg:w-1/2 flex items-center justify-center p-8">
+      <div className="lg:w-1/2 lg:h-screen overflow-y-auto">
+        <div className="min-h-screen lg:min-h-full flex items-center justify-center p-8">
         <div className="w-full max-w-md">
           <div className="mb-8">
             <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6">
@@ -276,6 +335,7 @@ const Login = () => {
               </p>
             </div>
           </Card>
+        </div>
         </div>
       </div>
     </div>

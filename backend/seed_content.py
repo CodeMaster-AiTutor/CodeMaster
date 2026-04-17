@@ -256,7 +256,13 @@ def parse_problem_descriptions_from_file(file_path):
         title = extract_problem_title(raw_lines[title_raw_index])
         if not title:
             continue
-        description_lines = [line.rstrip() for line in raw_lines[title_raw_index:]]
+        end_index = len(raw_lines)
+        for i in range(title_raw_index, len(raw_lines)):
+            marker = (raw_lines[i] or "").strip().lower()
+            if marker in {"test cases", "test scenarios", "test results"}:
+                end_index = i
+                break
+        description_lines = [line.rstrip() for line in raw_lines[title_raw_index:end_index]]
         description = "\n".join(description_lines).strip()
         key = normalize_problem_key(title)
         result[key] = description
@@ -292,24 +298,30 @@ def extract_test_cases_from_description(description):
 
 
 def load_all_problem_descriptions():
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    problems_dir = os.path.join(project_root, "problems")
-    files = [
-        os.path.join(problems_dir, "Beginner Problems.txt"),
-        os.path.join(problems_dir, "Intemediate Problems.txt"),
-        os.path.join(problems_dir, "Advanced Problems.txt"),
+    base_dir = os.path.dirname(__file__)
+    candidate_dirs = [
+        os.path.abspath(os.path.join(base_dir, "..", "problems")),
+        os.path.abspath(os.path.join(base_dir, "problems")),
     ]
-    merged = {}
-    for file_path in files:
-        merged.update(parse_problem_descriptions_from_file(file_path))
-    return merged
+    problems_dir = next((d for d in candidate_dirs if os.path.isdir(d)), candidate_dirs[0])
+    level_files = {
+        "beginner": os.path.join(problems_dir, "Beginner Problems.txt"),
+        "intermediate": os.path.join(problems_dir, "Intemediate Problems.txt"),
+        "advanced": os.path.join(problems_dir, "Advanced Problems.txt"),
+    }
+    by_level = {}
+    for level, file_path in level_files.items():
+        by_level[level] = parse_problem_descriptions_from_file(file_path)
+    return by_level
 
 
 def load_all_problem_test_cases(parsed_descriptions):
     parsed = {}
-    for key, description in parsed_descriptions.items():
-        cases = extract_test_cases_from_description(description)
-        parsed[key] = cases
+    for level, level_descriptions in parsed_descriptions.items():
+        parsed[level] = {}
+        for key, description in level_descriptions.items():
+            cases = extract_test_cases_from_description(description)
+            parsed[level][key] = cases
     return parsed
 
 
@@ -421,71 +433,94 @@ def build_problem_test_cases(title):
     if "transpose a matrix" in normalized:
         return [{"input": "2\n1 2\n3 4", "output": "1 3\n2 4"}, {"input": "1\n5", "output": "5"}, {"input": "3\n1 2 3\n4 5 6\n7 8 9", "output": "1 4 7\n2 5 8\n3 6 9"}]
     if "matrix multiplication" in normalized:
-        return [{"input": "2\n1 2\n3 4\n5 6\n7 8", "output": "19 22\n43 50"}, {"input": "1\n3\n4", "output": "12"}, {"input": "2\n1 0\n0 1\n1 2\n3 4", "output": "1 2\n3 4"}]
+        # TC3 changed from identity matrix (trivial) to a real non-trivial case
+        # [[2,3],[1,4]] x [[1,2],[3,4]] = [[11,16],[13,18]]
+        return [{"input": "2\n1 2\n3 4\n5 6\n7 8", "output": "19 22\n43 50"}, {"input": "1\n3\n4", "output": "12"}, {"input": "2\n2 3\n1 4\n1 2\n3 4", "output": "11 16\n13 18"}]
     if "method overloading" in normalized:
-        return [{"input": "2\n5\n3", "output": "8"}, {"input": "2\n2.5\n1.5", "output": "4.0"}, {"input": "3\n1\n2\n3", "output": "6"}]
+        # TC3 changed from 1+2+3=6 (same as product, ambiguous) to 2+3+4=9
+        return [{"input": "2\n5\n3", "output": "8"}, {"input": "2\n2.5\n1.5", "output": "4.0"}, {"input": "3\n2\n3\n4", "output": "9"}]
     if "student result system" in normalized:
-        return [{"input": "5\n70\n75\n80\n85\n90", "output": "B"},
+        # TC1: avg=70 → B, TC2: avg=97 → A+, TC3: avg=30 → F
+        return [{"input": "5\n70\n70\n70\n70\n70", "output": "B"},
         {"input": "5\n95\n97\n98\n96\n99", "output": "A+"},
         {"input": "5\n20\n25\n30\n35\n40", "output": "F"}]
     if "employee salary system" in normalized:
-        return [{"input": "50000\n5000\n2000", "output": "53000"}, {"input": "30000\n3000\n1000", "output": "32000"}, {"input": "100000\n10000\n5000", "output": "105000"}]
+        # Input: single basic salary. HRA=20%, DA=10%, Gross=Basic+HRA+DA
+        return [{"input": "50000", "output": "65000"}, {"input": "30000", "output": "39000"}, {"input": "100000", "output": "130000"}]
     if "menu-driven program" in normalized:
-        return [{"input": "1\n5\n0", "output": "Invalid Choice"}, {"input": "2\n0", "output": "Invalid Choice"}, {"input": "0", "output": "Exit"}]
+        # TC1: valid choice 1 then exit, TC2: invalid choice then exit, TC3: exit directly
+        return [{"input": "1\n4", "output": "Option 1 executed"}, {"input": "5\n4", "output": "Invalid"}, {"input": "4", "output": "Exit"}]
     if "custom exception demo" in normalized:
-        return [{"input": "-1", "output": "Exception"}, {"input": "0", "output": "Exception"}, {"input": "10", "output": "Valid"}]
+        # age<18 → exception, age>=18 → access granted
+        return [{"input": "-1", "output": "Exception"}, {"input": "0", "output": "Exception"}, {"input": "25", "output": "Access granted"}]
     if "number guessing game" in normalized:
         return [{"input": "50\n0", "output": "Correct"}, {"input": "10\n0", "output": "Try Again"}, {"input": "90\n0", "output": "Try Again"}]
     if "student management system" in normalized:
-        return [{"input": "1\nAsha\n2\n5", "output": "added"}, {"input": "2\n5", "output": "list"}, {"input": "3\nAsha\n5", "output": "Asha"}]
+        return [
+            {"input": "1\nAsha\n1\n90\n4", "output": "added"},
+            {"input": "1\nAsha\n1\n90\n2\n4", "output": "Asha"},
+            {"input": "1\nAsha\n1\n90\n3\n1\n4", "output": "Asha"}
+        ]
     if "library system" in normalized:
-        return [{"input": "1\nJava Basics\n2\n5", "output": "added"}, {"input": "2\n5", "output": "list"}, {"input": "3\nJava\n5", "output": "Java"}]
+        return [
+            {"input": "1\nJava Basics\nJohn\n001\n4", "output": "added"},
+            {"input": "1\nJava Basics\nJohn\n001\n2\n4", "output": "Java Basics"},
+            {"input": "1\nJava Basics\nJohn\n001\n3\nJava\n4", "output": "Java"}
+        ]
     if "contact book" in normalized:
-        return [{"input": "1\nRavi\n9876543210\n2\n5", "output": "saved"}, {"input": "3\nRavi\n5", "output": "Ravi"}, {"input": "4\nRavi\n5", "output": "deleted"}]
+        return [{"input": "1\nRavi\n9876543210\n5", "output": "saved"}, {"input": "1\nRavi\n9876543210\n3\nRavi\n5", "output": "Ravi"}, {"input": "1\nRavi\n9876543210\n4\nRavi\n5", "output": "deleted"}]
     if "atm simulator" in normalized:
-        return [{"input": "1234\n1\n4", "output": "balance"}, {"input": "1234\n2\n1000\n4", "output": "deposit"}, {"input": "0000\n4", "output": "denied"}]
+        return [{"input": "1234\n1\n4", "output": "Balance"}, {"input": "1234\n2\n1000\n4", "output": "Deposit successful"}, {"input": "0000", "output": "denied"}]
     if "shopping cart system" in normalized:
-        return [{"input": "1\nApple\n50\n2\n4\n5", "output": "added"}, {"input": "3\nApple\n5", "output": "removed"}, {"input": "4\n5", "output": "total"}]
+        return [{"input": "1\nApple\n50\n1\n5", "output": "added"}, {"input": "1\nApple\n50\n1\n3\nApple\n5", "output": "removed"}, {"input": "1\nApple\n50\n1\n4\n5", "output": "total"}]
     if "expense tracker" in normalized:
-        return [{"input": "1\nFood\nLunch\n100\n4\n5", "output": "total"}, {"input": "2\n5", "output": "list"}, {"input": "3\nFood\n5", "output": "Food"}]
+        return [{"input": "1\nFood\nLunch\n100\n5", "output": "added"}, {"input": "1\nFood\nLunch\n100\n2\n5", "output": "Food"}, {"input": "1\nFood\nLunch\n100\n4\n5", "output": "100"}]
     if "quiz application" in normalized:
-        return [{"input": "A\nB\nC\nD", "output": "score"}, {"input": "A\nA\nA\nA", "output": "score"}, {"input": "Z\nZ\nZ\nZ", "output": "invalid"}]
+        return [{"input": "B\nC\nB\nA\nB", "output": "Score: 5/5"}, {"input": "A\nA\nA\nA\nA", "output": "Score: 1/5"}, {"input": "B\nC\nB\nA\nA", "output": "Score: 4/5"}]
     if "voting system" in normalized:
-        return [{"input": "V101\nAlice\n5", "output": "recorded"}, {"input": "V101\nBob\n5", "output": "already"}, {"input": "V999\nAlice\n5", "output": "invalid"}]
+        return [{"input": "V101\nAlice\n", "output": "recorded"}, {"input": "V101\nAlice\nV101\nBob\n", "output": "already"}, {"input": "V101\nNobody\n", "output": "Invalid candidate"}]
     if "parking lot system" in normalized:
-        return [{"input": "1\nMH01AB1234\n3\n4", "output": "parked"}, {"input": "2\nMH01AB1234\n4", "output": "removed"}, {"input": "3\n4", "output": "slot"}]
+        return [
+            {"input": "1\n1\nMH01AB1234\n4", "output": "Assigned"},
+            {"input": "1\n1\nMH01AB1234\n2\nMH01AB1234\n4", "output": "Removed"},
+            {"input": "1\n3\n4", "output": "Slot"}
+        ]
     if "bank account system" in normalized:
-        return [{"input": "1\nRaj\n2\n1001\n500\n4\n5", "output": "account"}, {"input": "2\n1001\n5000\n5", "output": "deposit"}, {"input": "3\n1001\n999999\n5", "output": "insufficient"}]
+        return [{"input": "1\nRaj\n5", "output": "Account created"}, {"input": "1\nRaj\n2\n1001\n500\n5", "output": "Deposit successful"}, {"input": "1\nRaj\n3\n1001\n999999\n5", "output": "Insufficient"}]
     if "password validator" in normalized:
-        return [{"input": "Strong@123", "output": "strong"}, {"input": "Medium12", "output": "moderate"}, {"input": "abc", "output": "weak"}]
+        return [{"input": "Strong@123", "output": "Strong"}, {"input": "Medium12", "output": "Moderate"}, {"input": "abc", "output": "Weak"}]
     if "task manager" in normalized:
-        return [{"input": "1\nStudy\nHigh\n4\n6", "output": "added"}, {"input": "2\nStudy\n6", "output": "complete"}, {"input": "3\nStudy\n6", "output": "removed"}]
+        return [{"input": "1\nStudy\nHigh\n6", "output": "added"}, {"input": "1\nStudy\nHigh\n2\nStudy\n6", "output": "complete"}, {"input": "1\nStudy\nHigh\n3\nStudy\n6", "output": "removed"}]
     if "inventory system" in normalized:
-        return [{"input": "1\nP001\nLaptop\n10\n50000\n4\n5", "output": "product"}, {"input": "3\nP001\n15\n5", "output": "insufficient"}, {"input": "2\nP001\n5\n5", "output": "restocked"}]
+        return [{"input": "1\nP001\nLaptop\n10\n50000\n5", "output": "added"}, {"input": "1\nP001\nLaptop\n10\n50000\n2\nP001\n5\n5", "output": "restocked"}, {"input": "1\nP001\nLaptop\n10\n50000\n3\nP001\n15\n5", "output": "Insufficient"}]
     if "ticket booking system" in normalized:
-        return [{"input": "1\n3\n4", "output": "booked"}, {"input": "1\n3\n1\n3\n4", "output": "already"}, {"input": "2\n3\n4", "output": "cancelled"}]
+        return [{"input": "1\n3\n4", "output": "booked"}, {"input": "1\n3\n1\n3\n4", "output": "already booked"}, {"input": "1\n3\n2\n3\n4", "output": "cancelled"}]
     if "restaurant billing system" in normalized:
-        return [{"input": "1\nPizza\n2\n200\n4\n5", "output": "total"}, {"input": "2\nPizza\n5", "output": "removed"}, {"input": "4\n5", "output": "bill"}]
+        return [{"input": "1\nPizza\n5", "output": "added"}, {"input": "1\nPizza\n2\nPizza\n5", "output": "removed"}, {"input": "1\nPizza\n4\n5", "output": "Total"}]
     if "simple chat simulation" in normalized:
-        return [{"input": "Hello everyone", "output": "message"}, {"input": "Hi team", "output": "chat"}, {"input": "Welcome", "output": "user"}]
+        return [{"input": "Hello everyone\nexit", "output": "Hello everyone"}, {"input": "Hi team\nGoodbye\nexit", "output": "2 message(s) sent"}, {"input": "exit", "output": "No messages"}]
     if "simple login system" in normalized:
-        return [{"input": "1\nalice\nSecure@1\n2\nalice\nSecure@1\n3", "output": "welcome"}, {"input": "1\nbob\nPass@1\n2\nbob\nwrong\n2\nbob\nwrong\n2\nbob\nwrong\n3", "output": "locked"}, {"input": "2\nunknown\nPass@1\n3", "output": "invalid"}]
+        return [{"input": "1\nalice\nSecure@1\n2\nalice\nSecure@1\n3", "output": "Welcome"}, {"input": "1\nbob\nPass@1\n2\nbob\nwrong\n2\nbob\nwrong\n2\nbob\nwrong\n3", "output": "locked"}, {"input": "2\nunknown\nPass@1\n3", "output": "not found"}]
     if "employee management + sort by salary" in normalized:
-        return [{"input": "1\n101\nAlice\nIT\n72000\n1\n102\nBob\nHR\n45000\n3\n1\n6\n5\n0", "output": "45000"}, {"input": "1\n201\nCarol\nHR\n50000\n4\nHR\n6\n5\n0", "output": "HR"}, {"input": "1\n301\nDan\nSales\n90000\n5\n6\n5\n0", "output": "90000"}]
+        return [{"input": "1\nAlice\nIT\n72000\n1\nBob\nHR\n45000\n3\n1\n5", "output": "45000"}, {"input": "1\nCarol\nHR\n50000\n4\nHR\n5", "output": "Carol"}, {"input": "1\nDan\nSales\n90000\n1\nEve\nSales\n60000\n3\n2\n5", "output": "90000"}]
     if "mini banking transaction history" in normalized:
-        return [{"input": "1\n10000\n2\n3000\n3\n5", "output": "7000"}, {"input": "2\n500\n5", "output": "insufficient"}, {"input": "3\n5", "output": "transaction"}]
+        return [{"input": "1\n10000\n2\n3000\n4\n5", "output": "7000"}, {"input": "2\n500\n5", "output": "Insufficient"}, {"input": "1\n500\n3\n5", "output": "Deposit"}]
     if "course enrollment system" in normalized:
-        return [{"input": "1\nCS101\n30\n2\nS001\nCS101\n5", "output": "enrolled"}, {"input": "1\nCS101\n1\n2\nS001\nCS101\n2\nS002\nCS101\n5", "output": "full"}, {"input": "2\nS001\nCS101\n2\nS001\nCS101\n5", "output": "already"}]
+        return [{"input": "1\nCS101\n30\n2\nS001\nCS101\n5", "output": "enrolled"}, {"input": "1\nCS101\n1\n2\nS001\nCS101\n2\nS002\nCS101\n5", "output": "full"}, {"input": "1\nCS101\n30\n2\nS001\nCS101\n2\nS001\nCS101\n5", "output": "already"}]
     if "hotel room booking" in normalized:
-        return [{"input": "2\n101\nAsha\n4", "output": "booked"}, {"input": "2\n101\nAsha\n2\n101\nRavi\n4", "output": "not available"}, {"input": "3\n101\n4", "output": "checkout"}]
+        return [{"input": "2\n101\nAsha\n2\n5", "output": "booked"}, {"input": "2\n101\nAsha\n2\n2\n101\nRavi\n1\n5", "output": "Not available"}, {"input": "2\n101\nAsha\n2\n3\n101\n5", "output": "checkout"}]
     if "stack implementation (manual)" in normalized:
-        return [{"input": "1\n10\n1\n20\n2\n5", "output": "20"}, {"input": "2\n5", "output": "empty"}, {"input": "4\n((a+b)\n5", "output": "unbalanced"}]
+        return [{"input": "1\n10\n1\n20\n2\n5", "output": "Popped: 20"}, {"input": "2\n5", "output": "Underflow"}, {"input": "4\n((a+b)\n5", "output": "Unbalanced"}]
     if "queue implementation (manual)" in normalized:
-        return [{"input": "1\nReport.pdf\n1\nInvoice.pdf\n2\n5", "output": "report"}, {"input": "2\n5", "output": "empty"}, {"input": "1\nDoc1\n1\nDoc2\n4\n5", "output": "queue"}]
+        return [{"input": "1\nReport.pdf\n1\nInvoice.pdf\n2\n5", "output": "Processing: Report.pdf"}, {"input": "2\n5", "output": "Queue Empty"}, {"input": "1\nDoc1\n1\nDoc2\n4\n5", "output": "Job: Doc1"}]
     if "e-voting with id validation" in normalized:
-        return [{"input": "VID-001\nAlice\n5", "output": "recorded"}, {"input": "VID-001\nAlice\nVID-001\nBob\n5", "output": "already"}, {"input": "VID-999\nAlice\n5", "output": "invalid"}]
+        return [
+            {"input": "1\nVID-2024-001\nAlice\n3", "output": "recorded"},
+            {"input": "1\nVID-2024-001\nAlice\n1\nVID-2024-001\nBob\n3", "output": "already"},
+            {"input": "1\nVID-999\nAlice\n3", "output": "invalid"},
+        ]
     if "multi-user scoreboard system" in normalized:
-        return [{"input": "1\nPriya\n4500\n1\nRaj\n3200\n3\n6", "output": "4500"}, {"input": "2\nPriya\n500\n3\n6", "output": "updated"}, {"input": "4\n1\n6", "output": "top"}]
+        return [{"input": "1\nPriya\n4500\n1\nRaj\n3200\n3\n6", "output": "4500"}, {"input": "1\nPriya\n4500\n2\nPriya\n500\n3\n6", "output": "5000"}, {"input": "1\nPriya\n4500\n1\nRaj\n3200\n4\n1\n6", "output": "Priya"}]
     return [
         {"input": "", "output": "IMPLEMENTATION_PENDING"},
         {"input": "", "output": "IMPLEMENTATION_PENDING"},
@@ -565,7 +600,8 @@ def upsert_practice_problems():
         row = PracticeProblem.query.filter_by(title=title).first()
         fallback_description = build_problem_description(level, section, title, difficulty)
         problem_key = normalize_problem_key(title)
-        db_description = parsed_descriptions.get(problem_key, fallback_description)
+        level_descriptions = parsed_descriptions.get(level, {})
+        db_description = level_descriptions.get(problem_key, fallback_description)
         if not row:
             row = PracticeProblem(title=title, description=db_description)
             db.session.add(row)
@@ -583,7 +619,7 @@ def upsert_practice_problems():
         if not is_curated_pending:
             row.test_cases = curated_cases
         else:
-            parsed_cases = parsed_test_cases.get(problem_key, [])
+            parsed_cases = parsed_test_cases.get(level, {}).get(problem_key, [])
             if len(parsed_cases) >= 3:
                 row.test_cases = parsed_cases[:3]
             else:

@@ -20,8 +20,7 @@ def _internal_service_key() -> str:
 
 
 def use_external_llm_service() -> bool:
-    raw = os.getenv("USE_EXTERNAL_LLM_SERVICE", "false").strip().lower()
-    return raw in ("1", "true", "yes", "on")
+    return False
 
 
 def call_llm_service(path: str, payload: Dict[str, Any]) -> Dict[str, Any]:

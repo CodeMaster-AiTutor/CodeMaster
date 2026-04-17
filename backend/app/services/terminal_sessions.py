@@ -7,6 +7,8 @@ import tempfile
 import threading
 import subprocess
 import queue
+import io
+import tarfile
 import docker
 import requests
 from typing import Dict, Optional
@@ -563,27 +565,18 @@ class TerminalSessionManager:
         with open(java_file, "w", encoding="utf-8") as f:
             f.write(java_code)
         validation_errors = self._validate_structure(java_code)
-        compile_result = self._docker_compile(temp_dir, class_name, java_code) if self.use_docker else self._subprocess_compile(temp_dir, class_name, java_code)
-        if not compile_result["success"]:
-            if not compile_result.get("errors") and validation_errors:
-                compile_result["errors"] = validation_errors
-            shutil.rmtree(temp_dir, ignore_errors=True)
-            return {"success": False, "errors": compile_result["errors"], "compilation_time": compile_result["compilation_time"]}
         try:
             if self.use_docker:
                 self._ensure_image()
                 nano_cpus = int(self.cpu_limit * 1_000_000_000) if self.cpu_limit > 0 else None
                 container = self.docker_client.containers.create(
                     image=self.image,
-                    command=["/usr/bin/script", "-qf", "-c", f"/usr/bin/stdbuf -o0 -e0 /opt/jdk-17.0.12/bin/java -cp /app/workspace {class_name}", "/dev/null"],
-                    volumes={temp_dir: {"bind": "/app/workspace", "mode": "rw"}},
+                    command=["/bin/sh", "-lc", f"while [ ! -f /app/workspace/.start ]; do sleep 0.05; done; /usr/bin/script -qf -c '/usr/bin/stdbuf -o0 -e0 /opt/jdk-17.0.12/bin/java -cp /app/workspace {class_name}' /dev/null"],
                     working_dir="/app/workspace",
                     mem_limit=self.memory_limit,
                     nano_cpus=nano_cpus,
                     network_disabled=True,
-                    read_only=True,
-                    tmpfs={"/tmp": "size=50m"},
-                    user="runner",
+                    user="0",
                     detach=True,
                     stdin_open=True,
                     tty=True
@@ -594,6 +587,30 @@ class TerminalSessionManager:
                     shutil.rmtree(temp_dir, ignore_errors=True)
                     return {"success": False, "errors": [{"type": "system_error", "line": 0, "column": 0, "message": "Unable to attach to container"}]}
                 container.start()
+                container.exec_run(["/bin/sh", "-lc", "mkdir -p /app/workspace && chmod 777 /app/workspace"], stdout=True, stderr=True)
+                self._docker_put_text(container, f"/app/workspace/{class_name}.java", java_code)
+                compile_start = time.time()
+                compile_exec = container.exec_run(
+                    ["/opt/jdk-17.0.12/bin/javac", "-d", "/app/workspace", f"{class_name}.java"],
+                    stdout=True,
+                    stderr=True
+                )
+                compilation_time = time.time() - compile_start
+                if compile_exec.exit_code != 0:
+                    compile_output = (compile_exec.output or b"").decode("utf-8", errors="replace")
+                    errors = self._parse_compiler_errors(compile_output, java_code)
+                    if not errors:
+                        errors = [{"type": "compilation_error", "line": 0, "column": 0, "message": compile_output.strip() or "Compilation failed"}]
+                    if not errors and validation_errors:
+                        errors = validation_errors
+                    try:
+                        session_socket.close()
+                    except Exception:
+                        pass
+                    container.remove(force=True)
+                    shutil.rmtree(temp_dir, ignore_errors=True)
+                    return {"success": False, "errors": errors, "compilation_time": compilation_time}
+                container.exec_run(["/bin/sh", "-lc", "touch /app/workspace/.start"], stdout=True, stderr=True)
                 session_id = str(uuid.uuid4())
                 session = TerminalSession(session_id=session_id, container_id=container.id, temp_dir=temp_dir, user_id=user_id)
                 session.socket = session_socket
@@ -601,6 +618,12 @@ class TerminalSessionManager:
                 session.stop_event = threading.Event()
                 self._start_output_reader(session)
             else:
+                compile_result = self._subprocess_compile(temp_dir, class_name, java_code)
+                if not compile_result["success"]:
+                    if not compile_result.get("errors") and validation_errors:
+                        compile_result["errors"] = validation_errors
+                    shutil.rmtree(temp_dir, ignore_errors=True)
+                    return {"success": False, "errors": compile_result["errors"], "compilation_time": compile_result["compilation_time"]}
                 process = subprocess.Popen(
                     [self.java_path, "-cp", temp_dir, class_name],
                     stdin=subprocess.PIPE,
@@ -613,10 +636,22 @@ class TerminalSessionManager:
             with self.lock:
                 self.sessions[session_id] = session
             self._start_monitor(session_id)
-            return {"success": True, "session_id": session_id, "compilation_time": compile_result["compilation_time"]}
+            return {"success": True, "session_id": session_id, "compilation_time": compilation_time if self.use_docker else compile_result["compilation_time"]}
         except Exception as e:
             shutil.rmtree(temp_dir, ignore_errors=True)
             return {"success": False, "errors": [{"type": "system_error", "line": 0, "column": 0, "message": str(e)}]}
+
+    def _docker_put_text(self, container, target_path: str, content: str) -> None:
+        directory = os.path.dirname(target_path)
+        filename = os.path.basename(target_path)
+        buffer = io.BytesIO()
+        data = content.encode("utf-8")
+        with tarfile.open(fileobj=buffer, mode="w") as tar:
+            info = tarfile.TarInfo(name=filename)
+            info.size = len(data)
+            tar.addfile(info, io.BytesIO(data))
+        buffer.seek(0)
+        container.put_archive(directory, buffer.read())
 
     def get_session(self, session_id: str) -> Optional[TerminalSession]:
         with self.lock:

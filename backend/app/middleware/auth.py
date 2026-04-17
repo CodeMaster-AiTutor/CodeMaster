@@ -16,7 +16,7 @@ def token_required(f):
             current_user = db.session.get(User, user_id)
             
             if not current_user:
-                return jsonify({'error': 'User not found'}), 404
+                return jsonify({'error': 'Invalid or expired token'}), 401
             if current_user.deleted_at:
                 return jsonify({'error': 'Account deleted'}), 403
 

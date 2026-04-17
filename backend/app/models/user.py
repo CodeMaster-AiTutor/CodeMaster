@@ -16,6 +16,12 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=True)  # Nullable for OAuth users
     google_id = db.Column(db.String(255), unique=True, nullable=True, index=True)
+    github_id = db.Column(db.String(255), unique=True, nullable=True, index=True)
+    email_verified = db.Column(db.Boolean, nullable=False, default=False)
+    email_verification_token_hash = db.Column(db.String(128), nullable=True, index=True)
+    email_verification_expires_at = db.Column(db.DateTime, nullable=True)
+    reset_password_otp_hash = db.Column(db.String(128), nullable=True, index=True)
+    reset_password_otp_expires_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime)
     password_updated_at = db.Column(db.DateTime)
@@ -62,6 +68,7 @@ class User(db.Model):
             'id': self.id,
             'email': self.email,
             'username': self.username,
+            'email_verified': bool(self.email_verified),
             'skill_level': self.skill_level,
             'total_points': self.total_points,
             'profile_image_url': self.profile_image_url,

@@ -8,6 +8,7 @@ from app.models.skill_points import SkillPointTransaction
 from app.middleware.auth import token_required
 from datetime import datetime, timedelta
 from sqlalchemy import func, and_
+from app.services.skill_points_service import apply_daily_login_streak
 
 analytics_bp = Blueprint('analytics', __name__)
 
@@ -341,6 +342,7 @@ def track_time_spent(current_user):
             event_type='web_time_spent',
             event_data={'seconds': seconds}
         ))
+        apply_daily_login_streak(current_user, datetime.utcnow())
         db.session.commit()
         return jsonify({'tracked': True, 'seconds': seconds}), 200
     except Exception as e:

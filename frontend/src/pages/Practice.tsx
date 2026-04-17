@@ -676,6 +676,19 @@ const Practice = () => {
     intermediate: 'Intermediate',
     advanced: 'Advanced',
   };
+
+const getPracticeStorageOwner = () => {
+  try {
+    const raw = localStorage.getItem('user');
+    if (!raw) return 'anon';
+    const parsed = JSON.parse(raw) as { id?: string | number; email?: string };
+    const identity = String(parsed?.id ?? parsed?.email ?? '').trim().toLowerCase();
+    if (!identity) return 'anon';
+    return identity.replace(/[^a-z0-9@._-]+/g, '_');
+  } catch {
+    return 'anon';
+  }
+};
   const levelBulletClass: Record<LearningConcept['level'], string> = {
     basic: 'bg-success',
     intermediate: 'bg-warning',
@@ -862,10 +875,10 @@ const Practice = () => {
     level === 'basic' ? 'beginner' : level;
 
   const getSolveKey = (level: LearningConcept['level'], title: string) =>
-    `practice:solved:${normalizeLevelKey(level)}:${title}`;
+    `practice:solved:${getPracticeStorageOwner()}:${normalizeLevelKey(level)}:${title}`;
 
   const getTouchedKey = (level: LearningConcept['level'], title: string) =>
-    `practice:touched:${normalizeLevelKey(level)}:${title}`;
+    `practice:touched:${getPracticeStorageOwner()}:${normalizeLevelKey(level)}:${title}`;
 
   const isProblemSolved = (level: LearningConcept['level'], title: string) => {
     try {
@@ -897,8 +910,6 @@ const Practice = () => {
     const solved = isProblemSolved(level, problem.title) || progressEntry?.status === 'solved';
     const touched =
       solved ||
-      progressEntry?.status === 'attempted' ||
-      Boolean(progressEntry?.hasDraft) ||
       isProblemTouched(level, problem.title);
     return (
       <Card

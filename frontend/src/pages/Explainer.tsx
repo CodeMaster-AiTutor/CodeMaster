@@ -1,18 +1,159 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Brain, Code2, Lightbulb, Copy, Trash2 } from 'lucide-react';
+import { Brain, Code2, Lightbulb, Copy, Trash2, Volume2, Square } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import AppLayout from '@/components/layout/AppLayout';
 import { explainerAPI } from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
 
+type ExplainerSessionCache = {
+  code: string;
+  explanation: string;
+};
+
+const EXPLAINER_SESSION_KEY_PREFIX = 'explainer:session:v1';
+
+const getExplainerSessionOwner = () => {
+  try {
+    const raw = localStorage.getItem('user');
+    if (!raw) return 'anon';
+    const parsed = JSON.parse(raw) as { id?: string | number; email?: string };
+    const identity = String(parsed?.id ?? parsed?.email ?? '').trim().toLowerCase();
+    if (!identity) return 'anon';
+    return identity.replace(/[^a-z0-9@._-]+/g, '_');
+  } catch {
+    return 'anon';
+  }
+};
+
+const getExplainerSessionKey = () => `${EXPLAINER_SESSION_KEY_PREFIX}:${getExplainerSessionOwner()}`;
+
+const readExplainerSession = (key: string): ExplainerSessionCache | null => {
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as ExplainerSessionCache;
+    if (!parsed || typeof parsed.code !== 'string' || typeof parsed.explanation !== 'string') {
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
 const Explainer = () => {
   const navigate = useNavigate();
-  const [code, setCode] = useState('');
-  const [explanation, setExplanation] = useState('');
+  const [sessionKey] = useState(() => getExplainerSessionKey());
+  const [cachedSession] = useState<ExplainerSessionCache | null>(() => readExplainerSession(sessionKey));
+  const [code, setCode] = useState(cachedSession?.code || '');
+  const [explanation, setExplanation] = useState(cachedSession?.explanation || '');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const speechUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  const stopSpeaking = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    speechUtteranceRef.current = null;
+    setIsSpeaking(false);
+  };
+
+  const getPreferredVoice = (voices: SpeechSynthesisVoice[]) => {
+    if (!voices.length) return null;
+    const indianEnglishVoices = voices.filter((voice) => voice.lang.toLowerCase().startsWith('en-in'));
+    const femaleHint = /(heera|priya|veena|female|zira|hazel|susan|aria)/i;
+    const indianFemale = indianEnglishVoices.find((voice) => femaleHint.test(voice.name));
+    if (indianFemale) return indianFemale;
+    if (indianEnglishVoices.length) return indianEnglishVoices[0];
+    return voices.find((voice) => voice.lang.toLowerCase().startsWith('en')) || voices[0];
+  };
+
+  const handleReadExplanation = () => {
+    if (!explanation.trim()) {
+      toast({
+        title: "No explanation available",
+        description: "Generate an explanation first, then use read aloud.",
+        variant: "destructive"
+      });
+      return;
+    }
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      toast({
+        title: "TTS not supported",
+        description: "Your browser does not support speech synthesis.",
+        variant: "destructive"
+      });
+      return;
+    }
+    if (isSpeaking) {
+      stopSpeaking();
+      return;
+    }
+
+    const synth = window.speechSynthesis;
+    const startSpeech = () => {
+      const utterance = new SpeechSynthesisUtterance(
+        explanation.replace(/```[\s\S]*?```/g, '').replace(/\*\*/g, '').trim()
+      );
+      const preferredVoice = getPreferredVoice(synth.getVoices());
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+        utterance.lang = preferredVoice.lang || 'en-IN';
+      } else {
+        utterance.lang = 'en-IN';
+      }
+      utterance.rate = 0.92; // subtle and natural pace
+      utterance.pitch = 1.02;
+      utterance.volume = 1.0;
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => {
+        setIsSpeaking(false);
+        toast({
+          title: "TTS failed",
+          description: "Unable to read explanation aloud.",
+          variant: "destructive"
+        });
+      };
+      speechUtteranceRef.current = utterance;
+      setIsSpeaking(true);
+      synth.cancel();
+      synth.speak(utterance);
+    };
+
+    if (!synth.getVoices().length) {
+      const onVoicesChanged = () => {
+        synth.removeEventListener('voiceschanged', onVoicesChanged);
+        startSpeech();
+      };
+      synth.addEventListener('voiceschanged', onVoicesChanged);
+      setTimeout(() => {
+        synth.removeEventListener('voiceschanged', onVoicesChanged);
+        if (!isSpeaking) startSpeech();
+      }, 400);
+      return;
+    }
+    startSpeech();
+  };
+
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    try {
+      const payload: ExplainerSessionCache = { code, explanation };
+      sessionStorage.setItem(sessionKey, JSON.stringify(payload));
+    } catch {
+      void 0;
+    }
+  }, [code, explanation, sessionKey]);
 
 
 
@@ -27,6 +168,8 @@ const Explainer = () => {
     }
 
     setIsLoading(true);
+    stopSpeaking();
+    setExplanation('');
     
     try {
       // Call backend API for code explanation
@@ -64,8 +207,14 @@ const Explainer = () => {
   };
 
   const handleClear = () => {
+    stopSpeaking();
     setCode('');
     setExplanation('');
+    try {
+      sessionStorage.removeItem(sessionKey);
+    } catch {
+      void 0;
+    }
     toast({
       title: "Cleared!",
       description: "Code input and explanation have been cleared."
@@ -136,14 +285,7 @@ const Explainer = () => {
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   className="flex-1 font-mono text-sm resize-none border-0 bg-transparent focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                  placeholder="Paste your code here to get an AI-powered explanation...
-
-Examples:
-• JavaScript functions
-• Python classes  
-• Java methods
-• SQL queries
-• And much more!"
+                  placeholder="Paste your code here to get an AI-powered explanation..."
                 />
               </div>
             </div>
@@ -157,14 +299,25 @@ Examples:
                     <h3 className="font-semibold">Code Explanation</h3>
                   </div>
                   {explanation && (
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleCopyExplanation}
-                      className="h-6 w-6 p-0"
-                    >
-                      <Copy className="w-3 h-3" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleReadExplanation}
+                        className="h-6 px-2"
+                      >
+                        {isSpeaking ? <Square className="w-3 h-3 mr-1" /> : <Volume2 className="w-3 h-3 mr-1" />}
+                        {isSpeaking ? 'Stop' : 'Read'}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleCopyExplanation}
+                        className="h-6 w-6 p-0"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -190,9 +343,25 @@ Examples:
                                 .map((line) => line.trim())
                                 .filter((line) => /^[-*•]\s+/.test(line))
                                 .map((line, bulletIndex) => (
-                                  <li key={`${index}-${bulletIndex}`} className="text-white leading-relaxed">
-                                    • {line.replace(/^[-*•]\s+/, '')}
-                                  </li>
+                                  (() => {
+                                    const cleaned = line.replace(/^[-*•]\s+/, '');
+                                    const isSectionHeading = /^\d+\)\s*(Program Goal|Line-by-Line Explanation|Condition and Flow|End-to-End Flow)\s*:?\s*$/i.test(cleaned);
+                                    if (isSectionHeading) {
+                                      return (
+                                        <li
+                                          key={`${index}-${bulletIndex}`}
+                                          className="list-none text-primary text-lg font-bold leading-relaxed mt-3 mb-1"
+                                        >
+                                          {cleaned}
+                                        </li>
+                                      );
+                                    }
+                                    return (
+                                      <li key={`${index}-${bulletIndex}`} className="text-white leading-relaxed">
+                                        • {cleaned}
+                                      </li>
+                                    );
+                                  })()
                                 ))}
                             </ul>
                           ) : (

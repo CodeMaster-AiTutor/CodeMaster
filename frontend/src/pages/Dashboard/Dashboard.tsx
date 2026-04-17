@@ -109,7 +109,7 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       const [statsResult, activityResult] = await Promise.allSettled([
         dashboardAPI.getStats(),
-        dashboardAPI.getRecentActivity(5)
+        dashboardAPI.getRecentActivity(7)
       ]);
 
       if (isMounted && statsResult.status === 'fulfilled') {
@@ -161,7 +161,7 @@ const Dashboard = () => {
           time: activity.timestamp || activity.time ? formatTimeAgo(activity.timestamp || activity.time) : 'Unknown',
           points: activity.points || 0
         }));
-        setRecentActivity(formattedActivity.slice(0, 5));
+        setRecentActivity(formattedActivity.slice(0, 7));
       }
 
       if (isMounted && statsResult.status === 'rejected' && activityResult.status === 'rejected') {
@@ -233,7 +233,7 @@ const Dashboard = () => {
     }
   ];
 
-  const visibleRecentActivity = recentActivity;
+  const visibleRecentActivity = recentActivity.slice(0, 7);
   const visibleAchievements = achievements;
 
   return (
@@ -333,10 +333,7 @@ const Dashboard = () => {
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold">Recent Activity</h2>
                 <Card className="card-feature">
-                  <div
-                    className="space-y-4 max-h-[17rem] overflow-y-auto [&::-webkit-scrollbar]:hidden"
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                  >
+                  <div className="space-y-4 max-h-[16rem] overflow-y-hidden hover:overflow-y-auto pr-1">
                     {recentActivity.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground">
                         <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
@@ -344,8 +341,8 @@ const Dashboard = () => {
                         <p className="text-sm mt-1">Start coding to see your activity here!</p>
                       </div>
                     ) : (
-                      visibleRecentActivity.map((activity, index) => (
-                        <div key={index} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                        visibleRecentActivity.map((activity, index) => (
+                        <div key={`top-${index}`} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                           <div className="flex items-center space-x-3">
                             <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                               activity.type === 'practice_problem' ? 'bg-success/10' :
@@ -377,7 +374,7 @@ const Dashboard = () => {
                             )}
                           </div>
                         </div>
-                      ))
+                        ))
                     )}
                   </div>
                 </Card>

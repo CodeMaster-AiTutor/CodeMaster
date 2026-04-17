@@ -4,6 +4,8 @@ import subprocess
 import tempfile
 import re
 import time
+import io
+import tarfile
 import docker
 import requests
 from typing import Dict, List, Optional
@@ -73,6 +75,38 @@ class JavaExecutor:
         if (not result.get("success")) and (not result.get("errors")) and validation_errors:
             result["errors"] = validation_errors
         return result
+
+    def compile_only(self, java_code: str) -> Dict:
+        """
+        Compile Java code without executing it.
+
+        Useful for fast syntax validation flows (e.g., explainer pre-checks)
+        where runtime execution is unnecessary and can add latency/timeouts.
+        """
+        java_code = self._normalize_newlines(java_code)
+        validation_errors = self._validate_structure(java_code)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            class_name = self._extract_class_name(java_code)
+            java_file = os.path.join(temp_dir, f"{class_name}.java")
+            with open(java_file, 'w', encoding='utf-8') as f:
+                f.write(java_code)
+
+            if self.use_docker:
+                compile_result = self._docker_compile(temp_dir, class_name, java_code)
+            else:
+                compile_result = self._subprocess_compile(temp_dir, class_name, java_code)
+
+        errors = compile_result.get("errors", [])
+        if (not compile_result.get("success")) and (not errors) and validation_errors:
+            errors = validation_errors
+
+        return {
+            "success": bool(compile_result.get("success")),
+            "output": "",
+            "errors": errors,
+            "execution_time": 0,
+            "compilation_time": float(compile_result.get("compilation_time", 0.0) or 0.0),
+        }
     
     def _extract_class_name(self, java_code: str) -> str:
         """Extract class name from Java code"""
@@ -440,34 +474,99 @@ class JavaExecutor:
     
     def _execute_with_docker(self, java_code: str, input_data: str = "") -> Dict:
         """Execute Java code using Docker"""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            class_name = self._extract_class_name(java_code)
-            java_file = os.path.join(temp_dir, f"{class_name}.java")
-            
-            with open(java_file, 'w', encoding='utf-8') as f:
-                f.write(java_code)
-            
-            # Compile
-            compile_result = self._docker_compile(temp_dir, class_name, java_code)
-            if not compile_result["success"]:
+        class_name = self._extract_class_name(java_code)
+        container = None
+        compile_start = time.time()
+        try:
+            nano_cpus = int(self.cpu_limit * 1_000_000_000) if self.cpu_limit > 0 else None
+            container = self.docker_client.containers.create(
+                image=self.docker_image,
+                command=["/bin/sh", "-c", "sleep 300"],
+                working_dir='/app/workspace',
+                mem_limit=self.memory_limit,
+                nano_cpus=nano_cpus,
+                network_disabled=True,
+                user="0",
+                detach=True
+            )
+            container.start()
+            container.exec_run(["/bin/sh", "-lc", "mkdir -p /app/workspace && chmod 777 /app/workspace"], stdout=True, stderr=True)
+            self._docker_put_text(container, f"/app/workspace/{class_name}.java", java_code)
+            self._docker_put_text(container, "/app/workspace/__input.txt", input_data or "")
+            compile_exec = container.exec_run(
+                ["/opt/jdk-17.0.12/bin/javac", "-d", "/app/workspace", f"{class_name}.java"],
+                stdout=True,
+                stderr=True
+            )
+            compile_output = (compile_exec.output or b"").decode("utf-8", errors="replace")
+            compilation_time = time.time() - compile_start
+            if compile_exec.exit_code != 0:
+                errors = self._parse_compiler_errors(compile_output, java_code)
+                if not errors:
+                    errors = [{
+                        "type": "compilation_error",
+                        "line": 0,
+                        "column": 0,
+                        "message": compile_output.strip() or "Compilation failed"
+                    }]
                 return {
                     "success": False,
                     "output": "",
-                    "errors": compile_result["errors"],
+                    "errors": errors,
                     "execution_time": 0,
-                    "compilation_time": compile_result["compilation_time"]
+                    "compilation_time": compilation_time
                 }
-            
-            # Execute
-            execute_result = self._docker_execute(temp_dir, class_name, input_data=input_data)
-            
+            exec_start = time.time()
+            run_exec = container.exec_run(
+                ["/bin/sh", "-lc", f"/opt/jdk-17.0.12/bin/java -cp /app/workspace {class_name} < /app/workspace/__input.txt"],
+                stdout=True,
+                stderr=True
+            )
+            run_output = (run_exec.output or b"").decode("utf-8", errors="replace")
+            execution_time = time.time() - exec_start
+            if run_exec.exit_code == 0:
+                return {
+                    "success": True,
+                    "output": run_output,
+                    "errors": [],
+                    "execution_time": execution_time,
+                    "compilation_time": compilation_time
+                }
+            runtime_error = self._parse_runtime_error(run_output, class_name)
             return {
-                "success": execute_result["success"],
-                "output": execute_result["output"],
-                "errors": execute_result.get("errors", []),
-                "execution_time": execute_result["execution_time"],
-                "compilation_time": compile_result["compilation_time"]
+                "success": False,
+                "output": run_output,
+                "errors": [runtime_error],
+                "execution_time": execution_time,
+                "compilation_time": compilation_time
             }
+        except Exception as e:
+            self.logger.error(f"Docker execution error: {e}")
+            return {
+                "success": False,
+                "output": "",
+                "errors": [{"type": "system_error", "line": 0, "column": 0, "message": str(e)}],
+                "execution_time": 0,
+                "compilation_time": time.time() - compile_start
+            }
+        finally:
+            if container:
+                try:
+                    container.remove(force=True)
+                except Exception:
+                    pass
+
+    def _docker_put_text(self, container, target_path: str, content: str) -> None:
+        directory = os.path.dirname(target_path)
+        filename = os.path.basename(target_path)
+        buffer = io.BytesIO()
+        data = content.encode("utf-8")
+        with tarfile.open(fileobj=buffer, mode="w") as tar:
+            info = tarfile.TarInfo(name=filename)
+            info.size = len(data)
+            tar.addfile(info, io.BytesIO(data))
+        buffer.seek(0)
+        container.put_archive(directory, buffer.read())
     
     def _docker_compile(self, code_dir: str, class_name: str, java_code: str) -> Dict:
         """Compile Java code in Docker container"""

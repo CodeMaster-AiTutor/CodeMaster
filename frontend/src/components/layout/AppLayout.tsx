@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import TopNavigation from './TopNavigation';
 import Sidebar from './Sidebar';
-import { analyticsAPI, profileAPI } from '@/lib/api';
+import { profileAPI } from '@/lib/api';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -62,48 +62,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     }, 5000);
     return () => {
       isMounted = false;
-      window.clearInterval(interval);
-    };
-  }, []);
-
-  useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      return;
-    }
-    let mounted = true;
-    let lastMark = Date.now();
-    const flush = async () => {
-      if (!mounted || document.visibilityState !== 'visible') {
-        lastMark = Date.now();
-        return;
-      }
-      const now = Date.now();
-      const elapsedSeconds = Math.floor((now - lastMark) / 1000);
-      lastMark = now;
-      if (elapsedSeconds <= 0) {
-        return;
-      }
-      try {
-        await analyticsAPI.trackTimeSpent(elapsedSeconds);
-      } catch {
-        void 0;
-      }
-    };
-    const interval = window.setInterval(() => {
-      void flush();
-    }, 10000);
-    const onVisibility = () => {
-      if (document.visibilityState === 'hidden') {
-        void flush();
-      } else {
-        lastMark = Date.now();
-      }
-    };
-    document.addEventListener('visibilitychange', onVisibility);
-    return () => {
-      mounted = false;
-      document.removeEventListener('visibilitychange', onVisibility);
       window.clearInterval(interval);
     };
   }, []);

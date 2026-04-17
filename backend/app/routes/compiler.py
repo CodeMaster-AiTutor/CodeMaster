@@ -53,7 +53,7 @@ def execute_code(current_user):
         improvements = None
         
         if not result["success"] and result.get("errors"):
-            ai_service = get_ai_service()
+            ai_service = None if use_external_llm_service() else get_ai_service()
             suggestion_count = 0
             for err in result["errors"]:
                 if suggestion_count >= 3:
@@ -61,13 +61,25 @@ def execute_code(current_user):
                 if not err.get("message"):
                     continue
                 try:
-                    ai_suggestions = ai_service.suggest_error_fix(
-                        error_message=err["message"],
-                        code_context=java_code,
-                        error_type=err.get("type", "compilation_error"),
-                        error_line=err.get("line"),
-                        error_column=err.get("column")
-                    )
+                    if use_external_llm_service():
+                        ai_suggestions = call_llm_service(
+                            "/suggest-fix",
+                            {
+                                "error": err["message"],
+                                "code_context": java_code,
+                                "error_type": err.get("type", "compilation_error"),
+                                "error_line": err.get("line"),
+                                "error_column": err.get("column"),
+                            },
+                        )
+                    else:
+                        ai_suggestions = ai_service.suggest_error_fix(
+                            error_message=err["message"],
+                            code_context=java_code,
+                            error_type=err.get("type", "compilation_error"),
+                            error_line=err.get("line"),
+                            error_column=err.get("column")
+                        )
                     err["ai_fix_suggestion"] = ai_suggestions.get("fix_suggestion", "")
                     err["corrected_code"] = ai_suggestions.get("corrected_code", "")
                     err["explanation"] = ai_suggestions.get("explanation", "")
@@ -77,8 +89,11 @@ def execute_code(current_user):
         
         # Get code improvements (always try to improve)
         try:
-            ai_service = get_ai_service()
-            improvements = ai_service.improve_code(java_code)
+            if use_external_llm_service():
+                improvements = []
+            else:
+                ai_service = get_ai_service()
+                improvements = ai_service.improve_code(java_code)
         except Exception as e:
             current_app.logger.warning(f'compiler.ai_improve request_id={request_id} error={e}')
             improvements = []
@@ -94,10 +109,9 @@ def execute_code(current_user):
             compilation_time=result.get("compilation_time", 0)
         )
         db.session.add(submission)
-        db.session.commit()
-        
         if result["success"]:
             update_streak_on_submit(current_user)
+        db.session.commit()
         
         # Build response
         response = {

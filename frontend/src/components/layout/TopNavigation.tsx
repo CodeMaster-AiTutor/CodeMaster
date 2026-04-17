@@ -26,7 +26,7 @@ import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from 'next-themes';
-import { API_BASE_URL, contentAPI, practiceAPI, profileAPI } from '@/lib/api';
+import { API_BASE_URL, analyticsAPI, contentAPI, practiceAPI, profileAPI } from '@/lib/api';
 
 interface TopNavigationProps {
   onMenuClick: () => void;
@@ -34,6 +34,9 @@ interface TopNavigationProps {
 
 const STREAK_REMINDERS_KEY = 'settings:streak-reminders';
 const STREAK_REMINDER_DISMISSED_KEY = 'notifications:streak-reminder-dismissed-date';
+const STREAK_MILESTONE_DISMISSED_KEY = 'notifications:streak-milestone-dismissed-date';
+const TIME_TRACKER_ACTIVE_KEY = 'analytics:time-tracker-active';
+const TIME_TRACKER_HEARTBEAT_KEY = 'analytics:time-tracker-heartbeat';
 
 const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
   const navigate = useNavigate();
@@ -122,8 +125,26 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
       return true;
     }
   };
+  const getStreakMilestoneBonus = (streak: number) => {
+    if (!streak || streak % 5 !== 0) {
+      return 0;
+    }
+    const milestone = Math.floor(streak / 5);
+    return 20 + Math.max(0, milestone - 1) * 10;
+  };
+  const isStreakMilestoneUnread = () => {
+    const bonus = getStreakMilestoneBonus(Number(userInfo.streak || 0));
+    if (bonus <= 0) {
+      return false;
+    }
+    try {
+      return localStorage.getItem(STREAK_MILESTONE_DISMISSED_KEY) !== getTodayKey();
+    } catch {
+      return true;
+    }
+  };
   const refreshNotifications = () => {
-    const unreadCount = isStreakReminderUnread() ? 1 : 0;
+    const unreadCount = (isStreakReminderUnread() ? 1 : 0) + (isStreakMilestoneUnread() ? 1 : 0);
     setUserInfo((prev) => ({ ...prev, notifications: unreadCount }));
   };
   const getCurrentSkillLevel = (): 'beginner' | 'intermediate' | 'advanced' => {
@@ -228,6 +249,63 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
+    if (!token) {
+      return;
+    }
+    const now = Date.now();
+    const isActive = sessionStorage.getItem(TIME_TRACKER_ACTIVE_KEY) === 'true';
+    const heartbeatRaw = sessionStorage.getItem(TIME_TRACKER_HEARTBEAT_KEY);
+    const heartbeat = heartbeatRaw ? Number(heartbeatRaw) : 0;
+    const isHeartbeatFresh = Number.isFinite(heartbeat) && now - heartbeat < 30000;
+    if (isActive && isHeartbeatFresh) {
+      return;
+    }
+    sessionStorage.setItem(TIME_TRACKER_ACTIVE_KEY, 'true');
+    sessionStorage.setItem(TIME_TRACKER_HEARTBEAT_KEY, String(now));
+    let mounted = true;
+    let lastMark = Date.now();
+    const flush = async () => {
+      if (!mounted || document.visibilityState !== 'visible') {
+        lastMark = Date.now();
+        sessionStorage.setItem(TIME_TRACKER_HEARTBEAT_KEY, String(Date.now()));
+        return;
+      }
+      const now = Date.now();
+      const elapsedSeconds = Math.floor((now - lastMark) / 1000);
+      lastMark = now;
+      sessionStorage.setItem(TIME_TRACKER_HEARTBEAT_KEY, String(now));
+      if (elapsedSeconds <= 0) {
+        return;
+      }
+      try {
+        await analyticsAPI.trackTimeSpent(elapsedSeconds);
+      } catch {
+        void 0;
+      }
+    };
+    const interval = window.setInterval(() => {
+      void flush();
+    }, 10000);
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        void flush();
+      } else {
+        lastMark = Date.now();
+        sessionStorage.setItem(TIME_TRACKER_HEARTBEAT_KEY, String(lastMark));
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      mounted = false;
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.clearInterval(interval);
+      sessionStorage.removeItem(TIME_TRACKER_ACTIVE_KEY);
+      sessionStorage.removeItem(TIME_TRACKER_HEARTBEAT_KEY);
+    };
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
     const skillLevel = getCurrentSkillLevel();
     const assessmentTitle = `${skillLevel.charAt(0).toUpperCase()}${skillLevel.slice(1)} Assessment`;
     const staticPages: Array<{
@@ -298,7 +376,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
       refreshNotifications();
     }, 60_000);
     const onStorage = (event: StorageEvent) => {
-      if (event.key === STREAK_REMINDERS_KEY || event.key === STREAK_REMINDER_DISMISSED_KEY) {
+      if (event.key === STREAK_REMINDERS_KEY || event.key === STREAK_REMINDER_DISMISSED_KEY || event.key === STREAK_MILESTONE_DISMISSED_KEY) {
         refreshNotifications();
       }
     };
@@ -365,6 +443,11 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
         localStorage.removeItem(key);
       }
     });
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith('explainer:session:')) {
+        sessionStorage.removeItem(key);
+      }
+    });
     sessionStorage.removeItem('compiler:output');
     sessionStorage.removeItem('compiler:session-id');
     
@@ -378,6 +461,14 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
   const markReminderAsRead = () => {
     try {
       localStorage.setItem(STREAK_REMINDER_DISMISSED_KEY, getTodayKey());
+    } catch {
+      void 0;
+    }
+    refreshNotifications();
+  };
+  const markMilestoneAsRead = () => {
+    try {
+      localStorage.setItem(STREAK_MILESTONE_DISMISSED_KEY, getTodayKey());
     } catch {
       void 0;
     }
@@ -536,19 +627,33 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                 <div className="px-3 py-2 text-sm text-muted-foreground">
                   Streak reminders are turned off in Settings.
                 </div>
-              ) : isStreakReminderUnread() ? (
-                <div className="px-3 py-3 space-y-2">
-                  <div className="text-sm font-medium">Daily Streak Reminder</div>
-                  <div className="text-xs text-muted-foreground">
-                    Your current streak is {userInfo.streak} day{userInfo.streak === 1 ? '' : 's'}. Log in and practice every day to maintain and grow your streak.
-                  </div>
-                  <Button size="sm" variant="secondary" onClick={markReminderAsRead}>
-                    Mark as read
-                  </Button>
-                </div>
               ) : (
-                <div className="px-3 py-2 text-sm text-muted-foreground">
-                  You are all caught up for today.
+                <div className="px-3 py-2 space-y-3">
+                  {isStreakReminderUnread() ? (
+                    <div className="space-y-2">
+                      <div className="text-sm font-medium">Daily Streak Reminder</div>
+                      <div className="text-xs text-muted-foreground">
+                        Your current streak is {userInfo.streak} day{userInfo.streak === 1 ? '' : 's'}. Log in and practice every day to maintain and grow your streak.
+                      </div>
+                      <Button size="sm" variant="secondary" onClick={markReminderAsRead}>
+                        Mark as read
+                      </Button>
+                    </div>
+                  ) : null}
+                  {isStreakMilestoneUnread() ? (
+                    <div className="space-y-2 border-t border-border/50 pt-3">
+                      <div className="text-sm font-medium">Streak Milestone Reward</div>
+                      <div className="text-xs text-muted-foreground">
+                        You reached {userInfo.streak} days. Bonus points awarded: +{getStreakMilestoneBonus(Number(userInfo.streak || 0))}.
+                      </div>
+                      <Button size="sm" variant="secondary" onClick={markMilestoneAsRead}>
+                        Mark as read
+                      </Button>
+                    </div>
+                  ) : null}
+                  {!isStreakReminderUnread() && !isStreakMilestoneUnread() ? (
+                    <div className="text-sm text-muted-foreground">You are all caught up for today.</div>
+                  ) : null}
                 </div>
               )}
             </DropdownMenuContent>

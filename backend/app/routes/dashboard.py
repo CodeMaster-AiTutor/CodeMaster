@@ -268,6 +268,7 @@ def get_recent(current_user):
     """Get recent activity for dashboard"""
     try:
         limit = request.args.get('limit', 5, type=int)
+        limit = max(1, min(int(limit or 5), 7))
         
         allowed_levels = _allowed_levels_for_user(current_user.skill_level)
         activities = []

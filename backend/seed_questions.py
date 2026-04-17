@@ -12,9 +12,20 @@ LEVEL_MAP = {
     "ADVANCED LEVEL": "advanced",
 }
 
-QUESTION_BANK_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "problems", "Java_Question_Bank_Updated.txt")
-)
+def _resolve_problem_file(filename: str) -> str:
+    base_dir = os.path.dirname(__file__)
+    candidates = [
+        os.path.abspath(os.path.join(base_dir, "..", "problems", filename)),
+        os.path.abspath(os.path.join(base_dir, "problems", filename)),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return candidates[0]
+
+
+QUESTION_BANK_PATH = _resolve_problem_file("Java_Question_Bank_Updated.txt")
+PROBLEM_LIST_PATH = _resolve_problem_file("problems.txt")
 
 def _clean_text(value: str) -> str:
     return re.sub(r'\s+', ' ', (value or '').strip())
@@ -162,6 +173,56 @@ def _extract_sections(full_text: str):
             sections.extend(_parse_coding(level_text[coding_start:], level))
     return sections
 
+
+def _parse_leveled_problem_list(full_text: str):
+    level_headers = [
+        ("beginner", re.compile(r"^\s*(?:🟢\s*)?Beginner\s*$", re.IGNORECASE)),
+        ("intermediate", re.compile(r"^\s*(?:🟡\s*)?Intermediate\s*$", re.IGNORECASE)),
+        ("advanced", re.compile(r"^\s*(?:🔴\s*)?Advance(?:d)?\s*$", re.IGNORECASE)),
+    ]
+    level = None
+    seen = set()
+    questions = []
+    for raw_line in full_text.splitlines():
+        line = (raw_line or "").strip()
+        if not line:
+            continue
+        matched_level = None
+        for key, pattern in level_headers:
+            if pattern.match(line):
+                matched_level = key
+                break
+        if matched_level:
+            level = matched_level
+            continue
+        if level is None:
+            continue
+        title_match = re.match(r"^\d+\.\s*(.+?)\s*$", line)
+        if not title_match:
+            continue
+        title = title_match.group(1).strip()
+        title = re.sub(r"\s+", " ", title)
+        if not title or title.lower().startswith("focus:"):
+            continue
+        dedupe_key = (level, title.lower())
+        if dedupe_key in seen:
+            continue
+        seen.add(dedupe_key)
+        payload = {
+            "title": title,
+            "test_cases": [{"input": "", "output": "", "match_type": "compile_only"}]
+        }
+        questions.append({
+            "question_text": f"{title}\n\nSolve this Java problem for {level} level.",
+            "question_type": "coding",
+            "options": None,
+            "correct_answer": json.dumps(payload, ensure_ascii=False),
+            "explanation": "Imported from problems.txt",
+            "difficulty": level,
+            "tags": ["assessment", "coding", "problem-list"]
+        })
+    return questions
+
 def seed_questions():
     with app.app_context():
         if not os.path.exists(QUESTION_BANK_PATH):
@@ -169,6 +230,10 @@ def seed_questions():
         with open(QUESTION_BANK_PATH, "r", encoding="utf-8") as f:
             full_text = f.read()
         questions_data = _extract_sections(full_text)
+        if os.path.exists(PROBLEM_LIST_PATH):
+            with open(PROBLEM_LIST_PATH, "r", encoding="utf-8", errors="ignore") as f:
+                list_text = f.read()
+            questions_data.extend(_parse_leveled_problem_list(list_text))
         if not questions_data:
             raise RuntimeError("No questions parsed from question bank")
         Question.query.delete()

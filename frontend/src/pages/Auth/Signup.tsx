@@ -113,20 +113,30 @@ const Signup = () => {
     
     try {
       // Call backend API for registration
-      await authAPI.register({
+      const result = await authAPI.register({
         username: formData.username,
         email: formData.email,
         password: formData.password,
         skill_level: formData.skillLevel as "beginner" | "intermediate" | "advanced"
       });
+      const expiresInMs = Number(result.expires_in_seconds || 600) * 1000;
+      sessionStorage.setItem(
+        'pending_signup_credentials',
+        JSON.stringify({
+          email: formData.email.trim().toLowerCase(),
+          password: formData.password,
+          expiresAt: Date.now() + expiresInMs
+        })
+      );
       
       toast({
-        title: "Account created successfully!",
-        description: "Welcome to CodeMaster! Your account has been created. Please login to continue.",
+        title: result.email_delivery_failed ? "Signup complete, email pending" : "Verification email sent",
+        description: result.email_delivery_failed
+          ? "We created your account but could not send email. Use resend on next screen."
+          : "Please verify your email from the link we sent.",
       });
       
-      // Navigate to login page after successful signup
-      navigate('/login');
+      navigate(`/verify-pending?email=${encodeURIComponent(formData.email.trim().toLowerCase())}`);
     } catch (error) {
       toast({
         title: "Signup failed",
@@ -157,6 +167,20 @@ const Signup = () => {
           variant: "destructive",
         });
       }
+    } else if (provider === 'GitHub') {
+      try {
+        setIsLoading(true);
+        const response = await authAPI.getGithubAuthUrl();
+        sessionStorage.setItem('github_oauth_state', response.state);
+        window.location.href = response.auth_url;
+      } catch (error) {
+        setIsLoading(false);
+        toast({
+          title: "GitHub Signup Failed",
+          description: error instanceof Error ? error.message : 'Failed to initiate GitHub signup.',
+          variant: "destructive",
+        });
+      }
     } else {
       toast({
         title: `${provider} Signup`,
@@ -178,10 +202,14 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="min-h-screen lg:h-screen flex flex-col lg:flex-row lg:overflow-hidden">
       {/* Left Side - Branding */}
-      <div className="lg:w-1/2 bg-gradient-to-br from-accent to-primary flex items-center justify-center p-8">
-        <div className="text-center text-white max-w-md">
+      <div className="relative overflow-hidden lg:w-1/2 lg:h-screen bg-gradient-to-br from-accent to-primary flex items-center justify-center p-8">
+        <div className="auth-grid-shimmer" />
+        <div className="auth-blob w-40 h-40 bg-white/30 top-16 left-12" />
+        <div className="auth-blob w-52 h-52 bg-primary/35 bottom-20 right-10 [animation-delay:1.8s]" />
+        <div className="auth-blob w-28 h-28 bg-white/20 top-1/2 right-1/4 [animation-delay:0.9s]" />
+        <div className="relative text-center text-white max-w-md">
           <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-6 animate-float">
             <Code2 className="w-8 h-8" />
           </div>
@@ -213,7 +241,8 @@ const Signup = () => {
       </div>
 
       {/* Right Side - Signup Form */}
-      <div className="lg:w-1/2 flex items-center justify-center p-8">
+      <div className="lg:w-1/2 lg:h-screen overflow-y-auto">
+        <div className="min-h-screen lg:min-h-full flex items-center justify-center p-8">
         <div className="w-full max-w-md">
           <div className="mb-8">
             <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6">
@@ -450,6 +479,7 @@ const Signup = () => {
               </p>
             </div>
           </Card>
+        </div>
         </div>
       </div>
     </div>
