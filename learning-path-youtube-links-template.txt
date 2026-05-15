@@ -1,0 +1,31 @@
+topic id | topic title | youtube link
+
+java-introduction | Introduction to Java | https://youtu.be/0XWb1PX9akw
+jvm-architecture | JVM Architecture | https://youtu.be/V95XIvDJtdQ
+data-types-variables | Data Types & Variables | https://youtu.be/zc6q5dxJb7g
+operators | Operators | https://youtu.be/o4HPvkSEPwg
+control-flow | Control Flow Statements | https://youtu.be/RNupSIbIbMw
+arrays | Arrays | https://youtu.be/avEm9LttA1I
+methods | Methods | https://youtu.be/upk0wiowp54
+basic-oop | Basic OOP Concepts | https://youtu.be/jMuE-aq5_oM
+
+advanced-oop | Advanced OOP | https://youtu.be/OPvC1hz-qSo
+string-handling | String Handling | https://youtu.be/qeuTH5PntVc
+exception-handling | Exception Handling | https://youtu.be/Tkpgi4g8zjM
+inner-classes | Inner Classes | https://youtu.be/U8oX8eolEUk
+collections-framework | Collections Framework | https://youtu.be/GJLHkQVMGjY
+file-handling-io | File Handling & I/O | https://youtu.be/zN00FDR-9PE
+multithreading | Multithreading | https://youtu.be/ZWAjYep6k1c
+enums-annotations | Enums & Annotations | https://youtu.be/RfMA8ELlT0I
+
+generics | Generics | https://youtu.be/zinLRbsnmT8
+java-8-features | Java 8+ Features | https://youtu.be/pM19quJEpRE
+concurrency-advanced | Concurrency (Advanced) | https://youtu.be/ziYLsp7-sM0
+jvm-memory-management | JVM & Memory Management | https://youtu.be/DiBTybBwM2Q
+reflection-api | Reflection API | https://youtu.be/fF3Vhm8rDIU
+networking | Networking | https://youtu.be/BXXW1ori3Dc
+jdbc | JDBC | https://youtu.be/W7ZTBQcsyo4
+gui-programming | GUI Programming | https://youtu.be/7F06XNNo-cQ
+security | Security | https://youtu.be/cLvgm7nOFzo
+design-patterns | Design Patterns | https://youtu.be/JHeUnZ6dEVY
+enterprise-frameworks | Enterprise & Frameworks | https://youtu.be/-ifhgYLxirY

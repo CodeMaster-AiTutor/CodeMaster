@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -34,7 +34,7 @@ const learningPathConcepts: LearningConcept[] = [
       'main() Method Deep Concept',
     ],
     level: 'basic',
-    tutorialUrl: '/videos/v1_exp_video.mp4',
+    tutorialUrl: 'https://youtu.be/0XWb1PX9akw',
   },
   {
     id: 'jvm-architecture',
@@ -52,6 +52,7 @@ const learningPathConcepts: LearningConcept[] = [
       'JIT Compiler',
     ],
     level: 'basic',
+    tutorialUrl: 'https://youtu.be/V95XIvDJtdQ',
   },
   {
     id: 'data-types-variables',
@@ -68,6 +69,7 @@ const learningPathConcepts: LearningConcept[] = [
       'final Keyword (Basic Usage)',
     ],
     level: 'basic',
+    tutorialUrl: 'https://youtu.be/zc6q5dxJb7g',
   },
   {
     id: 'operators',
@@ -86,6 +88,7 @@ const learningPathConcepts: LearningConcept[] = [
       'instanceof Operator',
     ],
     level: 'basic',
+    tutorialUrl: 'https://youtu.be/o4HPvkSEPwg',
   },
   {
     id: 'control-flow',
@@ -103,6 +106,7 @@ const learningPathConcepts: LearningConcept[] = [
       'Labeled break',
     ],
     level: 'basic',
+    tutorialUrl: 'https://youtu.be/RNupSIbIbMw',
   },
   {
     id: 'arrays',
@@ -118,6 +122,7 @@ const learningPathConcepts: LearningConcept[] = [
       'Arrays Utility Class',
     ],
     level: 'basic',
+    tutorialUrl: 'https://youtu.be/avEm9LttA1I',
   },
   {
     id: 'methods',
@@ -133,6 +138,7 @@ const learningPathConcepts: LearningConcept[] = [
       'Static vs Instance Methods',
     ],
     level: 'basic',
+    tutorialUrl: 'https://youtu.be/upk0wiowp54',
   },
   {
     id: 'basic-oop',
@@ -150,6 +156,7 @@ const learningPathConcepts: LearningConcept[] = [
       'Packages & import',
     ],
     level: 'basic',
+    tutorialUrl: 'https://youtu.be/jMuE-aq5_oM',
   },
   {
     id: 'advanced-oop',
@@ -170,6 +177,7 @@ const learningPathConcepts: LearningConcept[] = [
       'Object Class Methods',
     ],
     level: 'intermediate',
+    tutorialUrl: 'https://youtu.be/OPvC1hz-qSo',
   },
   {
     id: 'string-handling',
@@ -186,6 +194,7 @@ const learningPathConcepts: LearningConcept[] = [
       'equals() vs ==',
     ],
     level: 'intermediate',
+    tutorialUrl: 'https://youtu.be/qeuTH5PntVc',
   },
   {
     id: 'exception-handling',
@@ -204,6 +213,7 @@ const learningPathConcepts: LearningConcept[] = [
       'try-with-resources',
     ],
     level: 'intermediate',
+    tutorialUrl: 'https://youtu.be/Tkpgi4g8zjM',
   },
   {
     id: 'inner-classes',
@@ -217,6 +227,7 @@ const learningPathConcepts: LearningConcept[] = [
       'Anonymous Inner Class',
     ],
     level: 'intermediate',
+    tutorialUrl: 'https://youtu.be/U8oX8eolEUk',
   },
   {
     id: 'collections-framework',
@@ -236,6 +247,7 @@ const learningPathConcepts: LearningConcept[] = [
       'Concurrent Collections',
     ],
     level: 'intermediate',
+    tutorialUrl: 'https://youtu.be/GJLHkQVMGjY',
   },
   {
     id: 'generics',
@@ -250,6 +262,7 @@ const learningPathConcepts: LearningConcept[] = [
       'Type Erasure',
     ],
     level: 'advanced',
+    tutorialUrl: 'https://youtu.be/zinLRbsnmT8',
   },
   {
     id: 'file-handling-io',
@@ -266,6 +279,7 @@ const learningPathConcepts: LearningConcept[] = [
       'transient Keyword',
     ],
     level: 'intermediate',
+    tutorialUrl: 'https://youtu.be/zN00FDR-9PE',
   },
   {
     id: 'multithreading',
@@ -283,6 +297,7 @@ const learningPathConcepts: LearningConcept[] = [
       'Thread Priority',
     ],
     level: 'intermediate',
+    tutorialUrl: 'https://youtu.be/ZWAjYep6k1c',
   },
   {
     id: 'enums-annotations',
@@ -296,6 +311,7 @@ const learningPathConcepts: LearningConcept[] = [
       'Meta-Annotations',
     ],
     level: 'intermediate',
+    tutorialUrl: 'https://youtu.be/RfMA8ELlT0I',
   },
   {
     id: 'java-8-features',
@@ -317,6 +333,7 @@ const learningPathConcepts: LearningConcept[] = [
       'Sealed Classes',
     ],
     level: 'advanced',
+    tutorialUrl: 'https://youtu.be/pM19quJEpRE',
   },
   {
     id: 'concurrency-advanced',
@@ -334,6 +351,7 @@ const learningPathConcepts: LearningConcept[] = [
       'Atomic Classes',
     ],
     level: 'advanced',
+    tutorialUrl: 'https://youtu.be/ziYLsp7-sM0',
   },
   {
     id: 'jvm-memory-management',
@@ -349,6 +367,7 @@ const learningPathConcepts: LearningConcept[] = [
       'Class Loading Mechanism',
     ],
     level: 'advanced',
+    tutorialUrl: 'https://youtu.be/DiBTybBwM2Q',
   },
   {
     id: 'reflection-api',
@@ -362,6 +381,7 @@ const learningPathConcepts: LearningConcept[] = [
       'Dynamic Object Creation',
     ],
     level: 'advanced',
+    tutorialUrl: 'https://youtu.be/fF3Vhm8rDIU',
   },
   {
     id: 'networking',
@@ -375,6 +395,7 @@ const learningPathConcepts: LearningConcept[] = [
       'HTTP Connections',
     ],
     level: 'advanced',
+    tutorialUrl: 'https://youtu.be/BXXW1ori3Dc',
   },
   {
     id: 'jdbc',
@@ -392,6 +413,7 @@ const learningPathConcepts: LearningConcept[] = [
       'Connection Pooling',
     ],
     level: 'advanced',
+    tutorialUrl: 'https://youtu.be/W7ZTBQcsyo4',
   },
   {
     id: 'gui-programming',
@@ -404,6 +426,7 @@ const learningPathConcepts: LearningConcept[] = [
       'JavaFX',
     ],
     level: 'advanced',
+    tutorialUrl: 'https://youtu.be/7F06XNNo-cQ',
   },
   {
     id: 'security',
@@ -418,6 +441,7 @@ const learningPathConcepts: LearningConcept[] = [
       'Secure Coding Practices',
     ],
     level: 'advanced',
+    tutorialUrl: 'https://youtu.be/cLvgm7nOFzo',
   },
   {
     id: 'design-patterns',
@@ -435,6 +459,7 @@ const learningPathConcepts: LearningConcept[] = [
       'MVC',
     ],
     level: 'advanced',
+    tutorialUrl: 'https://youtu.be/JHeUnZ6dEVY',
   },
   {
     id: 'enterprise-frameworks',
@@ -454,8 +479,33 @@ const learningPathConcepts: LearningConcept[] = [
       'Testing (JUnit, Mockito)',
     ],
     level: 'advanced',
+    tutorialUrl: 'https://youtu.be/-ifhgYLxirY',
   },
 ];
+
+const getYouTubeEmbedUrl = (url?: string) => {
+  if (!url) {
+    return undefined;
+  }
+  try {
+    const parsed = new URL(url);
+    let videoId = '';
+    if (parsed.hostname.includes('youtu.be')) {
+      videoId = parsed.pathname.replace(/^\/+/, '').split('/')[0] || '';
+    } else if (parsed.hostname.includes('youtube.com')) {
+      videoId = parsed.searchParams.get('v') || '';
+      if (!videoId && parsed.pathname.startsWith('/embed/')) {
+        videoId = parsed.pathname.split('/embed/')[1]?.split('/')[0] || '';
+      }
+      if (!videoId && parsed.pathname.startsWith('/shorts/')) {
+        videoId = parsed.pathname.split('/shorts/')[1]?.split('/')[0] || '';
+      }
+    }
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 const LearningPathTutorial = () => {
   const { conceptId } = useParams();
@@ -492,29 +542,14 @@ const LearningPathTutorial = () => {
   const locked = concept ? conceptRank[concept.level] > accessRank : false;
   const earnablePoints = concept ? (concept.level === 'basic' ? 10 : concept.level === 'intermediate' ? 15 : 20) : 0;
   const [videoPointsAwarded, setVideoPointsAwarded] = useState<number>(0);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const watchedSecondsRef = useRef(0);
-  const lastMediaTimeRef = useRef(0);
-  const lastWallTimeRef = useRef(0);
-  const invalidPlaybackRef = useRef(false);
-  const completionRequestRef = useRef(false);
-  const warningShownRef = useRef(false);
-
-  useEffect(() => {
-    watchedSecondsRef.current = 0;
-    lastMediaTimeRef.current = 0;
-    lastWallTimeRef.current = 0;
-    invalidPlaybackRef.current = false;
-    completionRequestRef.current = false;
-    warningShownRef.current = false;
-    setVideoPointsAwarded(0);
-  }, [concept, locked]);
+  const [completionInFlight, setCompletionInFlight] = useState(false);
+  const embedUrl = useMemo(() => getYouTubeEmbedUrl(concept?.tutorialUrl), [concept?.tutorialUrl]);
 
   const markVideoComplete = useCallback(async () => {
-    if (!concept || locked || completionRequestRef.current) {
+    if (!concept || locked || completionInFlight) {
       return;
     }
-    completionRequestRef.current = true;
+    setCompletionInFlight(true);
     try {
       await contentAPI.trackCourseOpen(`learning-path:${concept.id}`, concept.level, concept.title, 'learning_path_tutorial');
     } catch {
@@ -538,98 +573,18 @@ const LearningPathTutorial = () => {
           title: "Skill points earned",
           description: `+${response.points_awarded} points for watching this video.`,
         });
+      } else {
+        toast({
+          title: "Already completed",
+          description: "This video was already marked as completed earlier.",
+        });
       }
     } catch {
-      completionRequestRef.current = false;
-    }
-  }, [concept, locked]);
-
-  const handleVideoPlay = useCallback(() => {
-    lastWallTimeRef.current = performance.now() / 1000;
-    lastMediaTimeRef.current = videoRef.current?.currentTime || 0;
-  }, []);
-
-  const handleVideoRateChange = useCallback(() => {
-    const video = videoRef.current;
-    if (!video) {
+      setCompletionInFlight(false);
       return;
     }
-    if (Math.abs(video.playbackRate - 1) > 0.01) {
-      invalidPlaybackRef.current = true;
-      if (!warningShownRef.current) {
-        warningShownRef.current = true;
-        toast({
-          title: "Normal playback required",
-          description: "Watch at 1x speed without skipping to mark this video as completed.",
-          variant: "destructive",
-        });
-      }
-    }
-  }, []);
-
-  const handleVideoSeeking = useCallback(() => {
-    const video = videoRef.current;
-    if (!video) {
-      return;
-    }
-    const forwardJump = video.currentTime - lastMediaTimeRef.current;
-    if (forwardJump > 0.25) {
-      invalidPlaybackRef.current = true;
-      if (!warningShownRef.current) {
-        warningShownRef.current = true;
-        toast({
-          title: "Skipping detected",
-          description: "Please watch the full video continuously to complete it.",
-          variant: "destructive",
-        });
-      }
-    }
-    lastMediaTimeRef.current = video.currentTime;
-    lastWallTimeRef.current = performance.now() / 1000;
-  }, []);
-
-  const handleVideoTimeUpdate = useCallback(() => {
-    const video = videoRef.current;
-    if (!video || video.paused || video.ended) {
-      return;
-    }
-    const now = performance.now() / 1000;
-    const currentMedia = video.currentTime;
-    const prevMedia = lastMediaTimeRef.current;
-    const prevWall = lastWallTimeRef.current;
-    if (prevWall > 0) {
-      const mediaDelta = currentMedia - prevMedia;
-      const wallDelta = now - prevWall;
-      if (mediaDelta > 0) {
-        if (mediaDelta > wallDelta * 1.25 + 0.2) {
-          invalidPlaybackRef.current = true;
-        } else {
-          watchedSecondsRef.current += Math.min(mediaDelta, wallDelta + 0.2);
-        }
-      }
-    }
-    lastMediaTimeRef.current = currentMedia;
-    lastWallTimeRef.current = now;
-  }, []);
-
-  const handleVideoEnded = useCallback(async () => {
-    const video = videoRef.current;
-    if (!video || !concept || locked) {
-      return;
-    }
-    const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 0;
-    const watchedEnough = duration > 0 ? watchedSecondsRef.current >= duration * 0.98 : false;
-    const validPlayback = !invalidPlaybackRef.current && Math.abs(video.playbackRate - 1) <= 0.01;
-    if (!watchedEnough || !validPlayback) {
-      toast({
-        title: "Video not marked as completed",
-        description: "Watch the full video at 1x without skipping to complete it.",
-        variant: "destructive",
-      });
-      return;
-    }
-    await markVideoComplete();
-  }, [concept, locked, markVideoComplete]);
+    setCompletionInFlight(false);
+  }, [completionInFlight, concept, locked]);
 
   return (
     <AppLayout>
@@ -700,23 +655,31 @@ const LearningPathTutorial = () => {
             </Card>
           ) : (
             <div className="grid items-stretch gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-10">
-              {concept.tutorialUrl ? (
-                <div className="aspect-[16/9] w-full max-w-3xl mx-auto overflow-hidden rounded-xl border border-border/60 bg-black">
-                  <video
-                    ref={videoRef}
-                    className="h-full w-full"
-                    controls
-                    preload="metadata"
-                    playsInline
-                    src={concept.tutorialUrl}
-                    onPlay={handleVideoPlay}
-                    onRateChange={handleVideoRateChange}
-                    onSeeking={handleVideoSeeking}
-                    onTimeUpdate={handleVideoTimeUpdate}
-                    onEnded={handleVideoEnded}
-                  >
-                    Your browser does not support the video tag.
-                  </video>
+              {embedUrl ? (
+                <div className="w-full max-w-3xl mx-auto space-y-4">
+                  <div className="aspect-[16/9] overflow-hidden rounded-xl border border-border/60 bg-black">
+                    <iframe
+                      className="h-full w-full"
+                      src={embedUrl}
+                      title={`${concept.title} tutorial`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                    />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button onClick={() => void markVideoComplete()} disabled={completionInFlight}>
+                      {completionInFlight ? 'Saving...' : 'Mark as watched'}
+                    </Button>
+                    <Button variant="outline" asChild>
+                      <a href={concept.tutorialUrl} target="_blank" rel="noreferrer">
+                        Open on YouTube
+                      </a>
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    The tutorial now uses embedded YouTube playback. After finishing the video, click "Mark as watched" to claim points.
+                  </p>
                 </div>
               ) : (
                 <div
